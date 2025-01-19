@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heap Visualization</title>
+  <!-- CDN for d3.js -->
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <style>
+    /* Overall body styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f8f9fa;
+    }
+
+    /* Controls section styling */
+    #controls {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    #controls label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    #controls input {
+      width: 60%;
+      padding: 5px;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+
+    #controls button {
+      padding: 5px 15px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    #controls button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Visualization container */
+    #visualization {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    /* Heap Tree container */
+    #heap-tree {
+      flex: 1;
+      min-width: 400px;
+      max-width: 500px;
+      background-color: white;
+      border: 1px solid #dee2e6;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    /* Grid container */
+    #heap-grid {
+      flex: 1;
+      min-width: 400px;
+      max-width: 500px;
+      background-color: white;
+      border: 1px solid #dee2e6;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    #heap-grid svg {
+      margin: auto;
+      display: block;
+    }
+
+    /* Water volume chart container */
+    #water-volume-chart {
+      flex-basis: 100%;
+      background-color: white;
+      border: 1px solid #dee2e6;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    #water-volume-chart svg {
+      margin: auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<div id="controls">
+  <label for="heightMapInput">Enter Height Map (2D Array):</label>
+  <input id="heightMapInput" type="text" size="50" value="[[1, 4, 3, 1, 3, 2], [3, 2, 1, 3, 2, 4], [2, 3, 3, 2, 3, 1]]">
+  <button id="startButton">Start Animation</button>
+</div>
+<div id="visualization">
+  <div id="heap-tree"></div>
+  <div id="heap-grid"></div>
+  <div id="water-volume-chart"></div>
+</div>
+<script>
+  const gridSize = 50; // Grid cell size
+  const treeWidth = 500;
+  const treeHeight = 300;
+
+  // Draws the grid with highlights for the current cell and neighbors
+  function drawGrid(heightMap, heap, current, neighbors) {
+    const gridWidth = heightMap[0].length;
+    const gridHeight = heightMap.length;
+    const svg = d3.select("#heap-grid")
+      .html("") // Clear previous grid
+      .append("svg")
+      .attr("width", gridWidth * gridSize)
+      .attr("height", gridHeight * gridSize);
+
+    heightMap.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        const rect = svg.append("rect")
+          .attr("x", colIndex * gridSize)
+          .attr("y", rowIndex * gridSize)
+          .attr("width", gridSize)
+          .attr("height", gridSize)
+          .attr("fill", heap.some(h => h.row === rowIndex && h.col === colIndex) ? "lightblue" : "white")
+          .attr("stroke", "black");
+
+        if (current && current.row === rowIndex && current.col === colIndex) {
+          rect.attr("stroke", "red").attr("stroke-width", 3);
+        }
+
+        if (neighbors.some(n => n.row === rowIndex && n.col === colIndex)) {
+          rect.attr("stroke", "yellow").attr("stroke-width", 3);
+        }
+
+        svg.append("text")
+          .attr("x", colIndex * gridSize + gridSize / 2)
+          .attr("y", rowIndex * gridSize + gridSize / 2)
+          .attr("dy", ".35em")
+          .attr("text-anchor", "middle")
+          .text(cell);
+      });
+    });
+  }
+
+  // Draws the heap as a tree
+  function drawHeapTree(heap) {
+    const svg = d3.select("#heap-tree")
+      .html("") // Clear previous tree
+      .append("svg")
+      .attr("width", treeWidth)
+      .attr("height", treeHeight);
+
+    // Calculate positions for the nodes
+    const nodes = heap.map((node, index) => ({
+      id: index,
+      height: node.height,
+      row: node.row,
+      col: node.col,
+      x: (index - (2 ** Math.floor(Math.log2(index + 1)) - 1)) * (treeWidth / (2 ** Math.floor(Math.log2(index + 1)))),
+      y: Math.floor(Math.log2(index + 1)) * 80 + 40, // Level spacing
+      label: `H=${node.height}\n(${node.row},${node.col})`
+    }));
+
+    const links = [];
+    for (let i = 0; i < heap.length; i++) {
+      const leftChild = 2 * i + 1;
+      const rightChild = 2 * i + 2;
+      if (leftChild < heap.length) {
+        links.push({ source: i, target: leftChild });
+      }
+      if (rightChild < heap.length) {
+        links.push({ source: i, target: rightChild });
+      }
+    }
+
+    // Draw links
+    svg.selectAll(".link")
+      .data(links)
+      .enter()
+      .append("line")
+      .attr("class", "link")
+      .attr("x1", d => nodes[d.source].x + treeWidth / (2 ** Math.floor(Math.log2(nodes[d.source].id + 1))) / 2)
+      .attr("y1", d => nodes[d.source].y)
+      .attr("x2", d => nodes[d.target].x + treeWidth / (2 ** Math.floor(Math.log2(nodes[d.target].id + 1))) / 2)
+      .attr("y2", d => nodes[d.target].y)
+      .attr("stroke", "black");
+
+    // Draw nodes
+    svg.selectAll(".node")
+      .data(nodes)
+      .enter()
+      .append("circle")
+      .attr("class", "node")
+      .attr("cx", d => d.x + treeWidth / (2 ** Math.floor(Math.log2(d.id + 1))) / 2)
+      .attr("cy", d => d.y)
+      .attr("r", 15)
+      .attr("fill", "lightblue")
+      .attr("stroke", "black");
+
+    // Add labels to nodes
+    svg.selectAll(".label")
+      .data(nodes)
+      .enter()
+      .append("text")
+      .attr("class", "label")
+      .attr("x", d => d.x + treeWidth / (2 ** Math.floor(Math.log2(d.id + 1))) / 2)
+      .attr("y", d => d.y - 20)
+      .attr("text-anchor", "middle")
+      .text(d => d.label);
+  }
+
+
+  // Initialize the grid and tree visuals with the initial heap
+  function initializeVisuals(heightMap) {
+    const m = heightMap.length, n = heightMap[0].length;
+    const heap = [];
+
+    // Add boundary cells to the heap
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        if (i === 0 || i === m - 1 || j === 0 || j === n - 1) {
+          heap.push({ height: heightMap[i][j], row: i, col: j });
+        }
+      }
+    }
+    heap.sort((a, b) => a.height - b.height); // Sort the heap by height
+
+    // Draw the initial heap tree and grid
+    drawHeapTree(heap);
+    drawGrid(heightMap, heap, null, []);
+  }
+
+  // Draws the cumulative water volume chart with proper scaling and integer tick marks
+  function drawWaterVolumeChart(waterVolumes) {
+    const chartWidth = 500;
+    const chartHeight = 200;
+    const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+
+    // Set up the SVG for the chart
+    const svg = d3.select("#water-volume-chart")
+      .html("") // Clear previous chart
+      .append("svg")
+      .attr("width", chartWidth + margin.left + margin.right)
+      .attr("height", chartHeight + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Set up scales with default ranges
+    const x = d3.scaleLinear().domain([0, Math.max(waterVolumes.length - 1, 1)]).range([0, chartWidth]);
+    const y = d3.scaleLinear().domain([0, Math.max(1, d3.max(waterVolumes, d => d))]).range([chartHeight, 0]);
+
+    // Add axes
+    svg.append("g")
+      .attr("class", "axis-x")
+      .attr("transform", `translate(0,${chartHeight})`)
+      .call(d3.axisBottom(x).ticks(Math.max(waterVolumes.length - 1, 1)).tickFormat(d3.format("d")));
+
+    svg.append("g")
+      .attr("class", "axis-y")
+      .call(d3.axisLeft(y).ticks(Math.max(d3.max(waterVolumes, d => d), 1)).tickFormat(d3.format("d")));
+
+    // Add axes labels
+    svg.append("text")
+      .attr("transform", `translate(${chartWidth / 2},${chartHeight + margin.bottom - 10})`)
+      .style("text-anchor", "middle")
+      .text("Steps");
+
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -chartHeight / 2)
+      .attr("y", -margin.left + 15)
+      .style("text-anchor", "middle")
+      .text("Cumulative Water Volume");
+
+    // Add line path
+    svg.append("path")
+      .datum(waterVolumes)
+      .attr("class", "volume-line")
+      .attr("fill", "none")
+      .attr("stroke", "blue")
+      .attr("stroke-width", 2)
+      .attr("d", d3.line()
+        .x((d, i) => x(i))
+        .y(d => y(d)));
+  }
+
+  // Updates the water volume chart with new data and proper scaling
+  function updateWaterVolumeChart(waterVolumes) {
+    const chartWidth = 500;
+    const chartHeight = 200;
+
+    // Update scales dynamically
+    const x = d3.scaleLinear().domain([0, waterVolumes.length - 1]).range([0, chartWidth]);
+    const y = d3.scaleLinear().domain([0, Math.max(1, d3.max(waterVolumes, d => d))]).range([chartHeight, 0]);
+
+    const line = d3.line()
+      .x((d, i) => x(i))
+      .y(d => y(d));
+
+    const svg = d3.select("#water-volume-chart svg g");
+
+    // Update the line
+    svg.select(".volume-line")
+      .datum(waterVolumes)
+      .transition()
+      .duration(500)
+      .attr("d", line);
+
+    // Update axes
+    svg.select(".axis-x")
+      .call(d3.axisBottom(x).ticks(waterVolumes.length - 1).tickFormat(d3.format("d")));
+
+    svg.select(".axis-y")
+      .call(d3.axisLeft(y).ticks(Math.max(d3.max(waterVolumes, d => d), 1)).tickFormat(d3.format("d")));
+  }
+
+  // Animates the heap visualization step-by-step
+  function processAndVisualize(heightMap) {
+    const m = heightMap.length, n = heightMap[0].length;
+    const heap = [];
+    const visited = Array.from({ length: m }, () => Array(n).fill(false));
+    const waterVolumes = []; // To track cumulative water volume
+
+    // Add boundary cells to the heap
+    for (let i = 0; i < m; i++) {
+      for (let j = 0; j < n; j++) {
+        if (i === 0 || i === m - 1 || j === 0 || j === n - 1) {
+          heap.push({ height: heightMap[i][j], row: i, col: j });
+          visited[i][j] = true;
+        }
+      }
+    }
+    heap.sort((a, b) => a.height - b.height);
+
+    const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+    let trappedWater = 0;
+
+    // Draw the initial water volume chart
+    drawWaterVolumeChart(waterVolumes);
+
+    function step() {
+      if (!heap.length) {
+        console.log(`Total trapped water: ${trappedWater}`);
+        return;
+      }
+
+      const current = heap.shift();
+      const neighbors = [];
+
+      directions.forEach(([dx, dy]) => {
+        const newRow = current.row + dx, newCol = current.col + dy;
+        if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n && !visited[newRow][newCol]) {
+          visited[newRow][newCol] = true;
+          const water = Math.max(0, current.height - heightMap[newRow][newCol]);
+          trappedWater += water;
+          const newNode = {
+            height: Math.max(current.height, heightMap[newRow][newCol]),
+            row: newRow,
+            col: newCol
+          };
+          neighbors.push(newNode);
+          heap.push(newNode);
+          heap.sort((a, b) => a.height - b.height);
+        }
+      });
+
+      // Update visuals
+      drawHeapTree(heap);
+      drawGrid(heightMap, heap, current, neighbors);
+
+      // Update water volume data and chart
+      waterVolumes.push(trappedWater);
+      updateWaterVolumeChart(waterVolumes);
+
+      setTimeout(step, 1000); // Delay for animation
+    }
+
+    step();
+  }
+
+
+  // Attach event listener to the button
+  document.getElementById("startButton").addEventListener("click", () => {
+    const input = document.getElementById("heightMapInput").value;
+    const heightMap = JSON.parse(input);
+
+    // Render the initial visuals
+    initializeVisuals(heightMap);
+
+    // Start the animation
+    processAndVisualize(heightMap);
+  });
+
+  // Default setup with the initial heightMap
+  const defaultHeightMap = [
+    [1, 4, 3, 1, 3, 2],
+    [3, 2, 1, 3, 2, 4],
+    [2, 3, 3, 2, 3, 1]
+  ];
+
+  initializeVisuals(defaultHeightMap);
+</script>
+</body>
+</html>
