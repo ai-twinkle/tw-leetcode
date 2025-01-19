@@ -65,6 +65,10 @@ return the volume of water it can trap after raining.
 
 ![示意圖](./images/TestCase1.gif)
 
+![示意圖](./images/TestCase2.gif)
+
+自由輸入測試案例，可觀察演算法運作過程。到[這裡](https://www.cs.usfca.edu/~galles/visualization/Heap.html)可以看到最小堆的動畫。
+
 ## 解題步驟
 
 ### Step 1: 定義 MinHeap 類別
