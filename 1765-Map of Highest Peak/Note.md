@@ -17,6 +17,8 @@ Find an assignment of heights such that the maximum height in the matrix is maxi
 Return an integer matrix height of size `m x n` where `height[i][j]` is cell `(i, j)`'s height. 
 If there are multiple solutions, return any of them.
 
+It Is nearly the same as [542. 01 Matrix](../542-01%20Matrix/Note.md)
+
 ## 基礎思路
 這可以視為一個 Multi-Source BFS 問題，由水源開始，逐漸往空白地區擴散，直到所有地區都被填滿。
 
