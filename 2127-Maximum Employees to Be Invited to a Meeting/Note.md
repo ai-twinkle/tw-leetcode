@@ -27,10 +27,6 @@ return the maximum number of employees that can be invited to the meeting.
 
 ## 解題步驟
 
-以下步驟對應到主要程式邏輯，並附上重點程式片段說明。
-
----
-
 ### Step 1: 找出圖中最大的迴圈長度
 
 ```typescript
