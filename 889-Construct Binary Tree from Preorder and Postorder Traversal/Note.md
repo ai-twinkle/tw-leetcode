@@ -256,7 +256,53 @@ Postorder: [ 4,  5,  2,  6,  7,  3, (1) ]
 
 ## 解題步驟
 
-### Step 1: 
+### Step 1: 定義指針追蹤
+
+由於我們須要在遞迴過程中不斷更新指針，
+因此我們定義兩個全局變量 `preIndex` 和 `postIndex` 用於追蹤前序和後序遍歷數組。
+
+```typescript
+let preIndex = 0;
+let postIndex = 0;
+```
+
+### Step 2: 構造二叉樹
+
+我們定義一個遞迴函數 `buildTree` 用於構造二叉樹。
+我們檢查當前節點的值是否與後序遍歷數組中的值相同，若不同則說明該節點還有子樹，進而遞歸構造。
+當左右子樹構造完畢後，我們更新後序遍歷指針 `postIndex`，表示當前子樹已構造完畢。
+
+```typescript
+function buildTree(): TreeNode | null {
+  // 如果前序遍歷數組已處理完畢，返回 null。
+  if (preIndex >= preorder.length) {
+    return null;
+  }
+
+  // 建立一個新節點，值為前序遍歷數組中的當前值。
+  const node = new TreeNode(preorder[preIndex++]);
+
+  // 若當前節點的值與 postorder[postIndex] 不匹配，說明左子樹還未構造完畢。
+  // 此時遞歸構造左子樹。
+  if (node.val !== postorder[postIndex]) {
+    node.left = buildTree();
+  }
+
+  // 當左子樹構造完畢後，若當前節點的值仍不匹配 postorder[postIndex]，
+  // 則說明右子樹存在，遞歸構造右子樹。
+  if (node.val !== postorder[postIndex]) {
+    node.right = buildTree();
+  }
+
+  // 更新 postIndex，表示當前子樹已構造完畢。
+  postIndex++;
+
+  // 返回當前節點。
+  return node;
+}
+
+return buildTree();
+```
 
 ## 時間複雜度
 
