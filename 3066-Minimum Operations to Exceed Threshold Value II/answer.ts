@@ -1,5 +1,5 @@
 function minOperations(nums: number[], k: number): number {
-  const priorityQueue = new PriorityQueue<number>({ compare: (a, b) => a - b });
+  const priorityQueue = new PriorityQueue<number>((a, b) => a - b);
 
   // Enqueue all elements.
   for (let num of nums) {

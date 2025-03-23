@@ -1,13 +1,9 @@
-interface PriorityQueueOptions<T> {
-  compare: (a: T, b: T) => number;
-}
-
 class PriorityQueue<T> {
   private readonly heap: T[] = [];
   private readonly compare: (a: T, b: T) => number;
 
-  constructor(options: PriorityQueueOptions<T>, items?: T[]) {
-    this.compare = options.compare;
+  constructor(compare: (a: T, b: T) => number, items?: T[]) {
+    this.compare = compare;
     if (items) {
       // Initialize heap with given items and heapify in O(n) time.
       this.heap = [...items];
