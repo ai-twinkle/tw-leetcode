@@ -12,8 +12,6 @@ Decrement the value at each index in the range $[l_i, r_i]$ in nums by at most $
 Return the minimum possible non-negative value of `k`, such that after processing the first `k` queries in sequence, 
 `nums` becomes a Zero Array. If no such `k` exists, return -1.
 
-以下是根據你的需求，經過重新組織且更易懂的解法解析：
-
 ## 基礎思路
 
 這道題的核心是要透過一系列區間的減法操作，讓陣列中每個元素都達到 0。
