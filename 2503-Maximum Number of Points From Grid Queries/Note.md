@@ -37,18 +37,20 @@ Return the resulting array `answer`.
 
 這樣一來，每次查詢時，我們只需檢查入口是否開通，就能迅速知道可以拿到的最大分數（能到達多少格子）。
 
-## 解題步驟
-
 ### Step 1：資料預處理與排序
 
-- **扁平化格子資訊**  
-  將 `m x n` 的矩陣展平成一個列表，每個元素為 `[row, col, value]`，並依格子值由小到大排序。
+在開始處理問題前，我們需將原本二維的 `grid` 資料轉成更容易排序的形式，以方便後續快速處理查詢。
 
-- **查詢值排序**  
-  將查詢數組與其原始索引打包成 `[queryValue, index]` 的形式，並根據查詢值從小到大排序。這樣在逐步啟動格子的過程中，我們可以同步處理所有查詢。
+- **扁平化格子資訊**  
+  我們將原本二維的 `grid` 陣列轉為一維的列表，每個元素包含了格子的座標 `(row, col)` 以及該格子的值，型態為 `[row, col, value]`。  
+  接著再依照格子值由小到大排序，這樣一來我們可以方便地逐步將符合條件的格子「啟動」或「激活」。
+
+- **查詢值排序與索引記錄**  
+  由於題目給定的多次查詢之間沒有特定順序，我們也同時需要紀錄每個查詢值的原始索引。  
+  透過排序查詢值後，我們就能依序處理每個查詢，在每一步僅激活那些新能到達的格子。
 
 ```typescript
-// 將格子展平成 [row, col, value] 並排序
+// 扁平化格子資訊為 [row, col, value] 並排序
 const gridCells: [number, number, number][] = [];
 for (let row = 0; row < rows; row++) {
   for (let col = 0; col < cols; col++) {
@@ -57,43 +59,74 @@ for (let row = 0; row < rows; row++) {
 }
 gridCells.sort((a, b) => a[2] - b[2]);
 
-// 查詢值與原始索引綁定後排序
+// 將查詢值與原始索引綁定後排序
 const queriesWithIndices: [number, number][] = queries.map((value, index) => [value, index]);
 queriesWithIndices.sort((a, b) => a[0] - b[0]);
 ```
 
 ### Step 2：利用並查集合併啟動格子
 
-- **初始化並查集**  
-  為所有格子初始化並查集，並用一個指針 `nextCellToActivate` 依次啟動格子。
+接下來，我們將逐步根據每個查詢的閾值（能量）來「激活」格子，並利用 **並查集（Union-Find）** 來管理和合併這些激活後的相鄰格子，並記錄其形成的連通區域大小。
 
-- **動態啟動與合併相鄰格子**  
-  對於每個查詢值，當前格子的值小於查詢值時，即視為「啟動」。啟動時檢查該格子上下左右相鄰的位置，若相鄰格子也已啟動（其值同樣小於查詢值），則利用並查集將兩個格子合併。如此一來，最終可求得起點 (0,0) 所在連通區域的大小。
+- **初始化並查集**  
+  初始化 `UnionFind` 物件，讓每個格子初始時都是獨立的狀態。  
+  另外，使用指標 `nextCellToActivate` 追蹤下一個待激活的格子索引。
+
+- **動態激活並合併相鄰格子**  
+  針對每一個查詢值，逐步激活所有值小於此查詢值的格子。  
+  激活一個格子時，立刻查看其相鄰上下左右的格子是否已激活（即已被納入連通區域），若是，則透過並查集合併這兩個相鄰的格子區域。
 
 ```typescript
-// 對每個查詢值，啟動所有格子值 < queryValue
-while (nextCellToActivate < totalGridCells && gridCells[nextCellToActivate][2] < queryValue) {
-  const [row, col] = gridCells[nextCellToActivate];
+const unionFind = new UnionFind(totalCells);
+let nextCellToActivate = 0;
+const totalGridCells = gridCells.length;
+const directions = [
+  [-1, 0], // 向上
+  [0, 1],  // 向右
+  [1, 0],  // 向下
+  [0, -1]  // 向左
+];
 
-  // 掃描四個方向
-  for (const [dRow, dCol] of directions) {
-    const newRow = row + dRow;
-    const newCol = col + dCol;
-    if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols) continue;
-    if (grid[newRow][newCol] < queryValue) {
-      unionFind.union(getIndex(row, col), getIndex(newRow, newCol));
+const getIndex = (row: number, col: number) => row * cols + col;
+
+for (const [queryValue, originalIndex] of queriesWithIndices) {
+  // 激活所有格子值小於 queryValue 的格子
+  while (nextCellToActivate < totalGridCells && gridCells[nextCellToActivate][2] < queryValue) {
+    const [row, col] = gridCells[nextCellToActivate];
+
+    // 檢查上下左右四個方向的相鄰格子是否已激活，並進行合併
+    for (const [dRow, dCol] of directions) {
+      const newRow = row + dRow;
+      const newCol = col + dCol;
+
+      // 邊界檢查
+      if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols) continue;
+
+      // 若相鄰格子也已激活（值小於當前查詢值），則合併兩個格子
+      if (grid[newRow][newCol] < queryValue) {
+        unionFind.union(getIndex(row, col), getIndex(newRow, newCol));
+      }
     }
+    nextCellToActivate++;
   }
-  nextCellToActivate++;
+
+  // 此時，所有能量低於 queryValue 的格子已被激活
+  // 如果起點 (0,0) 已激活，則記錄起點所在連通區域大小
+  result[originalIndex] =
+    grid[0][0] < queryValue ? unionFind.componentSize[unionFind.find(0)] : 0;
 }
 ```
 
 ### Step 3：查詢答案計算
 
-對於每個查詢，若起點 (0,0) 的值小於查詢值，則答案為起點所在連通區域的大小；否則答案為 0。
+在前一步驟完成激活與合併後，每個查詢的答案即是起點 `(0,0)` 所在連通區域的大小。但需特別檢查起點本身是否符合條件：
+
+- 若起點的值小於當前查詢值，則答案為起點所在區域大小。
+- 否則（起點本身無法進入），答案為 0。
 
 ```typescript
-result[originalIndex] = grid[0][0] < queryValue ? unionFind.componentSize[unionFind.find(0)] : 0;
+result[originalIndex] =
+  grid[0][0] < queryValue ? unionFind.componentSize[unionFind.find(0)] : 0;
 ```
 
 ## 時間複雜度
