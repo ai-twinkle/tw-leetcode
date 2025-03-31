@@ -12,172 +12,252 @@ Find an array `answer` of size `k` such that for each integer `queries[i]` you s
 After the process, `answer[i]` is the maximum number of points you can get. 
 Note that for each query you are allowed to visit the same cell multiple times.
 
-Return the resulting array `answer`.
+Return the resulting array `answer`
 
 ## 基礎思路
 
-這題的情境可以想像成「遊戲中的角色從迷宮的入口 (左上角格子) 出發，每個格子都有一個難度值」。
-每次我們有一個能量值（即查詢值），我們可以從入口開始探索，只要我們目前的能量 **嚴格大於** 所在格子的難度值，我們就可以：
+可以把這題想像成從左上角出發玩迷宮遊戲，每個格子有自己的難度值。如果你的「能量值」（即查詢值）**嚴格大於**格子難度，就可以進入這個格子並拿 1 分，然後再往上下左右繼續探索。
 
-- **獲得該格子內的 1 分（僅第一次走訪時）**
-- 繼續向四個方向（上下左右）探索相鄰格子（如果相鄰格子也是可以通過的話）
+因為會有多個不同的查詢值，每次都從頭開始探索效率太低。所以我們採用**累積擴展區域**的方式：
 
-當我們遇到一個格子的難度值大於或等於我們的能量值，就無法繼續前進，探索就結束了。
+- **從小到大處理查詢值**，每次只需要額外擴展新開放的區域。
+- 使用**小根堆**管理「待探索的邊界格子」，每次都挑選最容易通過（數值最小）的格子優先處理。
 
-因為題目可能給我們很多次不同的能量值（多次查詢），每次都重複以上步驟會很慢。
-
-因此我們需要更聰明的作法：
-
-- **事先將所有格子依照難度從小到大排序，逐步將它們「打開（激活）」**  
-  隨著我們的能量值增加，能通過的格子數量也會越來越多。這時，原本無法互相連通的格子，可能就會因為中間新開通的格子而形成更大的連通區域。
-
-- **使用並查集來記錄格子的連通狀況**  
-  「並查集（Union-Find）」是一個資料結構，可以有效地幫我們合併相鄰的格子並追蹤已經連成一片區域的格子數量。  
-  一旦入口（左上角）格子也被開通，我們馬上就能知道從入口能夠到達多少已開通的格子。
-
-這樣一來，每次查詢時，我們只需檢查入口是否開通，就能迅速知道可以拿到的最大分數（能到達多少格子）。
+這樣，每個格子只會被探索一次，大幅降低了重複運算的成本。
 
 ## 解題步驟
 
 ### Step 1：取得矩陣基本資訊
 
-- 首先取得輸入矩陣的基本資訊，包含矩陣的列數 (`rows`)、行數 (`cols`)，以及總格子數量 (`totalCells`)。
+首先，取得矩陣的行數、列數以及總格子數量，以便後續進行記憶體預分配與邊界判斷。
 
 ```typescript
-const rows = grid.length;
-const cols = grid[0].length;
-const totalCells = rows * cols;
+const numRows = grid.length;
+const numCols = grid[0].length;
+const totalCells = numRows * numCols;
 ```
 
-### Step 2：資料預處理（扁平化並排序）
+### Step 2：建立自定義資料結構（小根堆）與查詢預處理
 
-- **扁平化格子資訊**：將二維的矩陣資料轉換成一維的陣列，每個元素儲存 `[row, col, value]`。
+- **查詢預處理**：利用 `Set` 取得查詢的唯一值後，再從小到大排序，確保每次擴展都是累積進行。
 
-- **格子依照數值排序**：將扁平化後的格子依照格子數值從小到大排序，方便後續依序啟動。
+- **自定義小根堆**：使用預先分配的記憶體（`Uint32Array`）來管理邊界上的格子，儲存格子的數值與座標，這有助於以較低成本進行堆操作。
 
 ```typescript
-const gridCells: [number, number, number][] = [];
+// 取得唯一且排序的查詢值
+const uniqueSortedQueries = Array.from(new Set(queries)).sort((a, b) => a - b);
 
-// 扁平化格子資訊
-for (let row = 0; row < rows; row++) {
-  for (let col = 0; col < cols; col++) {
-    gridCells.push([row, col, grid[row][col]]);
-  }
+// 建立自定義的小根堆，容量為所有格子的數量
+const border = new CustomMinHeap(totalCells);
+```
+
+### Step 3：初始化探索起點
+
+從起點 (0,0) 開始探索。利用 `expandCell` 函數將起點加入小根堆，同時標記該格子為已拜訪（設定為 0）。
+
+```typescript
+function expandCell(row: number, col: number): void {
+  if (grid[row][col] === 0) return;
+  border.add(grid[row][col], row, col);
+  grid[row][col] = 0;
 }
 
-// 排序格子
-gridCells.sort((a, b) => a[2] - b[2]);
+expandCell(0, 0);
 ```
 
-### Step 3：處理查詢值（排序查詢）
+### Step 4：動態處理每個查詢
 
-- **將每個查詢值與其原始索引綁定後排序**  
-  這樣能依序且有效率地處理每次查詢。
+對於每個查詢值，重複以下步驟：
 
-```typescript
-const queriesWithIndices: [number, number][] = queries.map((value, index) => [value, index]);
-queriesWithIndices.sort((a, b) => a[0] - b[0]);
-```
+- **區域擴展**：當小根堆中最小的格子數值小於當前查詢值時，不斷從堆中取出該格子，同時計數並將其四個方向（上、左、下、右）的相鄰格子進行擴展（呼叫 `expandCell`）。
 
-### Step 4：初始化資料結構（並查集與輔助變數）
-
-- **初始化並查集**：利用並查集追蹤已啟動的格子是否相互連通。
-
-- **初始化答案陣列與輔助變數**：建立儲存答案的陣列 `result`，以及後續需要的輔助變數。
+- **記錄結果**：每次查詢結束時，將從起點能夠到達的總格子數記錄下來，並映射到該查詢值上。
 
 ```typescript
-// 初始化並查集
-const unionFind = new UnionFind(totalCells);
+let totalVisitedCells = 0;
+const lastRow = numRows - 1, lastCol = numCols - 1;
+const queryResults = new Map<number, number>();
 
-// 初始化答案陣列與輔助變數
-const result: number[] = new Array(queries.length).fill(0);
-let nextCellToActivate = 0;
-const totalGridCells = gridCells.length;
-const directions = [
-  [-1, 0], // 上
-  [0, 1],  // 右
-  [1, 0],  // 下
-  [0, -1]  // 左
-];
-const getIndex = (row: number, col: number) => row * cols + col;
-```
-
-### Step 5：動態啟動格子並合併連通區域
-
-- **依序處理每個查詢**：逐步「啟動」數值小於當前查詢值的格子，並合併其相鄰的已啟動格子。
-
-- **逐步啟動格子**：啟動尚未啟動且數值小於查詢值的格子。
-
-- **檢查並合併相鄰格子**：對每個啟動的格子，檢查上下左右是否有已啟動格子並進行合併。
-
-```typescript
-for (const [queryValue, originalIndex] of queriesWithIndices) {
-
-  // 逐步啟動格子
-  while (nextCellToActivate < totalGridCells && gridCells[nextCellToActivate][2] < queryValue) {
-    const [row, col] = gridCells[nextCellToActivate];
-
-    // 檢查並合併相鄰格子
-    for (const [dRow, dCol] of directions) {
-      const newRow = row + dRow;
-      const newCol = col + dCol;
-
-      if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols) continue;
-
-      if (grid[newRow][newCol] < queryValue) {
-        unionFind.union(getIndex(row, col), getIndex(newRow, newCol));
-      }
+for (const queryThreshold of uniqueSortedQueries) {
+  // 當邊界上最小的格子數值小於查詢值時，持續擴展
+  while (border.top() !== undefined && queryThreshold > border.top()!) {
+    const [row, col] = border.pop();
+    totalVisitedCells++;
+    // 向四個方向探索相鄰格子
+    if (row > 0) {
+      expandCell(row - 1, col);
     }
-    nextCellToActivate++;
+    if (col > 0) {
+      expandCell(row, col - 1);
+    }
+    if (row < lastRow) {
+      expandCell(row + 1, col);
+    }
+    if (col < lastCol) {
+      expandCell(row, col + 1);
+    }
+  }
+  queryResults.set(queryThreshold, totalVisitedCells);
+}
+```
+
+### Step 5：將查詢結果映射回原始順序
+
+由於查詢在預處理時被排序過，最後需要依據原始查詢的順序來產生最終答案。
+
+```typescript
+const output: number[] = new Array(queries.length);
+for (let i = 0; i < queries.length; i++) {
+  output[i] = queryResults.get(queries[i])!;
+}
+return output;
+```
+
+### Step 6：最小堆的實作
+
+我們需要一個小根堆來管理邊界格子，這裡使用 `Uint32Array` 來儲存格子的數值與座標。
+
+以下是小根堆的實作：
+
+```typescript
+/**
+ * CustomMinHeap is a specialized min‑heap implementation optimized for grid expansion.
+ * It uses pre‑allocated typed arrays (Uint32Array) for storing cell values and their coordinates.
+ */
+class CustomMinHeap {
+  private last: number;
+  private readonly values: Uint32Array;
+  private readonly rows: Uint32Array;
+  private readonly cols: Uint32Array;
+
+  /**
+   * Creates an instance of CustomMinHeap with the given capacity.
+   *
+   * @param capacity Maximum number of elements that can be stored (typically m*n).
+   */
+  constructor(capacity: number) {
+    this.last = -1;
+    this.values = new Uint32Array(capacity);
+    this.rows = new Uint32Array(capacity);
+    this.cols = new Uint32Array(capacity);
   }
 
-  // ...
+  /**
+   * Returns the smallest cell value in the heap or undefined if the heap is empty.
+   *
+   * @returns The smallest cell value, or undefined.
+   */
+  public top(): number | undefined {
+    return this.last < 0 ? undefined : this.values[0];
+  }
+
+  /**
+   * Adds a new cell to the heap.
+   *
+   * @param cellValue The value of the cell.
+   * @param row The row coordinate.
+   * @param col The column coordinate.
+   */
+  public add(cellValue: number, row: number, col: number): void {
+    this.last++;
+    this.values[this.last] = cellValue;
+    this.rows[this.last] = row;
+    this.cols[this.last] = col;
+    this.bubbleUp(this.last);
+  }
+
+  /**
+   * Removes and returns the coordinates [row, col] of the cell with the smallest value.
+   *
+   * @returns A tuple [row, col] of the popped cell.
+   */
+  public pop(): [number, number] {
+    const retRow = this.rows[0];
+    const retCol = this.cols[0];
+    this.swap(0, this.last);
+    this.last--;
+    this.bubbleDown(0);
+    return [retRow, retCol];
+  }
+
+  /**
+   * Swaps the elements at indices i and j in all arrays.
+   *
+   * @param i The first index.
+   * @param j The second index.
+   */
+  private swap(i: number, j: number): void {
+    let temp = this.values[i];
+    this.values[i] = this.values[j];
+    this.values[j] = temp;
+
+    temp = this.rows[i];
+    this.rows[i] = this.rows[j];
+    this.rows[j] = temp;
+
+    temp = this.cols[i];
+    this.cols[i] = this.cols[j];
+    this.cols[j] = temp;
+  }
+
+  /**
+   * Bubbles up the element at index i to maintain the heap invariant.
+   *
+   * @param i The index of the element to bubble up.
+   */
+  private bubbleUp(i: number): void {
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (this.values[i] >= this.values[parent]) break;
+      this.swap(i, parent);
+      i = parent;
+    }
+  }
+
+  /**
+   * Bubbles down the element at index i to maintain the heap invariant.
+   *
+   * @param i The index of the element to bubble down.
+   */
+  private bubbleDown(i: number): void {
+    while ((i << 1) + 1 <= this.last) {
+      let smallest = i;
+      const left = (i << 1) + 1;
+      const right = left + 1;
+      if (left <= this.last && this.values[left] < this.values[smallest]) {
+        smallest = left;
+      }
+      if (right <= this.last && this.values[right] < this.values[smallest]) {
+        smallest = right;
+      }
+      if (smallest === i) break;
+      this.swap(i, smallest);
+      i = smallest;
+    }
+  }
 }
-```
-
-### Step 6：計算每個查詢的答案
-
-- **計算查詢的結果**  
-  若起點 `(0,0)` 已啟動，則該次查詢的答案即為起點所在連通區域的大小；否則為 0。
-
-```typescript
-for (const [queryValue, originalIndex] of queriesWithIndices) {
-  // Step 5：動態啟動格子並合併連通區域 ...
-  
-  result[originalIndex] =
-    grid[0][0] < queryValue ? unionFind.componentSize[unionFind.find(0)] : 0;
-}
-```
-
-### Step 7：回傳所有查詢的答案
-
-- **回傳結果陣列**：最終完成所有查詢，回傳對應的答案陣列。
-
-```typescript
-return result;
 ```
 
 ## 時間複雜度
 
-- **排序階段**
-  - 格子排序的時間複雜度為 $O(m * n log(m * n))$。
-  - 查詢排序的時間複雜度為 $O(k log k)$。
+- **區域擴展部分**  
+  每個格子最多被加入與彈出小根堆一次，每次堆操作的平均複雜度為 $O(\log(m \times n))$，因此該部分的最壞情況為 $O(m \times n \log(m \times n))$。
 
-- **啟動與合併階段**  
-  每個格子最多被啟動一次，並查集的合併操作均攜帶優化（近似 $O(α(m * n))$），故此部分時間複雜度近似 $O(m * n)$。
+- **查詢預處理**  
+  去重與排序查詢的時間複雜度為 $O(q \log q)$。
 
-- 總時間複雜度為 $O(m * n log(m * n) + k log k)$。
+- 總時間複雜度為 $O(m \times n \log(m \times n) + q \log q)$。
 
-> $O(m * n \log(m * n) + k \log k)$
+> $O(m \times n \log(m \times n) + q \log q)$
 
 ## 空間複雜度
 
-- **並查集數組**  
-  需要額外 $O(m * n)$ 的空間來記錄父節點、連通區域大小等。
+- **小根堆空間**  
+  預先分配的空間大小為 $O(m \times n)$，用來存儲格子數值與座標。
 
-- **排序與輔助陣列**  
-  扁平化格子與查詢綁定等額外使用 $O(m * n)$ 和 $O(k)$ 的空間。
+- **額外查詢映射空間**  
+  用於存放查詢結果的映射與最終答案陣列，佔用 $O(q)$ 的空間。
 
-- 總空間複雜度為 $O(m * n + k)$。
+- 總空間複雜度為 $O(m \times n + q)$。
 
-> $O(m * n + k)$
+> $O(m \times n + q)$
