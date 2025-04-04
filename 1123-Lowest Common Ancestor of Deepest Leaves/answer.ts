@@ -5,7 +5,7 @@
  * and each level down increases the depth by 1. The LCA of a set of nodes is the node with
  * the greatest depth that is an ancestor of all nodes in the set.
  *
- * @param root {TreeNode | null} - The root of the binary tree.
+ * @param {TreeNode | null} root - The root of the binary tree.
  * @returns {TreeNode | null} The lowest common ancestor of the deepest leaves, or null if the tree is empty.
  */
 function lcaDeepestLeaves(root: TreeNode | null): TreeNode | null {
@@ -18,8 +18,8 @@ function lcaDeepestLeaves(root: TreeNode | null): TreeNode | null {
    * When both left and right subtrees have the same maximum depth, the current node becomes
    * a candidate for the lowest common ancestor of the deepest leaves.
    *
-   * @param node {TreeNode | null} - The current node in the DFS.
-   * @param depth {number} - The current depth of the node.
+   * @param {TreeNode | null} node - The current node in the DFS.
+   * @param {number} depth - The current depth of the node.
    * @returns {number} The maximum depth reached in the subtree rooted at this node.
    */
   function dfs(node: TreeNode | null, depth: number): number {
