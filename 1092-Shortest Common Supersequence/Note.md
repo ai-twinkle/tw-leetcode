@@ -139,10 +139,6 @@ const middleSequence = sequence.reverse().join('');
 return commonPrefix + middleSequence + commonSuffix;
 ```
 
-下面是對該演算法的時間與空間複雜度分析：
-
----
-
 ## 時間複雜度
 
 - **Prefix/Suffix Removal:**  
@@ -160,6 +156,7 @@ return commonPrefix + middleSequence + commonSuffix;
 - 總時間複雜度為 $O(\min(m, n)) + O(m \times n) + O(m+n) \approx O(m \times n)$。
 
 > $O(m \times n)$
+
 ## 空間複雜度
 
 - **DP Table:**  
