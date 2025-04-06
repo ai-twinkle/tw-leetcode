@@ -3,6 +3,7 @@
 Given the root of a binary tree, return the postorder traversal of its nodes' values.
 
 ## 基礎思路
+
 這題是經典的 Tree Traversal 題目，我們可以使用遞迴的方式來解決這個問題。
 遞迴的方式依序遍歷左子樹結果、右子樹結果，最後再加上根節點 (也可是子樹的"根"節點)。
 
@@ -17,13 +18,16 @@ return root ? [...postorderTraversal(root.left), ...postorderTraversal(root.righ
 然後把左子樹的結果展開，再把右子樹的結果展開，最後再加上根節點的值。
 
 ## 時間複雜度
-每個節點都會被訪問一次，因此時間複雜度為 $O(n)$。
+
+- 每個節點都會被訪問一次，因此時間複雜度為 $O(n)$。
+- 總時間複雜度為 $O(n)$。
 
 > $O(n)$
 
 ## 空間複雜度
-* 最壞的情況下，遞迴的深度為 $O(n)$，最好的情況下，遞迴的深度為 $O(\log n)$。
-* 保存結果的空間複雜度為 $O(n)$。
-* 故總體空間複雜度為 $O(n)$。
+
+- 最壞的情況下，遞迴的深度為 $O(n)$，最好的情況下，遞迴的深度為 $O(\log n)$。
+- 保存結果的空間複雜度為 $O(n)$。
+- 總空間複雜度為 $O(n)$。
 
 > $O(n)$
