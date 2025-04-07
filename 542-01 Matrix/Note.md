@@ -89,6 +89,7 @@ while (queue.length > 0) {
 > $O(m \times n)$
 
 ## 空間複雜度
+
 - 額外使用了一個二維陣列 `newMatrix` 來記錄每個點的距離，空間複雜度為 $O(m \times n)$
 - `queue` 與 `nextQueue` 佇列的空間複雜度為 $O(m \times n)$
 - 總空間複雜度為 $O(m \times n)$

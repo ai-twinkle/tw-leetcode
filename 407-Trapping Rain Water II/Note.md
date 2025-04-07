@@ -4,6 +4,7 @@ Given an `m x n` integer matrix `heightMap` representing the height of each unit
 return the volume of water it can trap after raining.
 
 ## 基礎思路
+
 1. **最小堆**：利用最小堆來追蹤當前最小的高度，確保每次處理的都是目前能影響水量的最低高度。
 2. **廣度優先搜尋（實際上更貼近 Dijkstra 思路）**：每次處理堆中最低高度的單元，嘗試將鄰居單元的高度加入堆中，並計算可能的儲水量。
 
@@ -22,8 +23,6 @@ return the volume of water it can trap after raining.
 > 1. **水位總是以邊界為基準**：低洼區域的水位不能超過邊界的最低高度，因為水會從更低的地方流出去。如果鄰居高度低於當前高度，就需要將其高度更新為當前高度，代表「已被水填滿至該高度」。
 > 2. **防止水流出**：若不更新鄰居的高度，演算法可能誤判這些已被填水的區域還能二度儲水。
 > 3. **確保模擬過程正確**：每次更新鄰居高度，等於向內推進「最低的邊界」，並繼續以最小堆的機制維持正確的水位擴散。
-
----
 
 ### 範例分解
 
@@ -277,8 +276,6 @@ while (minHeap.size() > 0) {
 ```typescript
 return trappedWater;
 ```
-
----
 
 ## 時間複雜度
 
