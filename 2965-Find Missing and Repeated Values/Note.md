@@ -58,8 +58,6 @@ $$
    a = \frac{(a+b) + (a-b)}{2} \quad\text{及}\quad b = \frac{(a+b) - (a-b)}{2}
    $$
 
----
-
 ## 解題步驟
 
 ### Step 1: 計算總和與平方和
@@ -99,8 +97,6 @@ const sumAB = diffSquare / diff;
 const a = (sumAB + diff) / 2;
 const b = (sumAB - diff) / 2;
 ```
-
----
 
 ## 時間複雜度
 
