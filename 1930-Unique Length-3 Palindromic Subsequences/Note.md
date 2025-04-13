@@ -1,12 +1,16 @@
 # 1930. Unique Length-3 Palindromic Subsequences
 
-Given a string s, return the number of unique palindromes of length three that are a subsequence of s.
-Note that even if there are multiple ways to obtain the same subsequence, it is still only counted once.
+Given a string `s`, return the number of unique palindromes of length three that are a subsequence of `s`.
+
+Note that even if there are multiple ways to obtain the same subsequence, 
+it is still only counted once.
+
 A palindrome is a string that reads the same forwards and backwards.
 A subsequence of a string is a new string generated from the original string with some characters (can be none) deleted without changing the relative order of the remaining characters.
  * For example, "ace" is a subsequence of "abcde".
 
 ## 基礎思路
+
 先找尋所有字母的最起始位置和最結束位置，然後再找尋中間的字母是否存在，如果存在則計數加一。
 
 ## 解題步驟
@@ -56,7 +60,15 @@ for (let i = 0; i < 26; i++) {
 ```
 
 ## 時間複雜度
-由於需要遍歷所有字串內的字母，因此時間複雜度為 O(n)。
+
+- 由於需要遍歷所有字串內的字母，因此時間複雜度為 $O(n)$。
+- 總時間複雜度為 $O(n)$。
+
+> $O(n)$
 
 ## 空間複雜度
-不論字串內有多少字母，都僅需要建立兩個長度為 26 的陣列，因此空間複雜度為 O(1)。
+
+- 不論字串內有多少字母，都僅需要建立兩個長度為 26 的陣列，因此空間複雜度為 $O(1)$。
+- 總空間複雜度為 $O(1)$。
+
+> $O(1)$

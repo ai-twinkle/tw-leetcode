@@ -9,12 +9,5 @@
  * @returns the string `s` after removing all occurrences of `part`
  */
 function removeOccurrences(s: string, part: string): string {
-  const stack: string[] = [];
-  for (const char of s) {
-    stack.push(char);
-    if (stack.length >= part.length && stack.slice(-part.length).join('') === part) {
-      stack.splice(-part.length);
-    }
-  }
-  return stack.join('');
+  return s.includes(part) ? removeOccurrences(s.replace(part, ''), part) : s;
 }
