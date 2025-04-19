@@ -112,6 +112,6 @@ return countUpToUpper - countBelowLower;
 - **輔助函式內部使用空間**：
   雙指標與計數器僅需常數空間 $O(1)$。
 
-- 總空間複雜度主要為 $O(n)$。
+- 總空間複雜度為 $O(n)$。
 
 > $O(n)$
