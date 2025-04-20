@@ -60,8 +60,7 @@ const slotsAvailable = remainingSlots.get(response) ?? 0;
 if (slotsAvailable > 0) {
   // 加入現有群組，空位減少一
   remainingSlots.set(response, slotsAvailable - 1);
-}
-else {
+} else {
   // 建立新群組，大小為 (response + 1)
   const groupSize = response + 1;
   totalRabbitsCount += groupSize;
