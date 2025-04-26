@@ -124,9 +124,11 @@ return parseInt(resultBits.join(''), 2);
 ```
 
 ## 時間複雜度
+
 - 在計算數字1的數量時，需要將數字轉換為二進制字串，分別是 Num1 和 Num2，時間複雜度為 $O(logNum1 + logNum2)$。
 - 初始化 ResultBits 時，需要將 Num1 轉換為二進制字串，時間複雜度為 $O(logNum1)$。
 - 在處理情境 2 和情境 3 時，需要遍歷 ResultBits，時間複雜度為 $O(max(logNum1, logNum2))$。
+- 總時間複雜度為 $O(logNum1 + logNum2)$。
 
 > $O(logNum1 + logNum2)$
 
@@ -134,5 +136,6 @@ return parseInt(resultBits.join(''), 2);
 
 - 需要存儲 Num1 和 Num2 的二進制字串，空間複雜度為 $O(logNum1 + logNum2)$。
 - 保存 ResultBits 的空間複雜度為 $O(max(logNum1, logNum2))$。
+- 總空間複雜度為 $O(logNum1 + logNum2)$。
 
 > $O(logNum1 + logNum2)$
