@@ -12,8 +12,6 @@ Implement the `ProductOfNumbers` class:
 The test cases are generated so that, 
 at any time, the product of any contiguous sequence of numbers will fit into a single 32-bit integer without overflowing.
 
----
-
 ## 基礎思路
 
 我們可以利用一個陣列記錄從流開始到當前位置的連乘結果。
@@ -27,8 +25,6 @@ at any time, the product of any contiguous sequence of numbers will fit into a s
 > Tips:
 > - 由於任何數乘以 0 都會變成 0，遇到 0 時，之前的累積結果就不再有用，因此可以直接重置累積陣列來減少記憶體使用。
 > - 同時，若請求的 k 超過從上次 0 以後的數字個數，則結果必然包含 0，可直接返回 0。
-
----
 
 ### 圖示
 
@@ -122,9 +118,9 @@ class ProductOfNumbers {
 
 
 ## 時間複雜度
-- 每次加入數字 (add) 為 O(1)
-- 查詢最後 k 個數字的乘積 (getProduct) 為 O(1)
-- 總體時間複雜度為 O(1)
+- 每次加入數字 (add) 為 $O(1)$
+- 查詢最後 k 個數字的乘積 (getProduct) 為 $O(1)$
+- 總時間複雜度為 $O(1)$
 
 > $O(1)$
 
