@@ -10,6 +10,7 @@ A string a from words1 is universal if for every string b in words2, b is a subs
 Return an array of all the universal strings in words1. You may return the answer in any order.
 
 ## 基礎思路
+
 需要把題目拆解成兩個步驟，第一個是把words2字串陣列轉換成每個字母的最低需求數量。
 用一個最低需求數量的陣列來記錄，因為需求較大的需求滿足了，需求較小的需求也會滿足，這能減少比對的次數與儲存空間。
 接下來只要找尋words1字串陣列中的字串是否符合每個字母的最低需求數量即可。
@@ -72,14 +73,18 @@ for (const word of words1) {
 ```
 
 ## 時間複雜度
+
 - 預處理 words2 的時間複雜度： $O(n_2 \cdot m_2)$ ，其中 $n_2$ 是 words2 的長度，$m_2$ 是 words2 中字串的平均長度
 - 遍歷 words1 的時間複雜度： $O(n_1 \cdot m_1)$ ，其中 $n_1$ 是 words1 的長度，$m_1$ 是 words1 中字串的平均長度
+- 總時間複雜度：$O(n_1 \cdot m_1 + n_2 \cdot m_2)$
 
-總時間複雜度： 
 > $O(n_1 \cdot m_1 + n_2 \cdot m_2)$
 
 ## 空間複雜度
+
 - 預處理 words2 的空間複雜度： $O(1)$
 - 遍歷 words1 的空間複雜度： $O(n_1)$
 - 結果陣列的空間複雜度： $O(n_1)$
+- 總空間複雜度：$O(n_1)$
 
+> $O(n_1)$
