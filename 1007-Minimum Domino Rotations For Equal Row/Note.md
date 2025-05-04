@@ -10,7 +10,7 @@ or all the values in `bottoms` are the same.
 
 If it cannot be done, return `-1`.
 
-## Constraints:
+**Constraints:**
 
 - `2 <= tops.length <= 2 * 10^4`
 - `bottoms.length == tops.length`
