@@ -11,6 +11,7 @@ A node is a safe node if every possible path starting from that node leads to a 
 Return an array containing all the safe nodes of the graph. The answer should be sorted in ascending order.
 
 ## 基礎思路
+
 對於每個 Node 做 DFS，為了減少重複運算，我們用一個 visited 陣列來記錄每個 Node 的狀態，分為三種狀態：
 
 - 0: 未訪問
@@ -80,11 +81,13 @@ for (let i = 0; i < n; i++) {
 ## 時間複雜度
 
 - 每個 Node 與 Edge 都只會被訪問一次，所以時間複雜度為 $O(V + E)$
+- 總時間複雜度為 $O(V + E)$
 
 > $O(V + E)$
 
 ## 空間複雜度
 
 - 額外使用了 visited 陣列，所以空間複雜度為 $O(V)$
+- 總空間複雜度為 $O(V)$
 
 > $O(V)$
