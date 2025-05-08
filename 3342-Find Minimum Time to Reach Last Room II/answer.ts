@@ -94,20 +94,20 @@ function minTimeToReach(moveTime: number[][]): number {
   while (heapSize > 0) {
     const currentIndex = popHeap();
 
-    // skip if already visited
+    // Skip if already visited
     if (visitedFlags[currentIndex]) {
       continue;
     }
 
-    // stop early if destination reached
+    // Stop early if destination reached
     if (currentIndex === totalCells - 1) {
       break;
     }
 
-    // mark as visited
+    // Mark as visited
     visitedFlags[currentIndex] = 1;
 
-    // compute row/column and cost for current cell
+    // Compute row/column and cost for current cell
     const currentDistance = distanceArray[currentIndex];
     const rowIndex = (currentIndex / m) | 0;
     const columnIndex = currentIndex - rowIndex * m;
@@ -122,7 +122,7 @@ function minTimeToReach(moveTime: number[][]): number {
         return;
       }
 
-      // determine departure time (may need to wait for openTime)
+      // Determine departure time (may need to wait for openTime)
       let departTime = currentDistance;
       const openTime = openTimeArray[neighbor];
       if (departTime < openTime) {
@@ -131,13 +131,13 @@ function minTimeToReach(moveTime: number[][]): number {
 
       const arriveTime = departTime + costForThisStep;
       if (arriveTime < distanceArray[neighbor]) {
-        // update shorter path
+        // Update the shorter path
         distanceArray[neighbor] = arriveTime;
         pushHeap(neighbor);
       }
     };
 
-    // relax four possible directions
+    // Relax four possible directions
     if (columnIndex + 1 < m) {
       relax(currentIndex + 1);
     }
@@ -152,7 +152,7 @@ function minTimeToReach(moveTime: number[][]): number {
     }
   }
 
-  // return result or -1 if unreachable
+  // Return result or -1 if unreachable
   const result = distanceArray[totalCells - 1];
   return result === INF ? -1 : result;
 }
