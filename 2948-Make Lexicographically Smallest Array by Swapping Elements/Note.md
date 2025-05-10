@@ -14,6 +14,7 @@ For example, the array `[2,10,3]` is lexicographically smaller than the array `[
 they differ at index `0` and `2 < 10`.
 
 ## 基礎思路
+
 我們可以觀測到，最理想情況是由小排到大。
 但是因為有 limit 的限制，能被交換不得超過 limit。
 那麼我們將 nums 可進行交換的分組，對每個分組進行排序，最後再寫回該分組位置。
@@ -106,6 +107,7 @@ while (groupStart < n) {
 ```
 
 ## 時間複雜度
+
 - 排序索引的操作耗費 $O(n \log n)$
 - 分組和結果更新共耗費 $O(n)$
 - 分組內排序耗費 $O(n \log n)$
@@ -115,6 +117,7 @@ while (groupStart < n) {
 > $O(n \log n)$
 
 ## 空間複雜度
+
 - 額外空間包含排序操作的臨時數據 ($O(n)$)
 - 結果陣列 ($O(n)$)
 - 分組索引與值的臨時存儲 ($O(n)$)
