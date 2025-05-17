@@ -62,9 +62,9 @@ while (currentNode !== null) {
 
 ### Step 3：建立並初始化桶（計數陣列）
 
-* 透過已知的最大與最小值，計算出桶的大小 (`bucketCount`)。
-* 為避免負數索引，利用 `valueOffset` 調整索引。
-* 使用 Uint32Array（高效數值陣列）作為桶，初始每個元素值為 0。
+- 透過已知的最大與最小值，計算出桶的大小 (`bucketCount`)。
+- 為避免負數索引，利用 `valueOffset` 調整索引。
+- 使用 Uint32Array（高效數值陣列）作為桶，初始每個元素值為 0。
 
 ```typescript
 const valueOffset = -minimumValue; // 調整負值索引的偏移量
@@ -87,8 +87,8 @@ while (currentNode !== null) {
 
 ### Step 5：第三次遍歷，將桶中的排序結果回寫到鏈結串列中
 
-* 使用 `writePointer` 指向鏈結串列頭節點。
-* 依序檢查每個桶（計數陣列），若有出現次數，則將對應數值逐一覆寫回鏈結串列的節點值中。
+- 使用 `writePointer` 指向鏈結串列頭節點。
+- 依序檢查每個桶（計數陣列），若有出現次數，則將對應數值逐一覆寫回鏈結串列的節點值中。
 
 ```typescript
 let writePointer = head;
