@@ -92,8 +92,6 @@ const countAndSayCache: string[] = (() => {
 - 首先檢查輸入參數 $n$ 是否在有效範圍內（即介於 1 到 `MAX_TERMS` 之間），若超出此範圍則拋出 `RangeError` 異常提示。
 - 因為 TypeScript/JavaScript 陣列是從 0 開始索引的，所以第 $n$ 項即對應於緩存陣列中的第 `n - 1` 個元素。
 
-完整程式碼如下：
-
 ```typescript
 function countAndSay(n: number): string {
   if (n < 1 || n > MAX_TERMS) {
