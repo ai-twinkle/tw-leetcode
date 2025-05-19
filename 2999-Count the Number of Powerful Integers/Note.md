@@ -12,6 +12,14 @@ A string `x` is a suffix of a string `y` if and only if `x` is a substring of `y
 that starts from some index (including `0`) in `y` and extends to the index `y.length - 1`. 
 For example, `25` is a suffix of `5125` whereas `512` is not.
 
+**Constraints:**
+
+- `1 <= start <= finish <= 10^15`
+- `1 <= limit <= 9`
+- `1 <= s.length <= floor(log10(finish)) + 1`
+- `s` only consists of numeric digits which are at most `limit`.
+- `s` does not have leading zeros.
+
 ## 基礎思路
 
 本題要求計算區間 `[start, finish]` 中滿足下列條件的數字個數：
