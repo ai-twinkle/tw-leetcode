@@ -27,9 +27,9 @@ flowchart TD
     D1 --> D
     G -->|No| I{Execution Error?}
     I -->|Yes| J[Get Error Feedback]
-    J --> D
+    J --> E
     I -->|No| K[Provide Performance Feedback]
-    K --> D
+    K --> E
     G -->|Same Performance & Beats 100%| L[Stop Optimization]
     
     style A fill:#d0f0c0
