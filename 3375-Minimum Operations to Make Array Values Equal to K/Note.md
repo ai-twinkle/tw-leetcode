@@ -16,6 +16,12 @@ You are allowed to perform the following operation on `nums`:
 Return the minimum number of operations required to make every element in `nums` equal to `k`. 
 If it is impossible to make all elements equal to `k`, return -1.
 
+**Constraints:**
+
+- `1 <= nums.length <= 100`
+- `1 <= nums[i] <= 100`
+- `1 <= k <= 100`
+
 ## 基礎思路
 
 本題要求透過有限次的操作，使陣列中所有元素的值都等於給定的數值 `k`，每次操作的限制為：

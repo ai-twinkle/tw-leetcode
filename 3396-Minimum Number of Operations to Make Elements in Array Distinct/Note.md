@@ -10,6 +10,11 @@ To achieve this, you can perform the following operation any number of times:
 Note that an empty array is considered to have distinct elements. 
 Return the minimum number of operations needed to make the elements in the array distinct.
 
+**Constraints:**
+
+- `1 <= nums.length <= 100`
+- `1 <= nums[i] <= 100`
+
 ## 基礎思路
 
 題目要求透過移除陣列前三個元素的操作（若元素不足三個，則全數移除），來達成陣列內元素皆為不重複的目標，問最少需要多少次這樣的操作。

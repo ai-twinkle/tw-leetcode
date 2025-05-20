@@ -6,16 +6,24 @@ You are also given a 2D array of coordinates rectangles,
 where `rectangles[i]` is in the form `[start_x, start_y, end_x, end_y]`, 
 representing a rectangle on the grid. Each rectangle is defined as follows:
 
-* `(start_x, start_y)`: The bottom-left corner of the rectangle.
-* `(end_x, end_y)`: The top-right corner of the rectangle.
+- `(start_x, start_y)`: The bottom-left corner of the rectangle.
+- `(end_x, end_y)`: The top-right corner of the rectangle.
 
 Note that the rectangles do not overlap. 
 Your task is to determine if it is possible to make either two horizontal or two vertical cuts on the grid such that:
 
-* Each of the three resulting sections formed by the cuts contains at least one rectangle.
-* Every rectangle belongs to exactly one section.
+- Each of the three resulting sections formed by the cuts contains at least one rectangle.
+- Every rectangle belongs to exactly one section.
 
 Return `true` if such cuts can be made; otherwise, return `false`.
+
+**Constraints:**
+
+- `3 <= n <= 10^9`
+- `3 <= rectangles.length <= 10^5`
+- `0 <= rectangles[i][0] < rectangles[i][2] <= n`
+- `0 <= rectangles[i][1] < rectangles[i][3] <= n`
+- No two rectangles overlap.
 
 ## 基礎思路
 

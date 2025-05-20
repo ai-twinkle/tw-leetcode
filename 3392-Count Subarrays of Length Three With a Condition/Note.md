@@ -3,6 +3,11 @@
 Given an integer array `nums`, return the number of subarrays of length 3 such that 
 the sum of the first and third numbers equals exactly half of the second number.
 
+**Constraints:**
+
+- `3 <= nums.length <= 100`
+- `-100 <= nums[i] <= 100`
+
 ## 基礎思路
 
 題目要求計算所有長度為 3 的子陣列 `[a, b, c]` 中，滿足以下條件的子陣列數量：

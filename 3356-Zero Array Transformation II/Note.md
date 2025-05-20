@@ -12,6 +12,15 @@ Decrement the value at each index in the range $[l_i, r_i]$ in nums by at most $
 Return the minimum possible non-negative value of `k`, such that after processing the first `k` queries in sequence, 
 `nums` becomes a Zero Array. If no such `k` exists, return -1.
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `0 <= nums[i] <= 5 * 10^5`
+- `1 <= queries.length <= 10^5`
+- `queries[i].length == 3`
+- `0 <= l_i <= r_i < nums.length`
+- `1 <= val_i <= 5`
+
 ## 基礎思路
 
 這道題的核心是要透過一系列區間的減法操作，讓陣列中每個元素都達到 0。
