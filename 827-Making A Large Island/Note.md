@@ -7,6 +7,13 @@ Return the size of the largest island in `grid` after applying this operation.
 
 An island is a 4-directionally connected group of `1`s.
 
+**Constraints:**
+
+- `n == grid.length`
+- `n == grid[i].length`
+- `1 <= n <= 500`
+- `grid[i][j]` is either `0` or `1`.
+
 ## 基礎思路
 
 我們可以先把所有島嶼找出來，並給他們編號，紀錄每個島嶼的大小。

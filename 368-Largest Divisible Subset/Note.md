@@ -8,6 +8,12 @@ return the largest subset `answer` such that every pair `(answer[i], answer[j])`
 
 If there are multiple solutions, return any of them.
 
+**Constraints:**
+
+- `1 <= nums.length <= 1000`
+- `1 <= nums[i] <= 2 * 10^9`
+- All the integers in `nums` are unique.
+
 ## 基礎思路
 
 題目要求在一組正整數中找到一個最大的子集，使得這個子集中任意兩個數字之間，都必須滿足「其中一個數字能整除另一個數字」的條件。

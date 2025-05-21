@@ -7,6 +7,11 @@ Given the root of a binary tree, return the postorder traversal of its nodes' va
 這題是經典的 Tree Traversal 題目，我們可以使用遞迴的方式來解決這個問題。
 遞迴的方式依序遍歷左子樹結果、右子樹結果，最後再加上根節點 (也可是子樹的"根"節點)。
 
+**Constraints:**
+
+- The number of the nodes in the tree is in the range `[0, 100]`.
+- `-100 <= Node.val <= 100`
+
 ## 解題步驟
 
 ### Step 1: 直接返回遞迴結果

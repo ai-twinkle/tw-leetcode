@@ -3,6 +3,13 @@
 Given an `m x n` integer matrix `heightMap` representing the height of each unit cell in a 2D elevation map,  
 return the volume of water it can trap after raining.
 
+**Constraints:**
+
+- `m == heightMap.length`
+- `n == heightMap[i].length`
+- `1 <= m, n <= 200`
+- `0 <= heightMap[i][j] <= 2 * 10^4`
+
 ## 基礎思路
 
 1. **最小堆**：利用最小堆來追蹤當前最小的高度，確保每次處理的都是目前能影響水量的最低高度。
@@ -283,15 +290,18 @@ return trappedWater;
    - 邊界單元約 $O(m + n)$，推入堆操作約 $O(k \log k)$，但這部分相對整體不算大。
 
 2. **主體搜索**
-   - 理論上，整個地圖的每個格子最多只會被放入堆一次，因此 $k \approx mn$。
-   - 每次 push/pop 需要 $O(\log(mn))$ 時間。
-   - 綜合下來，整體為 $O(mn \log (mn))$。
+   - 理論上，整個地圖的每個格子最多只會被放入堆一次，因此 $k \approx m \times n$。
+   - 每次 push/pop 需要 $O(\log(m \times n))$ 時間。
+   - 綜合下來，整體為 $O(m \times n \log (m \times n))$。
 
-> 若只是初步估計，也可先寫成 $O(m \times n \log k)$，但最終 $k$ 會與 $mn$ 同數量級。
+3. 總時間複雜度為 $O(m \times n \log (m \times n))$。
+
+> $O(m \times n \log (m \times n))$。
 
 ## 空間複雜度
 
-- 堆的大小在最壞情況下可達 $O(mn)$。
-- `visited` 矩陣亦為 $O(mn)$。
+- 堆的大小在最壞情況下可達 $O(m \times n)$。
+- `visited` 矩陣亦為 $O(m \times n)$。
+- 空間複雜度為 $O(m \times n)$。
 
-> 總空間需求為 $O(mn)$。
+> $O(m \times n)$。

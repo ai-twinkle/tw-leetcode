@@ -9,6 +9,11 @@ Note that the partition is done so that after concatenating all the parts in ord
 
 Return a list of integers representing the size of these parts.
 
+**Constraints:**
+
+- `1 <= s.length <= 500`
+- `s` consists of lowercase English letters.
+
 ## 基礎思路
 
 這題希望我們把字串切割成許多片段，並要求每個字母只能出現在其中一個片段，不能跨越到其他片段。我們的目標是：**盡可能地將字串分割成更多的小段**。

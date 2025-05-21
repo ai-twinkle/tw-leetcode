@@ -6,6 +6,11 @@ where `answers[i]` is the answer of the $i^{th}$ rabbit.
 
 Given the array `answers`, return the minimum number of rabbits that could be in the forest.
 
+**Constraints:**
+
+- `1 <= answers.length <= 1000`
+- `0 <= answers[i] < 1000`
+
 ## 基礎思路
 
 題目描述有一個森林裡存在未知數量的兔子。我們詢問了其中部分兔子：「森林中還有多少隻兔子和你同樣顏色？」並將兔子的回答記錄在整數陣列 `responses` 中，其中每隻兔子的回答值為 `response`，代表此兔子所屬顏色群體的兔子總數為 `response + 1`。

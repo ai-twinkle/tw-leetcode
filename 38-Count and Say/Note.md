@@ -15,6 +15,10 @@ Thus, the compressed string becomes `"23321511"`.
 
 Given a positive integer `n`, return the $n^{th}$ element of the count-and-say sequence.
 
+**Constraints:**
+
+- `1 <= n <= 30`
+
 ## 基礎思路
 
 本題要求回傳 count-and-say 序列的第 $n$ 項，其中序列的定義如下：

@@ -4,6 +4,11 @@ Given an integer array `nums`,
 return `true` if you can partition the array into two subsets such that 
 the sum of the elements in both subsets is equal or `false` otherwise.
 
+**Constraints:**
+
+- `1 <= nums.length <= 200`
+- `1 <= nums[i] <= 100`
+
 ## 基礎思路
 
 這道題目要求將一個數字陣列拆成兩個子集，使得兩個子集的元素總和相同。

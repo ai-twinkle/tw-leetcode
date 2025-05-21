@@ -4,14 +4,23 @@ Given an `m x n` binary matrix mat, return the distance of the nearest 0 for eac
 
 The distance between two cells sharing a common edge is 1.
 
-It Is nearly the same as [1765. Map of Highest Peak](../1765-Map%20of%20Highest%20Peak/Note.md)
+**Constraints:**
+
+- `m == mat.length`
+- `n == mat[i].length`
+- `1 <= m, n <= 10^4`
+- `1 <= m * n <= 10^4`
+- `mat[i][j]` is either `0` or `1`.
+- There is at least one `0` in `mat`.
 
 ## 基礎思路
+
 這可以視為一個 Multi-Source BFS 問題，由是 `0` 的格子開始，逐漸往非 `0` 區域擴散，直到所有地區都被計算。
 
-> Tips 這題很容易超時，或炸記憶體，這邊引入一些小技巧
-> 1. 用簡化後 Sliding Window 方向陣列，可以從 4 x 2 大小簡化到 5 x 1 (移動一次取兩位，一樣是4個方向)
-> 2. 用 nextQueue 來存放下一次要處理的點，減少使用 `unshift` 所帶來的效能損耗
+由於這題很容易超時，或炸記憶體，這邊引入一些小技巧
+
+- 用簡化後 Sliding Window 方向陣列，可以從 4 x 2 大小簡化到 5 x 1 (移動一次取兩位，一樣是4個方向)
+- 用 nextQueue 來存放下一次要處理的點，減少使用 `unshift` 所帶來的效能損耗
 
 ## 解題步驟
 

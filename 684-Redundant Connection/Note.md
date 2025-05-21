@@ -10,14 +10,24 @@ there is an edge between nodes `a_i` and `b_i` in the graph.
 Return an edge that can be removed so that the resulting graph is a tree of `n` nodes. 
 If there are multiple answers, return the answer that occurs last in the input.
 
+**Constraints:**
+
+- `n == edges.length`
+- `3 <= n <= 1000`
+- `edges[i].length == 2`
+- `1 <= a_i < b_i <= edges.length`
+- `a_i != b_i`
+- There are no repeated edges.
+- The given graph is connected.
+
 ## 基礎思路
+
 我們可以換個角度來看這個問題，我們可以將這個問題轉換成尋找一個圖中的cycle，並且返回這個cycle中的最後一個邊。
 
-> Tips:
-> - 為了節省時間，我們可以使用 DSU (Disjoint Set Union) 來實現這個問題。
-> - 在圖中，如果兩個節點之間已經通過其他邊相連，它們會屬於同一個集合。
-> - 如果我們再加入一個邊，且這個邊的兩個節點屬於同一個集合，那麼這個邊就是多餘的。
-> - 為了節省空間，我們能用單個陣列追蹤每個節點的父節點，來代表集合。
+為了節省時間，我們可以使用 DSU (Disjoint Set Union) 來實現這個問題。
+ - 在圖中，如果兩個節點之間已經通過其他邊相連，它們會屬於同一個集合。
+ - 如果我們再加入一個邊，且這個邊的兩個節點屬於同一個集合，那麼這個邊就是多餘的。
+ - 為了節省空間，我們能用單個陣列追蹤每個節點的父節點，來代表集合。
 
 ## 解題步驟
 

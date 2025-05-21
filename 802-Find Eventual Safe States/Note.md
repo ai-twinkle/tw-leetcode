@@ -10,6 +10,16 @@ A node is a safe node if every possible path starting from that node leads to a 
 
 Return an array containing all the safe nodes of the graph. The answer should be sorted in ascending order.
 
+**Constraints:**
+
+- `n == graph.length`
+- `1 <= n <= 10^4`
+- `0 <= graph[i].length <= n`
+- `0 <= graph[i][j] <= n - 1`
+- `graph[i]` is sorted in a strictly increasing order.
+- The graph may contain self-loops.
+- The number of edges in the graph will be in the range `[1, 4 * 10^4]`.
+
 ## 基礎思路
 
 對於每個 Node 做 DFS，為了減少重複運算，我們用一個 visited 陣列來記錄每個 Node 的狀態，分為三種狀態：

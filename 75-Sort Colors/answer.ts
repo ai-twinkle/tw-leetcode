@@ -1,6 +1,3 @@
-/**
- * Do not change name or signature.
- */
 function sortColors(nums: number[]): void {
   const lengthOfArray = nums.length;
   let zeroCount = 0;
@@ -14,7 +11,7 @@ function sortColors(nums: number[]): void {
     } else if (currentValue === 1) {
       oneCount++;
     }
-    // no else – if it's 2 we just skip
+    // No else – if it's 2 we just skip
   }
 
   // 2. Rewrite segments in-place using native .fill (O(1) per element in C++)

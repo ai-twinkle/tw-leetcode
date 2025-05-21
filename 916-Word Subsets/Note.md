@@ -9,6 +9,13 @@ A string a from words1 is universal if for every string b in words2, b is a subs
 
 Return an array of all the universal strings in words1. You may return the answer in any order.
 
+**Constraints:**
+
+- `1 <= words1.length, words2.length <= 10^4`
+- `1 <= words1[i].length, words2[i].length <= 10`
+- `words1[i]` and `words2[i]` consist only of lowercase English letters.
+- All the strings of `words1` are unique.
+
 ## 基礎思路
 
 需要把題目拆解成兩個步驟，第一個是把words2字串陣列轉換成每個字母的最低需求數量。
