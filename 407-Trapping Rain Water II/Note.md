@@ -73,7 +73,7 @@ return the volume of water it can trap after raining.
 
 ![示意圖](./images/TestCase2.gif)
 
-自由輸入測試案例，可觀察演算法運作過程。到[這裡](https://whats2000.github.io/DailyLeetCode/407-Trapping%20Rain%20Water%20II/heap-visualization/index.html)可以看到最小堆的動畫。
+自由輸入測試案例，可觀察演算法運作過程。到[這裡](https://ai-twinkle.github.io/tw-leetcode/407-Trapping%20Rain%20Water%20II/heap-visualization/index.html)可以看到最小堆的動畫。
 
 ## 解題步驟
 

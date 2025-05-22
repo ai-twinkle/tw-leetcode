@@ -1,13 +1,14 @@
-# Daily LeetCode
+# Tw-LeetCode
 
-This repository contains my solutions to the problems on LeetCode. 
-I will try to solve at least one problem every day if I have time. 
-I will be using TypeScript for all the solutions.
-There will also be a Note in Traditional Chinese to explain my solution.
+This dataset contains the solutions to the problems on LeetCode. 
+
+- Update Fequency: At least one problem every day.
+- Language: TypeScript
+- Model: Solutions and explanations are generated using OpenAI's GPT-4.5 and GPT-4.1 models with human cleanup.
 
 ## Solution Optimization Process
 
-My approach to solving and optimizing LeetCode problems follows this process:
+The approach to solving and optimizing LeetCode problems follows this process:
 
 1. Create a basic solution that correctly solves the problem
 2. Leverage `o4-mini-high` model to iteratively optimize the solution using a specialized prompt
