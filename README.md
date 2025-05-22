@@ -7,9 +7,13 @@
 
 <img src="https://cdn-uploads.huggingface.co/production/uploads/618dc56cbc345ca7bf95f3cd/3Cwsv5Pfqo_-j5KFG-CFg.png" alt="tw-leetcode" width="100%" />
 
-This dataset contains the solutions to the problems on LeetCode. 
+---
 
-- Update Fequency: At least one problem every day.
+## Overview
+
+This dataset contains the solutions to the problems on LeetCode.
+
+- Update Frequency: At least one problem every day.
 - Language: TypeScript
 - Model: Solutions and explanations are generated using OpenAI's GPT-4.5 and GPT-4.1 models with human cleanup.
 
@@ -56,7 +60,7 @@ flowchart TD
 
 ---
 
-### Optimization Prompt
+## Optimization Prompt
 
 For each optimization iteration, I use the following prompt:
 
@@ -86,7 +90,7 @@ The following is the base code and the question
 
 ---
 
-### Optimization Process
+## Optimization Process
 
 The optimization process continues iteratively with these important rules:
 
@@ -97,7 +101,7 @@ The optimization process continues iteratively with these important rules:
 
 ---
 
-### Solution Explanation and Cleanup
+## Solution Explanation and Cleanup
 
 After optimization is complete, the following additional steps are performed:
 
@@ -110,3 +114,25 @@ After optimization is complete, the following additional steps are performed:
    - Proper formatting of the output
    - Clarity of explanations
    - Consistency with the repository standards
+
+---
+
+## Citation
+
+If you find this dataset useful, please consider citing it in your work:
+
+```bibtex
+@misc{twleetcode2025,
+  title        = {tw-leetcode: Traditional Chinese High-Quality LeetCode Solution Dataset},
+  author       = {Ren-Di Wu, Huang Liang Hsun and Twinkle AI community},
+  year         = {2025},
+  howpublished = {https://huggingface.co/datasets/lianghsun/tw-leetcode},
+  note         = {Accessed May 2025}
+}
+```
+
+---
+
+## License
+
+This dataset is licensed under the [MIT License](./LICENSE). You are free to use, modify, and distribute the dataset, but please provide appropriate credit to the original authors.
