@@ -11,6 +11,11 @@ Flipping an element means changing its value from 0 to 1, and from 1 to 0.
 Return the minimum number of operations required to make all elements in `nums` equal to 1. 
 If it is impossible, return -1.
 
+**Constraints:**
+
+- `3 <= nums.length <= 10^5`
+- `0 <= nums[i] <= 1`
+
 ## 基礎思路
 
 我們從左邊開始，一個一個往右看，看到是 0 就直接翻它跟它後面兩個元素，因為如果不在這裡翻的話，之後就再也沒有機會回頭處理這個位置的 0。

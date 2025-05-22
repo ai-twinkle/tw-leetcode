@@ -11,7 +11,16 @@ Note that you can only apply the described operation if `nums` contains at least
 
 Return the minimum number of operations needed so that all elements of the array are greater than or equal to `k`.
 
+**Constraints:**
+
+- `2 <= nums.length <= 2 * 10^5`
+- `1 <= nums[i] <= 10^9`
+- `1 <= k <= 10^9`
+- The input is generated such that an answer always exists. 
+  That is, after performing some number of operations, all elements of the array are greater than or equal to `k`.
+
 ## 基礎思路
+
 這題可以使用 Priority Queue (Min Heap) 來解決，每次取出最小的兩個數字，然後進行運算，再將運算後的結果放回 Priority Queue 中，直到 `front` 大於等於 `k` 為止。
 
 > Tips:
@@ -51,7 +60,14 @@ while (priorityQueue.front()! < k) {
 }
 ```
 
+### Step 3: 返回結果
+
+```typescript
+return operations;
+```
+
 ## 時間複雜度
+
 - 每一次從優先佇列中 dequeue 或 enqueue 的操作都是 $O(\log n)$（n 為目前佇列中的元素個數）。
 - 在每次迴圈中，我們會執行 2 次 dequeue 與 1 次 enqueue，也就是 $O(3 * \log n) ≈ O(\log n)$ 的操作。 
   由於每一次迴圈操作會使優先佇列中的元素個數減少 1（兩個取出，一個加入），所以最多會進行 `n - 1` 次操作。
@@ -60,6 +76,7 @@ while (priorityQueue.front()! < k) {
 > $O(n \log n)$
 
 ## 空間複雜度
+
 - 優先佇列需要存放所有元素，最壞情況下佇列大小約為 `n`（初始時為 `n`，之後每次操作數量減少，但不會超過 `n`）。
 - 總空間複雜度為 $O(n)$。
 

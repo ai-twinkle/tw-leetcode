@@ -8,6 +8,13 @@ Return the count of days when the employee is available for work but no meetings
 
 Note: The meetings may overlap.
 
+**Constraints:**
+
+- `1 <= days <= 10^9`
+- `1 <= meetings.length <= 10^5`
+- `meetings[i].length == 2`
+- `1 <= meetings[i][0] <= meetings[i][1] <= days`
+
 ## 基礎思路
 
 題目要求計算在指定的工作天數內，有哪些天數沒有安排任何會議。  
@@ -89,32 +96,26 @@ return freeDays;
 
 ## 時間複雜度
 
-根據 [Time & Space Complexity of Array.sort in V8](https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/) 的分析：
-
 - **排序**：
     - 若陣列元素數超過 10 個，V8 採用 QuickSort，其平均時間複雜度為 $Θ(n \log(n))$。
     - 若陣列元素數 10 個或更少，則使用 InsertionSort，時間複雜度為 $O(n^2)$。  
       一般而言，我們在大規模資料情況下考慮平均情況，因此排序部分時間複雜度視為 $O(n \log n)$。
-
+    - [Time & Space Complexity of Array.sort in V8](https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/)
 - **遍歷**：  
   對排序後的會議陣列進行一次遍歷，時間複雜度為 $O(n)$。
-
 - 總時間複雜度為 $O(n \log n)$ (在大規模資料情況下)。
 
-> $O(n \log n)$ (在大規模資料情況下)
+> $O(n \log n)$
 
 ## 空間複雜度
-
-根據參考文章 [Time & Space Complexity of Array.sort in V8](https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/) 的說明：
 
 - **排序額外空間**：
     - 對於超過 10 個元素的陣列，V8 採用 QuickSort，其平均額外空間複雜度為 $O(\log n)$。
     - 對於 10 個元素或更少的陣列，則使用 InsertionSort，額外空間為 $O(1)$。  
       採用最保守分析，將額外空間複雜度視為 $O(\log n)$。
-
+    - 根據參考文章 [Time & Space Complexity of Array.sort in V8](https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/)
 - **其他變數**：  
   其他輔助變數僅佔用常數空間。
-
-- 總體空間複雜度為 $O(\log n)$。
+- 總空間複雜度為 $O(\log n)$。
 
 > $O(\log n)$

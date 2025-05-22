@@ -4,20 +4,32 @@ You are given a string s.
 
 You can perform the following process on s any number of times:
 
-* Choose an index i in the string such that there is at least one character to the left of index i that is equal to s[i], 
+- Choose an index i in the string such that there is at least one character to the left of index i that is equal to s[i], 
   And at least one character to the right that is also equal to s[i].
-* Delete the closest character to the left of index i that is equal to s[i].
-* Delete the closest character to the right of index i that is equal to s[i].
+- Delete the closest character to the left of index i that is equal to s[i].
+- Delete the closest character to the right of index i that is equal to s[i].
 
 Return the minimum length of the final string s that you can achieve.
 
+**Constraints:**
+
+- `1 <= s.length <= 2 * 10^5`
+- `s` consists only of lowercase English letters.
+
 ## 基礎思路
 
-第一個點就是如果字串已經小於等於2，那麼就不用再處理了，因為無法再刪除了。
-對於大於等於3的字串，我們始終都可以刪去一對相鄰的相同字元，直到字串長度小於等於2。那只要判定基偶性就可以了。
-若數量為奇數，像是5，那麼我們可以刪去一對相鄰的相同字元，剩下3，再刪去一對相鄰的相同字元，剩下1。基數始終剩下1個字元。
-同理，若數量為偶數，像是4，那麼我們可以刪去一對相鄰的相同字元，剩下2。偶數始終剩下2個字元。
-而本身小於3的字串，則直接加上去，因為無法再刪去了。
+本題的核心在於：**每次操作都會同時刪除目標字元左右各一個最近的相同字元**。
+換句話說，每種字元每兩個可以成對移除。
+
+需要特別注意的是，當字串長度小於等於2時，無法滿足操作條件，因此直接回傳原長度。
+
+對於其他情況，可以分成兩類討論：
+
+- 若某字元出現次數為**偶數**，經過多次操作後，最終會剩下0或2個；
+- 若出現次數為**奇數**，最終則一定會剩下1個（最後那一個無法再配對刪除）。
+
+因此，只要計算每種字元經過操作後剩下的數量，將其總和即為最終字串長度。
+
 
 ## 解題步驟
 
@@ -40,6 +52,11 @@ for (const char of s) {
 ```
 
 ### Step 3: 根據字元數量判定基偶性，計算刪去後的字串長度。
+
+對於每一種字元：
+
+- 如果次數大於2，則剩下 $1$（若奇數）或 $2$（若偶數）；
+- 如果次數小於等於2，則照原本數量累加。
 
 ```typescript
 let result = 0;

@@ -14,6 +14,12 @@ Return the number of alternating groups.
 
 Note that since `colors` represents a circle, the first and the last tiles are considered to be next to each other.
 
+**Constraints:**
+
+- `3 <= colors.length <= 10^5`
+- `0 <= colors[i] <= 1`
+- `3 <= k <= colors.length`
+
 ## 基礎思路
 
 我們可以利用一個單次循環遍歷的方法，持續更新記錄當前連續交替的圖磚數量。

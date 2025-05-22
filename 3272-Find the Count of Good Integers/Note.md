@@ -17,6 +17,11 @@ Return the count of good integers containing `n` digits.
 Note that any integer must not have leading zeros, neither before nor after rearrangement. 
 For example, 1010 cannot be rearranged to form 101.
 
+**Constraints:**
+
+- `1 <= n <= 10`
+- `1 <= k <= 9`
+
 ## 基礎思路
 
 題目要求計算「好整數」(Good Integer) 的數量，所謂「好整數」的定義如下：

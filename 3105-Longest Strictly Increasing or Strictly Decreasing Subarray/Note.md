@@ -3,7 +3,13 @@
 You are given an array of integers `nums`. Return the length of the longest subarray of `nums` 
 which is either strictly increasing or strictly decreasing.
 
+**Constraints:**
+
+- `1 <= nums.length <= 50`
+- `1 <= nums[i] <= 50`
+
 ## 基礎思路
+
 我們可以觀察兩個元素之間差異，來決定趨勢，趨勢共有三種可能:
 - 變換趨勢: 重置長度為 2 (因為檢測到趨勢變換時已經有兩個元素)
 - 維持趨勢: 此時將當前趨勢長度加一即可
@@ -53,13 +59,21 @@ for (let i = 1; i < n; i++) {
 }
 ```
 
+### Step 3: 返回結果
+
+```typescript
+return maxLength;
+```
+
 ## 時間複雜度
+
 - 計算趨勢的時間複雜度為 $O(n)$
-- 總體時間複雜度為 $O(n)$
+- 總時間複雜度為 $O(n)$
 
 > $O(n)$
 
 ## 空間複雜度
+
 - 僅使用常數空間
 - 總空間複雜度為 $O(1)$
 

@@ -8,12 +8,18 @@ Your task is to remove all digits by doing this operation repeatedly:
 
 Return the resulting string after removing all digits.
 
+**Constraints:**
+
+- `1 <= s.length <= 100`
+- `s` consists only of lowercase English letters and digits.
+- The input is generated such that it is possible to delete all digits.
+
 ## 基礎思路
 
 這題可以轉換成典型 Stack 的問題，利用 Stack 的先進後出（LIFO）特性，可以很自然地達成這個需求。
 
-* 若遇到字母：將字母 push 到 Stack 中。
-* 若遇到數字：代表要刪除該數字左側最近的字母，因此從 Stack pop 出一個元素（如果 Stack 非空）。
+- 若遇到字母：將字母 push 到 Stack 中。
+- 若遇到數字：代表要刪除該數字左側最近的字母，因此從 Stack pop 出一個元素（如果 Stack 非空）。
 
 遍歷完所有字元後，Stack 中剩下的字母即為最終結果。只需將它們依序組合成字串返回即可。
 
@@ -57,12 +63,14 @@ return stack.join('');
 ```
 
 ## 時間複雜度
+
 - 我們只需遍歷一次字串，因此時間複雜度為：$O(n)$
 - 總時間複雜度：$O(n)$
 
 > $O(n)$
 
 ## 空間複雜度
+
 - 最壞情況下，Stack 中會存放所有字母，因此空間複雜度為：$O(n)$
 - 總空間複雜度：$O(n)$
 
