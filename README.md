@@ -1,11 +1,23 @@
+<img src="https://cdn-uploads.huggingface.co/production/uploads/618dc56cbc345ca7bf95f3cd/3Cwsv5Pfqo_-j5KFG-CFg.png" alt="tw-leetcode" width="100%" />
+
 <h1 align="center">Tw-LeetCode</h1>
 
 <p align="center">
-    <a href="https://huggingface.co/datasets/twinkle-ai/tw-leetcode"><img alt="Dataset on Hub" src="https://img.shields.io/badge/🤗-Dataset-ffce1c"></a>
-    <a href="https://github.com/ai-twinkle/tw-leetcode/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/ai-twinkle/tw-leetcode.svg?color=blue"></a>
+    <a href="https://huggingface.co/datasets/twinkle-ai/tw-leetcode"><img alt="Dataset on Hub" src="https://img.shields.io/badge/HuggingFace-Dataset-ffce1c?logo=huggingface&style=for-the-badge"></a>
+    <a href="https://github.com/ai-twinkle/tw-leetcode/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/ai-twinkle/tw-leetcode.svg?color=blue&style=for-the-badge"></a>
 </p>
 
-<img src="https://cdn-uploads.huggingface.co/production/uploads/618dc56cbc345ca7bf95f3cd/3Cwsv5Pfqo_-j5KFG-CFg.png" alt="tw-leetcode" width="100%" />
+<p align="center">
+    <a href="https://discord.gg/Cx737yw4ed">
+        <img alt="Discord" src="https://img.shields.io/discord/1310544431983759450?label=Twinkle%20AI&logo=discord&style=for-the-badge">
+    </a>
+    <a href="https://huggingface.co/twinkle-ai">
+        <img alt="Hugging Face" src="https://img.shields.io/badge/🤗%20Visit%20Huggingface-twinkle--ai-blue?style=for-the-badge">
+    </a>
+    <a href="https://linkedin.com/company/twinkle-ai">
+        <img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-Twinkle%20AI-blue?logo=linkedin&style=for-the-badge">
+    </a>
+</p>
 
 ---
 
