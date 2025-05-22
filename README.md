@@ -1,10 +1,19 @@
-# Tw-LeetCode
+<h1 align="center">Tw-LeetCode</h1>
+
+<p align="center">
+    <a href="https://huggingface.co/datasets/twinkle-ai/tw-leetcode"><img alt="Dataset on Hub" src="https://img.shields.io/badge/🤗-Dataset-ffce1c"></a>
+    <a href="https://github.com/ai-twinkle/tw-leetcode/blob/main/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/ai-twinkle/tw-leetcode.svg?color=blue"></a>
+</p>
+
+<img src="https://cdn-uploads.huggingface.co/production/uploads/618dc56cbc345ca7bf95f3cd/3Cwsv5Pfqo_-j5KFG-CFg.png" alt="tw-leetcode" width="100%" />
 
 This dataset contains the solutions to the problems on LeetCode. 
 
 - Update Fequency: At least one problem every day.
 - Language: TypeScript
 - Model: Solutions and explanations are generated using OpenAI's GPT-4.5 and GPT-4.1 models with human cleanup.
+
+---
 
 ## Solution Optimization Process
 
@@ -45,6 +54,8 @@ flowchart TD
     style O fill:#c0e0f0
 ```
 
+---
+
 ### Optimization Prompt
 
 For each optimization iteration, I use the following prompt:
@@ -73,6 +84,8 @@ The following is the base code and the question
 {Last Attempt Best Solution}
 ```
 
+---
+
 ### Optimization Process
 
 The optimization process continues iteratively with these important rules:
@@ -81,6 +94,8 @@ The optimization process continues iteratively with these important rules:
 - Error fixes and performance feedback continue in the same chat session
 - We only stop iterations when the solution reaches 100% runtime efficiency AND new optimization attempts yield the same performance (bottleneck reached)
 - The process aims to push solutions to their theoretical limits through continuous refinement
+
+---
 
 ### Solution Explanation and Cleanup
 
