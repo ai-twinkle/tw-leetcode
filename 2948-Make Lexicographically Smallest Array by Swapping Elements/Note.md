@@ -13,15 +13,19 @@ array `a` has an element that is less than the corresponding element in `b`.
 For example, the array `[2,10,3]` is lexicographically smaller than the array `[10,2,3]` because 
 they differ at index `0` and `2 < 10`.
 
+Constraints:
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^9`
+- `1 <= limit <= 10^9`
+
 ## 基礎思路
 
-我們可以觀測到，最理想情況是由小排到大。
-但是因為有 limit 的限制，能被交換不得超過 limit。
-那麼我們將 nums 可進行交換的分組，對每個分組進行排序，最後再寫回該分組位置。
+最理想狀況是把陣列整體排序（由小到大），但因為每次交換都受限於 `limit`，只能交換差值不超過 `limit` 的元素。
+因此，我們的做法是**將所有可以互換的元素分組**，對每一組內進行排序，最後將排序後的值寫回對應位置。
 
-> Tips
-> 這題也是非常容易炸掉 Time Limit 的題目，所以我們需要找到一個最佳解法。
-> 一個有效解決這種分組組內排序的方法是使用 "已排序的索引" 來進行排序。
+此題在數據量很大時容易 TLE（Time Limit Exceeded），因此**如何有效分組並排序組內元素**成為關鍵。
+使用「數值排序後的索引表」是高效解決這類分組問題的技巧。
 
 ## 解題步驟
 
@@ -41,15 +45,9 @@ sortedIndices.sort((a, b) => nums[a] - nums[b]);
 
 ### Step 3: 依照 limit 進行分組
 
-```typescript
-let groupStart: number = 0;
-while (groupStart < n) {
-
-}
-```
-終止條件式我們已經移動到最後一個索引。
-
 ### Step 3.1 找到分組結束索引
+
+終止條件式我們已經移動到最後一個索引。
 
 ```typescript
 let groupStart: number = 0;
@@ -63,6 +61,8 @@ while (groupStart < n) {
   while (groupEnd < n && nums[sortedIndices[groupEnd]] - nums[sortedIndices[groupEnd - 1]] <= limit) {
     groupEnd++;
   }
+  
+  // ...
 }
 ```
 
@@ -83,6 +83,8 @@ while (groupStart < n) {
   const sortedValues: number[] = groupIndices
     .map(index => nums[index])
     .sort((a, b) => a - b);
+  
+  // ...
 }
 ```
 
@@ -112,7 +114,6 @@ while (groupStart < n) {
 - 分組和結果更新共耗費 $O(n)$
 - 分組內排序耗費 $O(n \log n)$
 - 總時間複雜度為 $O(n \log n)$。
-
 
 > $O(n \log n)$
 

@@ -6,9 +6,18 @@ The task is to find the repeating and missing numbers `a` and `b`.
 
 Return a 0-indexed integer array `ans` of size `2` where `ans[0]` equals to `a` and `ans[1]` equals to `b`.
 
+**Constraints:**
+
+- `2 <= n == grid.length == grid[i].length <= 50`
+- `1 <= grid[i][j] <= n * n`
+- For all `x` that `1 <= x <= n * n` there is exactly one `x` that is not equal to any of the grid members.
+- For all `x` that `1 <= x <= n * n` there is exactly one `x` that is equal to exactly two of the grid members.
+- For all `x` that `1 <= x <= n * n` except two of them there is exactly one pair of `i`, `j` that `0 <= i, j <= n - 1` and `grid[i][j] == x`.
+
 ## 基礎思路
 
-這題可以巧妙地利用數學方式來解。我們知道，理論上在數字範圍 $[1, n^2]$ 內，每個數字都應該只出現一次，但題目中矩陣中卻有一個數 $a$ 重複出現，同時另一個數 $b$ 缺失，這會導致矩陣的總和與平方和產生偏差。  
+這題可以巧妙地利用數學方式來解。
+我們知道，理論上在數字範圍 $[1, n^2]$ 內，每個數字都應該只出現一次，但題目中矩陣中卻有一個數 $a$ 重複出現，同時另一個數 $b$ 缺失，這會導致矩陣的總和與平方和產生偏差。  
 
 因此，我們可以先計算矩陣中所有數字的總和與平方和，再分別與理論上的總和與平方和比較，得到 $a-b$ 以及 $a^2-b^2$ 的差值。利用這兩個結果，我們能夠構造出聯立方程，最終求得 $a$ 與 $b$ 的值。
 

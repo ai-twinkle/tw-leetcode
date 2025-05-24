@@ -13,6 +13,13 @@ Return an integer denoting the count of interesting subarrays.
 
 Note: A subarray is a contiguous non-empty sequence of elements within an array.
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^9`
+- `1 <= modulo <= 10^9`
+- `0 <= k < modulo`
+
 ## 基礎思路
 
 題目要求計算「有趣子陣列」(interesting subarrays) 的數量，一個子陣列被稱為「有趣」，當且僅當滿足以下條件：
@@ -112,7 +119,7 @@ return totalInterestingSubarrays;
 ## 時間複雜度分析
 
 - **遍歷整個陣列 (for 迴圈)**：需花費 $O(n)$ 時間，其中每次操作皆為常數時間（更新餘數與計算次數）。
-- 總時間複雜度：$O(n)$。
+- 總時間複雜度為 $O(n)$。
 
 > $O(n)$
 
@@ -121,6 +128,6 @@ return totalInterestingSubarrays;
 - **frequencyOfPrefixRemainder 陣列**：
   - 此陣列大小最多為 modulo 或 n + 1，因此空間複雜度最壞為 $O(\min(n, modulo))$。
 - 其他額外空間僅為常數級別。
-- 總空間複雜度：$O(\min(n, modulo))$。
+- 總空間複雜度為 $O(\min(n, modulo))$。
 
 > $O(\min(n, modulo))$

@@ -188,9 +188,7 @@ return resultIndices.map(i => words[i]);
 ## 時間複雜度
 
 - 主要 DP 迴圈對每個單字最多檢查 $O(n)$ 個其他單字（長度最多 $10$ 可視為常數）。
-
 - 每次檢查漢明距離最多需 $O(10)$（常數時間）。
-
 - 總時間複雜度為 $O(n^2)$。
 
 > $O(n^2)$
@@ -198,9 +196,7 @@ return resultIndices.map(i => words[i]);
 ## 空間複雜度
 
 - 儲存 DP 狀態 (`dpLength`, `previousIndex`) 與字元編碼陣列 (`wordCharCodes`) 需要 $O(n)$。
-
 - 儲存單字長度對應索引的 Map (`lengthToIndices`) 亦為 $O(n)$。
-
 - 總空間複雜度為 $O(n)$。
 
 > $O(n)$

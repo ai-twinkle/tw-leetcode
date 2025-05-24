@@ -6,9 +6,16 @@ Return the number of subarrays where the maximum element of `nums` appears at le
 
 A subarray is a contiguous sequence of elements within an array.
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^6`
+- `1 <= k <= 10^5`
+
 ## 基礎思路
 
-題目要求計算所有子陣列中，「最大元素」至少出現 $k$ 次的子陣列總數。我們可以透過以下方式快速求解：
+題目要求計算所有子陣列中，「最大元素」至少出現 $k$ 次的子陣列總數。
+我們可以透過以下方式快速求解：
 
 - **找到陣列中的全域最大值**：題目只關注這個數字出現的次數，其餘數字並不影響結果。
 - **紀錄最大值出現位置**：透過一個固定大小的隊列（使用 `Int32Array` 提升效能）來儲存每個最大值的索引。

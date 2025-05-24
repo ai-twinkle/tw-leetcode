@@ -8,6 +8,10 @@ Numbers with an odd number of digits are never symmetric.
 
 Return the number of symmetric integers in the range `[low, high]`.
 
+**Constraints:**
+
+- `1 <= low <= high <= 10^4`
+
 ## 基礎思路
 
 本題要求計算範圍 `[low, high]` 中「對稱整數」的數量。根據題意：
@@ -97,13 +101,13 @@ function countSymmetricIntegers(low: number, high: number): number {
 
 - **前綴和預計算**：處理固定範圍 `[1, 10000]` 的整數，迴圈次數固定，因此預計算為常數時間 $O(1)$。
 - **查詢區間**： 直接透過陣列相減，僅需 $O(1)$。
-- 總時間複雜度 $O(1)$。
+- 總時間複雜度為 $O(1)$。
 
 > $O(1)$
 
 ## 空間複雜度
 
 - 僅需一個固定大小（長度為 10001）的前綴和陣列儲存計算結果，陣列大小固定 $O(1)$。
-- 總空間複雜度 $O(1)$。
+- 總空間複雜度為  $O(1)$。
 
 > $O(1)$
