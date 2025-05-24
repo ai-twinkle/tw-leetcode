@@ -10,6 +10,12 @@ Return the minimum time taken to repair all the cars.
 
 Note: All the mechanics can repair the cars simultaneously.
 
+**Constraints:**
+
+- `1 <= ranks.length <= 10^5`
+- `1 <= ranks[i] <= 100`
+- `1 <= cars <= 10^6`
+
 ## 基礎思路
 
 本題的核心在於尋找一個最小的「修車所需時間」（time），使得所有技師在該時間內能共同修理完指定數量（cars）的汽車。
@@ -20,6 +26,7 @@ Note: All the mechanics can repair the cars simultaneously.
 
 - 我們從第一個技師開始，依序遍歷每位技師，計算每個技師在當前設定的時間內最多能修理的汽車數量。
 - 每位技師能修理的汽車數量可透過公式計算：  
+
   $$
   \text{汽車數量} = \left\lfloor\sqrt{\frac{\text{time}}{\text{rank}}}\right\rfloor
   $$
@@ -29,6 +36,7 @@ Note: All the mechanics can repair the cars simultaneously.
 為了找出最短所需的時間，我們使用二分搜尋（Binary Search）在合理的時間範圍內尋找最小可行的時間值：
 
 - 搜尋的下界設為 0，上界則可設定為所有技師中效率最差（rank 最大）的技師單獨修理全部汽車的最壞情況所需時間，即：  
+  
   $$
   \text{上界時間} = \text{最大 rank} \times cars^2
   $$
@@ -87,23 +95,18 @@ return lower;
 
 - **預處理階段：**
   - 遍歷技師等級（ranks）陣列以找出最大值，時間複雜度為 $O(n)$。
-
 - **二分搜尋階段：**
   - 搜索範圍設定在 $[0, \text{maxRank} \times \text{cars}^2]$，因此二分搜尋的迭代次數約為 $O(\log(\text{maxRank} \times \text{cars}^2))$。
   - 每一次二分搜尋迭代中，都會調用一次 `canRepairCars` 檢查函式。該函式在最壞情況下需遍歷整個 `ranks` 陣列，耗時 $O(n)$。
   - 因此，二分搜尋階段的時間複雜度為 $O(n \cdot \log(\text{maxRank} \times \text{cars}^2))$。
-
-- **總時間複雜度：**
-  - 預處理與二分搜尋階段合併後，總時間複雜度為  
-    $$
-    O(n) + O(n \cdot \log(\text{maxRank} \times \text{cars}^2)) = O(n \cdot \log(\text{maxRank} \times \text{cars}^2))
-    $$
+- 預處理與二分搜尋階段合併後，總時間複雜度為  $O(n) + O(n \cdot \log(\text{maxRank} \times \text{cars}^2)) = O(n \cdot \log(\text{maxRank} \times \text{cars}^2))$。
+- 總時間複雜度為 $O(n \cdot \log(\text{maxRank} \times \text{cars}^2))$。
 
 > $O(n \cdot \log(\text{maxRank} \times \text{cars}^2))$
 
 ## 空間複雜度
 
 - 僅使用常數額外空間（例如變數 `low`、`high`、`mid` 等），不隨輸入大小成長，故空間複雜度為 $O(1)$。
-- **總空間複雜度：** $O(1)$
+- 總空間複雜度為 $O(1)$。
 
 > $O(1)$

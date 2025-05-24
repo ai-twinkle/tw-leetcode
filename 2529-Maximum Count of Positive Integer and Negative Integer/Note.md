@@ -8,6 +8,12 @@ return the maximum between the number of positive integers and the number of neg
 
 Note that `0` is neither positive nor negative.
 
+**Constraints:**
+
+- `1 <= nums.length <= 2000`
+- `-2000 <= nums[i] <= 2000`
+- `nums` is sorted in a non-decreasing order.
+
 ## 基礎思路
 
 這題最簡單方法是用兩個變數分別記錄正數和負數的個數，然後返回兩者中的最大值。

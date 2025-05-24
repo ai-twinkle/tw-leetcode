@@ -1,15 +1,20 @@
 # 2429. Minimize XOR
 
-Given two positive integers num1 and num2, find the positive integer x such that:
+Given two positive integers `num1` and `num2`, find the positive integer `x` such that:
 
-* x has the same number of set bits as num2, and
-* The value x XOR num1 is minimal.
+- `x` has the same number of set bits as `num2`, and
+- The value `x XOR num1` is minimal.
 
-Note that XOR is the bitwise XOR operation.
+Note that `XOR` is the bitwise XOR operation.
 
-Return the integer x. The test cases are generated such that x is uniquely determined.
+Return the integer `x`. 
+The test cases are generated such that `x` is uniquely determined.
 
-The number of set bits of an integer is the number of 1's in its binary representation.
+The number of set bits of an integer is the number of `1`'s in its binary representation.
+
+**Constraints:**
+
+- `1 <= num1, num2 <= 10^9`
 
 ## 基礎思路
 
@@ -53,7 +58,9 @@ if (countOfOneInNum1 === countOfOneInNum2) {
 }
 ```
 
-### Step 3: 處理情境 2
+### Step 3: 處理情境 2 與情境 3
+
+#### Step 3.1: 處理情境 2 `num1` 的位元中 `1` 的數量 <「需要分配的 `1` 數量」
 
 ```typescript
 // 若 num1 的 1 的數量小於 num2 的 1 的數量
@@ -83,19 +90,19 @@ if (countOfOneInNum1 < countOfOneInNum2) {
   if (remainingOne > 0) {
     resultBits = Array(remainingOne).fill('1').concat(resultBits);
   }
+} else {
+  // ...
 }
 ```
 
-跳去 [Step 5](#step-5-反轉結果)。
-
-### Step 4: 處理情境 3
+#### Step 3.2: 處理情境 3 `num1` 的位元中 `1` 的數量 >「需要分配的 `1` 數量」
 
 ```typescript
 let resultBits = num1.toString(2).split(''); // 複製 num1 的位元值
 let remainingOne: number;                    // 紀錄多分配的 1 的數量 <- 在這個 Case 時這個變數的代表的意義是不同的
 
 if (countOfOneInNum1 < countOfOneInNum2) {
-  // Step 3 的處理方式
+  // Step 3.1: 處理情境 2
 } else {
   // 計算多分配的 1 的數量
   remainingOne = countOfOneInNum1 - countOfOneInNum2;
@@ -116,7 +123,7 @@ if (countOfOneInNum1 < countOfOneInNum2) {
 }
 ```
 
-### Step 5: 反轉結果
+### Step 4: 反轉結果
 
 ```typescript
 // 把 Bit Array 轉換回數字

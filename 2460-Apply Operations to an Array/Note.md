@@ -15,6 +15,11 @@ Return the resulting array.
 
 Note that the operations are applied sequentially, not all at once.
 
+**Constraints:**
+
+- `2 <= nums.length <= 2000`
+- `0 <= nums[i] <= 1000`
+
 ## 基礎思路
 
 我們可以將題目拆分成兩個階段：
@@ -22,6 +27,8 @@ Note that the operations are applied sequentially, not all at once.
 - 模擬操作階段：根據題目要求依序進行數字合併和置 0 的操作，這部分比較直接，沒有太多優化空間。
 - 移動零階段：使用一個指針來追蹤當前該放置非零元素的位置，當遇到非零數字且位置不同時，與指針所在位置的數字交換，然後指針向後移動。
   這樣可以有效地把所有非零數字移到前面，剩餘的位置則自動就是 0。
+
+透過這樣的方式，我們可以在 $O(n)$ 的時間內完成操作，並且只需要 $O(1)$ 的額外空間。
 
 ## 解題步驟
 

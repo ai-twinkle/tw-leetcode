@@ -16,6 +16,15 @@ Divide the nodes of the graph into `m` groups (1-indexed) such that:
 Return the maximum number of groups (i.e., maximum `m`) into which you can divide the nodes. 
 Return `-1` if it is impossible to group the nodes with the given conditions.
 
+**Constraints:**
+
+- `1 <= n <= 500`
+- `1 <= edges.length <= 10^4`
+- `edges[i].length == 2`
+- `1 <= a_i, b_i <= n`
+- `a_i != b_i`
+- There is at most one edge between any pair of vertices.
+
 ## 基礎思路
 
 這個問題可以被轉換成以下三個子問題：
@@ -33,9 +42,7 @@ Return `-1` if it is impossible to group the nodes with the given conditions.
    - 每個不同層級對應一個獨立的組，因此 **最大組數 = 子圖中節點的最大層次深度 + 1**。
    - 節點越多層級，代表我們可以分配的組數越多。
 
-
-> Tips:
->在進行雙分圖檢查的同時，可以同步記錄每個節點的層級深度，從而減少額外的遍歷操作，提高效率。
+此外，在進行雙分圖檢查的同時，可以同步記錄每個節點的層級深度，從而減少額外的遍歷操作，提高效率。
 
 ## 解題步驟
 
@@ -188,15 +195,16 @@ return totalMaxGroups; // 回傳所有子圖組數的總和
 ## 時間複雜度
 - 建立鄰接表需要將所有邊掃描一次，耗時 $O(E)$。
 - 處理所有節點與子圖時：
-    1. `exploreComponent` 會以 BFS 走訪子圖中的每個節點，各子圖加總後約為 $O(N + E)$。
-    2. 不過在 `exploreComponent` 中，還會對該子圖的每個節點呼叫 `getMaxLayerCount`（又是一個 BFS）。在最壞情況（整張圖是單一連通子圖）下，對 $N$ 個節點各做一次 BFS，單次 BFS 為 $O(N + E)$
-    3. 因此最壞情況的整體時間複雜度可達 $O\bigl(N \times (N + E)\bigr)$
+  -. `exploreComponent` 會以 BFS 走訪子圖中的每個節點，各子圖加總後約為 $O(N + E)$。
+  - 不過在 `exploreComponent` 中，還會對該子圖的每個節點呼叫 `getMaxLayerCount`（又是一個 BFS）。在最壞情況（整張圖是單一連通子圖）下，對 $N$ 個節點各做一次 BFS，單次 BFS 為 $O(N + E)$
+  - 因此最壞情況的整體時間複雜度可達 $O\bigl(N \times (N + E)\bigr)$
+- 總時間複雜度為 $O\bigl(N \times (N + E)\bigr)$。
 
 > $O\bigl(N \times (N + E)\bigr)$
 
 ## 空間複雜度
 - **鄰接表**：需要儲存所有節點與邊的關係，約為 $O(N + E)$。
 - **輔助陣列**：包含 `globalVisited`、`distance` 等大小為 $N$ 的結構，因此額外空間複雜度為 $O(N)$。
-- **整體**：主要被鄰接表佔用，故空間複雜度為
+- 總空間複雜度為 $O(N + E)$。
 
 > $O(N + E)$

@@ -10,16 +10,23 @@ Return the positive integer array `ans = [num1, num2]`.
 If there are multiple pairs satisfying these conditions, return the one with the smallest `num1` value. 
 If no such numbers exist, return `[-1, -1]`.
 
+Constraints:
+
+- `1 <= left <= right <= 10^6`
+
 ## 基礎思路
 
 我們的解法核心在於先利用 Sieve of Eratosthenes 預先計算出所有的質數，再從中找出範圍內最接近的一對質數。
 由於 right 的範圍可能非常大，直接逐一判斷會導致超時 (Time Limit Error)，因此我們採取一次性預處理質數集合，後續每次查詢時便可快速定位。
 
 我們需要考慮以下幾種情況來做 early return：
+
 - **包含 [2, 3]：**  
   如果查詢範圍內包含 2 和 3，就直接回傳 [2, 3]，因為這是已知最小且間距最短的質數組合。
+
 - **無質數情況：**  
   如果在查詢範圍內沒有任何質數，則直接回傳 [-1, -1]。
+
 - **遍歷最接近質數：**  
   從預先篩選出的質數中依序比較相鄰質數之間的差距：
     - 當遇到差距為 2 的情況時，立即回傳結果，因為除了 [2, 3] 以外，其他質數的間距都不可能小於 2。
@@ -166,14 +173,15 @@ for (let currentIndex = startIndex; currentIndex < endIndex; currentIndex++) {
 - **查詢部分（二分搜尋與遍歷）：**
     - 利用二分搜尋來定位範圍內質數的起始和結束索引，複雜度為 $O(\log p)$ 其中 $ p $ 為質數的總數（約 $ \frac{n}{\log n} $）。
     - 遍歷查詢範圍內的質數，最壞情況下複雜度為 $O(k)$ 其中 $ k $ 是查詢區間內的質數數量，最壞情況約為 $ O\left(\frac{n}{\log n}\right) $。
-- 總體預處理時間複雜度為 $O(n \log \log n)$ ，總查詢時間複雜度為 $O\left(\frac{n}{\log n}\right)$
+- 總預處理時間複雜度為 $O(n \log \log n)$ ，總查詢時間複雜度為 $O\left(\frac{n}{\log n}\right)$
+- 總時間複雜度為 $O(n \log \log n) + O\left(\frac{n}{\log n}\right) = O(n \log \log n)$。
 
-> $O(n \log \log n) + O\left(\frac{n}{\log n}\right) = O(n \log \log n)$
+> $O(n \log \log n)$
 
 ## 空間複雜度
 
 - **Sieve 陣列：** 使用一個大小為 $ n + 1 $ 的陣列，複雜度為 $O(n)$
 - 儲存質數的陣列約包含 $ O\left(\frac{n}{\log n}\right) $ 個元素，但相對於 $ O(n) $ 來說可忽略不計。
-- 總體空間複雜度為 $O(n)$
+- 總空間複雜度為 $O(n)$
 
 > $O(n)$

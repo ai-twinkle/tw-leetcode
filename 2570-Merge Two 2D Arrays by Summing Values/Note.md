@@ -15,14 +15,21 @@ Merge the two arrays into one array that is sorted in ascending order by id, res
 
 Return the resulting array. The returned array must be sorted in ascending order by id.
 
+**Constraints:**
+
+- `1 <= nums1.length, nums2.length <= 200`
+- `nums1[i].length == nums2[j].length == 2`
+- `1 <= id_i, val_i <= 1000`
+- Both arrays contain unique ids.
+- Both arrays are in strictly ascending order by id.
 
 ## 基礎思路
 
 我們可以用兩個指針來追蹤當前處理的位置，然後分成三種情況來處理：
 
-- 如果數字 nums1 的 id 小於 nums2 的 id，則將 nums1 的數字加入結果中，並將 nums1 的指針向前移動。
-- 同理，如果 nums2 的 id 小於 nums1 的 id，則將 nums2 的數字加入結果中，並將 nums2 的指針向前移動。
-- 如果 nums1 和 nums2 的 id 相等，則將兩個數字相加，並將結果加入結果中，然後將兩個指針向前移動。
+- 如果數字 `nums1` 的 id 小於 `nums2` 的 id，則將 `nums1` 的數字加入結果中，並將 `nums1` 的指針向前移動。
+- 同理，如果 `nums2` 的 id 小於 `nums1` 的 id，則將 nums2 的數字加入結果中，並將 `nums2` 的指針向前移動。
+- 如果 `nums1` 和 `nums2` 的 id 相等，則將兩個數字相加，並將結果加入結果中，然後將兩個指針向前移動。
 
 為了進一步減少判定時間，當其中一個指針到達結尾時，我們可以直接將另一個數組的剩餘部分加入結果中。
 

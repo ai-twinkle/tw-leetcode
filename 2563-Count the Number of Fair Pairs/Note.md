@@ -8,6 +8,13 @@ A pair (i, j) is fair if:
 - `0 <= i < j < n`, and
 - `lower <= nums[i] + nums[j] <= upper`
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `nums.length == n`
+- `-10^9 <= nums[i] <= 10^9`
+- `-10^9 <= lower <= upper <= 10^9`
+
 ## 基礎思路
 
 題目要求計算給定整數陣列中，有多少對數字 `(i, j)`（且滿足條件 `i < j`）的和位於指定的範圍 `[lower, upper]` 內。
@@ -42,6 +49,18 @@ const lengthOfNumbers = sortedNumbers.length;
 
 接著，我們建立輔助函式 `countPairsAtMost(limit)`，使用雙指標計算所有數字對 `(i, j)`（`i < j`）的和不超過 `limit` 的數量：
 
+- **初始狀態**：
+    - `pairCount` 計算有效對數。
+    - `leftIndex` 指向陣列頭部。
+    - `rightIndex` 指向陣列尾部。
+
+- **迴圈條件**：
+    - 當兩個指標尚未交錯 (`leftIndex < rightIndex`)，持續檢查。
+
+- **邏輯判斷**：
+    - 若當前的數字對總和 `sumOfPair` 小於或等於限制值 `limit`，表示從 `leftIndex` 到 `rightIndex` 之間的所有元素與 `leftIndex` 均可形成合法配對，增加 `rightIndex - leftIndex` 對數，並移動 `leftIndex` 往右。
+    - 若總和超過限制值，則表示右邊的數字太大，需將 `rightIndex` 左移。
+
 ```typescript
 function countPairsAtMost(limit: number): number {
   let pairCount = 0;
@@ -65,18 +84,6 @@ function countPairsAtMost(limit: number): number {
 }
 ```
 
-- **初始狀態**：
-  - `pairCount` 計算有效對數。
-  - `leftIndex` 指向陣列頭部。
-  - `rightIndex` 指向陣列尾部。
-
-- **迴圈條件**：
-  - 當兩個指標尚未交錯 (`leftIndex < rightIndex`)，持續檢查。
-
-- **邏輯判斷**：
-  - 若當前的數字對總和 `sumOfPair` 小於或等於限制值 `limit`，表示從 `leftIndex` 到 `rightIndex` 之間的所有元素與 `leftIndex` 均可形成合法配對，增加 `rightIndex - leftIndex` 對數，並移動 `leftIndex` 往右。
-  - 若總和超過限制值，則表示右邊的數字太大，需將 `rightIndex` 左移。
-
 ### Step 3：計算最終答案
 
 我們透過兩次調用上述輔助函式，分別取得和 ≤ `upper` 與和 < `lower` 的對數，並計算差值，即得出位於 `[lower, upper]` 範圍內的數字對總數：
@@ -96,10 +103,8 @@ return countUpToUpper - countBelowLower;
 
 - **排序操作**：
   使用內建的排序函式進行排序，時間複雜度為 $O(n \log n)$。
-
 - **雙指標操作**：
   每次調用輔助函式 `countPairsAtMost()` 時，僅需掃描整個陣列一次，時間複雜度為 $O(n)$。由於總共調用兩次，因此整體仍為 $O(n)$。
-
 - 總時間複雜度為 $O(n \log n) + O(n) = O(n \log n)$。
 
 > $O(n \log n)$
@@ -108,10 +113,8 @@ return countUpToUpper - countBelowLower;
 
 - **排序使用的額外陣列**：
   轉換輸入數字為 `Int32Array` 會產生額外空間，空間複雜度為 $O(n)$。
-
 - **輔助函式內部使用空間**：
   雙指標與計數器僅需常數空間 $O(1)$。
-
 - 總空間複雜度為 $O(n)$。
 
 > $O(n)$

@@ -5,8 +5,8 @@ function isVowel(char: string): boolean {
 }
 
 function vowelStrings(words: string[], queries: number[][]): number[] {
-  const isStartAndEndVowel = new Array(words.length).fill(0);
-  const prefixSum = new Array(words.length + 1).fill(0);
+  const isStartAndEndVowel: number[] = new Array(words.length).fill(0);
+  const prefixSum: number[] = new Array(words.length + 1).fill(0);
 
   words.forEach((word, i) => {
     const startChar = isVowel(word[0]);

@@ -16,6 +16,12 @@ The score after distributing the marbles is the sum of the costs of all the `k` 
 
 Return the difference between the maximum and minimum scores among marble distributions.
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^9`
+- `1 <= k <= (nums.length + 1)/2`
+
 ## 基礎思路
 
 題目要求將一排球依序分成 `k` 個袋子，每個袋子的成本是該袋子「第一顆」與「最後一顆」球重量的總和。

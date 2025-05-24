@@ -14,6 +14,16 @@ Note that for each query you are allowed to visit the same cell multiple times.
 
 Return the resulting array `answer`
 
+**Constraints:**
+
+- `m == grid.length`
+- `n == grid[i].length`
+- `2 <= m, n <= 1000`
+- `4 <= m * n <= 10^5`
+- `k == queries.length`
+- `1 <= k <= 10^4`
+- `1 <= grid[i][j], queries[i] <= 10^6`
+
 ## 基礎思路
 
 可以把這題想像成從左上角出發玩迷宮遊戲，每個格子有自己的難度值。如果你的「能量值」（即查詢值）**嚴格大於**格子難度，就可以進入這個格子並拿 1 分，然後再往上下左右繼續探索。

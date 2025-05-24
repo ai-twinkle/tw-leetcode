@@ -11,6 +11,11 @@ A subarray is a contiguous part of an array.
 
 Note that subarrays of length `1` are always considered nice.
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^9`
+
 ## 基礎思路
 
 一個比較直觀的方式是比對兩兩元素的 `AND` 運算結果，但是這會需要 $O(n^2)$ 的時間複雜度。

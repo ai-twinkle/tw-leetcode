@@ -25,6 +25,18 @@ The game goes on as follows:
 
 Return the maximum net income Alice can have if she travels towards the optimal leaf node.
 
+**Constraints:**
+
+- `2 <= n <= 10^5`
+- `edges.length == n - 1`
+- `edges[i].length == 2`
+- `0 <= a_i, b_i < n`
+- `a_i != b_i`
+- `edges` represents a valid tree.
+- `1 <= bob < n`
+- `amount.length == n`
+- `amount[i]` is an even integer in the range `[-10^4, 10^4]`.
+
 ## 基礎思路
 
 我們可以換個方式思考，可以拆解成兩個問題：
@@ -38,7 +50,7 @@ Return the maximum net income Alice can have if she travels towards the optimal 
 我們可以合併這兩個過程，方法如下：
 
 - 當我們從根開始 DFS 時，遞迴向下時我們可以同時從子樹中回傳 Bob 的最短距離信息，
-  並用該信息更新當前節點的 bob 到達時間（bobDist[node] = min(bobDist[node], bobDist[child] + 1)）。
+  並用該信息更新當前節點的 bob 到達時間（`bobDist[node] = min(bobDist[node], bobDist[child] + 1)`）。
 - 遞迴過程中就能根據當前 DFS 深度（代表 Alice 到達該節點的時間）與該節點的 Bob 到達時間進行收益計算，這樣就不會有重複計算的問題。
 
 這樣經過遍歷整棵樹，就能得到 Alice 的最大收益。

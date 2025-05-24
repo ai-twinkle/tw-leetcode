@@ -1,4 +1,4 @@
-# 2559. Count Vowel Strings in Ranges
+# 2560. House Robber IV
 
 There are several consecutive houses along a street, each of which has some money inside. 
 There is also a robber, who wants to steal money from the homes, but he refuses to steal from adjacent homes.
@@ -12,6 +12,12 @@ You are also given an integer `k`, representing the minimum number of houses the
 It is always possible to steal at least `k` houses.
 
 Return the minimum capability of the robber out of all the possible ways to steal at least `k` houses.
+
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^9`
+- `1 <= k <= (nums.length + 1)/2`
 
 ## 基礎思路
 

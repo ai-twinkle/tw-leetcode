@@ -11,6 +11,11 @@ Return the number of fixed-bound subarrays.
 
 A subarray is a contiguous part of an array.
 
+**Constraints:**
+
+- `2 <= nums.length <= 10^5`
+- `1 <= nums[i], minK, maxK <= 10^6`
+
 ## 基礎思路
 
 題目要求計算陣列中滿足以下條件的「固定上下界子陣列」（fixed-bound subarray）數量：
@@ -31,9 +36,11 @@ A subarray is a contiguous part of an array.
 - 起點必須大於上一次的無效位置 (`lastInvalidIndex`)。
 
 因此，滿足條件的子陣列起始位置範圍為：
+
 $$
 \max(0,\; \min(\text{lastMinKIndex},\, \text{lastMaxKIndex}) - \text{lastInvalidIndex})
 $$
+
 將這個結果累加即為答案。
 
 ## 解題步驟
@@ -41,6 +48,11 @@ $$
 ### Step 1：初始化變數與資料結構
 
 首先取得陣列長度，並初始化三個追蹤索引與答案累加器：
+
+- `totalCount`：記錄符合條件子陣列的總數量。
+- `lastMinKIndex`：最後一次遇到值為 `minK` 的索引位置，初始為 `-1`。
+- `lastMaxKIndex`：最後一次遇到值為 `maxK` 的索引位置，初始為 `-1`。
+- `lastInvalidIndex`：最後一次遇到超出範圍元素的索引位置，初始為 `-1`。
 
 ```typescript
 const n = nums.length;
@@ -50,11 +62,6 @@ let lastMinKIndex = -1;
 let lastMaxKIndex = -1;
 let lastInvalidIndex = -1;
 ```
-
-- `totalCount`：記錄符合條件子陣列的總數量。
-- `lastMinKIndex`：最後一次遇到值為 `minK` 的索引位置，初始為 `-1`。
-- `lastMaxKIndex`：最後一次遇到值為 `maxK` 的索引位置，初始為 `-1`。
-- `lastInvalidIndex`：最後一次遇到超出範圍元素的索引位置，初始為 `-1`。
 
 ### Step 2：線性掃描並更新狀態
 
@@ -101,7 +108,7 @@ return totalCount;
 ## 時間複雜度
 
 - **單次線性掃描**：只需要遍歷陣列一次，每個元素做常數次操作，複雜度為 $O(n)$。
-- 因此總時間複雜度為 $O(n)$。
+- 總時間複雜度為 $O(n)$。
 
 > $O(n)$
 

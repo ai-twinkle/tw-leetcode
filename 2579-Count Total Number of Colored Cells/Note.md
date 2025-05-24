@@ -7,6 +7,10 @@ There exists an infinitely large two-dimensional grid of uncolored unit cells. Y
 
 Below is a pictorial representation of the state of the grid after minutes 1, 2, and 3.
 
+**Constraints:**
+
+- `1 <= n <= 10^5`
+
 ## 基礎思路
 
 這題的關鍵在於發現藍色區域會以曼哈頓距離（Manhattan distance）的概念向外擴散，形成一個「菱形」的區域。
@@ -29,15 +33,11 @@ Below is a pictorial representation of the state of the grid after minutes 1, 2,
   現在所有與藍色格子相鄰的未染色格子也會被染成藍色，此時新染上的格子正好是離中心曼哈頓距離為 2 的那些格子，數量為 8 個。  
   **此時藍色格子總數：** $1 + 4 + 8 = 13$。
 
----
-
 #### 2. 利用曼哈頓距離建立模型
 
 觀察上述模式可以發現，經過 $n$ 分鐘後，所有與中心的曼哈頓距離不超過 $n-1$ 的格子都會染成藍色。也就是說，藍色區域由滿足 $|x| + |y| \le n-1$ 的格子組成，其中 $x$ 與 $y$ 是與中心的水平與垂直距離。
 
----
-
-### 3. 計算菱形內格子的數量
+#### 3. 計算菱形內格子的數量
 
 對於曼哈頓半徑 $m = n-1$ 的菱形，格子數量可分為兩部分計算：
 
@@ -45,21 +45,22 @@ Below is a pictorial representation of the state of the grid after minutes 1, 2,
 - **距離 $d$ 的格子（其中 $1 \le d \le m$）：** 每一個 $d$ 的距離上有 $4d$ 個格子（分別位於上下左右及其對角延伸方向，但不含角點重複計算）。
 
 所以，總格子數為：
+
 $$
 \text{總數} = 1 + \sum_{d=1}^{m} 4d = 1 + 4\left(1 + 2 + \cdots + m\right)
 $$
 
 利用等差數列求和公式 $1 + 2 + \cdots + m = \frac{m(m+1)}{2}$，我們可以得到：
+
 $$
 \text{總數} = 1 + 4\left(\frac{m(m+1)}{2}\right) = 1 + 2m(m+1)
 $$
 
 把 $m = n - 1$ 帶回去，最終的公式為：
+
 $$
 \text{藍色格子數} = 1 + 2(n-1)n
 $$
-
----
 
 #### 4. 遞推關係
 
@@ -75,11 +76,10 @@ $$
   f(n) = 1 + 4\left(1 + 2 + \cdots + (n-1)\right) = 1 + 2(n-1)n
   $$
 
----
-
 #### 5. 結論
 
 經過 $n$ 分鐘後，藍色區域中藍色格子的數目為：
+
 $$
 1 + 2(n-1)n = \boxed{2n^2 - 2n + 1}
 $$
@@ -97,13 +97,13 @@ return 2 * n * n - 2 * n + 1;
 ## 時間複雜度
 
 - 我們只需要進行一次計算，因此時間複雜度為 $O(1)$。
-- 總時間複雜度：$O(1)$。
+- 總時間複雜度為 $O(1)$。
 
 > $O(1)$
 
 ## 空間複雜度
 
 - 我們僅需要常數空間來儲存變數，因此空間複雜度為 $O(1)$。
-- 總空間複雜度：$O(1)$。
+- 總空間複雜度為 $O(1)$。
 
 > $O(1)$
