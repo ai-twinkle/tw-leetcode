@@ -12,7 +12,14 @@ and no vertex of the subgraph shares an edge with a vertex outside of the subgra
 
 A connected component is said to be complete if there exists an edge between every pair of its vertices.
 
-下面我們詳細說明如何解題：「Count the Number of Complete Components」，重點在於利用 **並查集**（Union-Find）來快速合併同一連通分量，並在合併過程中累計每個分量內的邊數，最後檢查每個連通分量是否為完全圖。
+**Constraints:**
+
+- `1 <= n <= 50`
+- `0 <= edges.length <= n * (n - 1) / 2`
+- `edges[i].length == 2`
+- `0 <= a_i, b_i <= n - 1`
+- `a_i != b_i`
+- There are no repeated edges.
 
 ## 基礎思路
 
@@ -109,16 +116,16 @@ return completeComponents;
 
 ## 時間複雜度
 
-- **合併操作**：對每條邊執行 `union`，均攜帶優化（路徑縮減與按大小合併），均攤時間複雜度近似 O(α(n))（α 為反阿克曼函數，實際可視為常數）。
-- **遍歷所有節點**：O(n)。
-- 總體時間複雜度為 O(n + m)。
+- **合併操作**：對每條邊執行 `union`，均攜帶優化（路徑縮減與按大小合併），均攤時間複雜度近似 $O(α(n))$（α 為反阿克曼函數，實際可視為常數）。
+- **遍歷所有節點**：$O(n)$。
+- 總時間複雜度為 $O(n + m)$。
 
 > $O(n + m)$
 
 ## 空間複雜度
 
-- **parents, size, edgeCount 數組**：需要額外 O(n) 的空間。
+- **parents, size, edgeCount 數組**：需要額外 $O(n)$ 的空間。
 - 其他輔助變數僅為常數空間。
-- 總體空間複雜度為 O(n)。
+- 總空間複雜度為 $O(n)$。
 
 > $O(n)$

@@ -1,17 +1,23 @@
 # 2683. Neighboring Bitwise XOR
 
-A 0-indexed array derived with length n is derived by computing the bitwise XOR (⊕) of adjacent values in a binary array original of length n.
+A 0-indexed array `derived` with length `n` is derived by computing the bitwise XOR (⊕) of adjacent values in a binary array `original` of length `n`.
 
-Specifically, for each index i in the range [0, n - 1]:
+Specifically, for each index `i` in the range `[0, n - 1]`:
 
-* If i = n - 1, then derived[i] = original[i] ⊕ original[0].
-* Otherwise, derived[i] = original[i] ⊕ original[i + 1].
+- If `i = n - 1`, then `derived[i] = original[i] ⊕ original[0]`.
+- Otherwise, `derived[i] = original[i] ⊕ original[i + 1]`.
 
-Given an array derived, your task is to determine whether there exists a valid binary array original that could have formed derived.
+Given an array `derived`, your task is to determine whether there exists a valid binary array `original` that could have formed `derived`.
 
 Return true if such an array exists or false otherwise.
 
-* A binary array is an array containing only 0's and 1's
+- A binary array is an array containing only 0's and 1's
+
+**Constraints:**
+
+- `n == derived.length`
+- `1 <= n <= 10^5`
+- The values in derived are either `0`'s or `1`'s
 
 ## 基本思路
 
@@ -61,20 +67,17 @@ for (const x of derived) {
 return count % 2 === 0;
 ```
 
-### Step 3: 化簡
-
-```typescript
-return derived.filter(x => x === 1).length % 2 === 0;
-```
-
-> 備註: 這邊會使空間複雜度增加成 $O(n)$，因為 `filter` 會產生一個新陣列佔用額外空間。
-
 ## 時間複雜度
-由於需要遍歷 `derived` 陣列，因此時間複雜度為 O(n)。`n` 表示 `derived` 陣列的長度。
+
+- 由於需要遍歷 `derived` 陣列，因此時間複雜度為 $O(n)$。
+  `n` 表示 `derived` 陣列的長度。
+- 總時間複雜度為 $O(n)$。
 
 > $O(n)$
 
 ## 空間複雜度
-需要一個變數 `count` 來計算反轉次數，因此空間複雜度為 O(1)。
+
+- 需要一個變數 `count` 來計算反轉次數，因此空間複雜度為 $O(1)$。
+- 總空間複雜度為 $O(1)$。
 
 > $O(1)$

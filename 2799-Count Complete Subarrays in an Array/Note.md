@@ -9,13 +9,18 @@ Return the number of complete subarrays.
 
 A subarray is a contiguous non-empty part of an array.
 
+**Constraints:**
+
+- `1 <= nums.length <= 1000`
+- `1 <= nums[i] <= 2000`
+
 ## 基礎思路
 
 題目要求找出所有「完整子陣列」的數量，其中「完整子陣列」的定義為：
 
 > 子陣列中不同元素的數量，與原陣列中不同元素的數量相同。
 
-為了解決這個問題，我們可以利用**滑動窗口（Sliding Window）**的策略：
+為了解決這個問題，我們可以利用 **滑動窗口（Sliding Window）** 的策略：
 
 1. 首先計算整個陣列中「不同元素」的總數。
 2. 接著，透過維護一個滑動窗口，逐漸擴展窗口右端，並記錄窗口內的元素頻率。

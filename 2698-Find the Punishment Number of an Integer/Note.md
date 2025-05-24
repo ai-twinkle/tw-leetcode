@@ -8,26 +8,36 @@ The punishment number of `n` is defined as the sum of the squares of all integer
 - The decimal representation of `i * i` can be partitioned into contiguous substrings such that 
 - the sum of the integer values of these substrings equals `i`.
 
+**Constraints:**
+
+- `1 <= n <= 1000`
+
 ## 基本思路
 
 這題會用到一個數學概念，其證明如下：
 
 考慮一個十進位數 $N$，假設它的表示為
+
 $$
 N = d_k 10^k + d_{k-1} 10^{k-1} + \cdots + d_1 10^1 + d_0,
 $$
+
 其中每個 $d_i$ 都是 0 到 9 之間的數字。
 
 在模 9 的意義下，我們有一個很重要的性質：
+
 $$
 10 \equiv 1 \pmod{9}.
 $$
+
 因此對於任意正整數 $n$，都有
+
 $$
 10^n \equiv 1^n = 1 \pmod{9}.
 $$
 
 把這個性質帶入 $N$ 的表示式中，可以得到：
+
 $$
 N \equiv d_k + d_{k-1} + \cdots + d_1 + d_0 \pmod{9}.
 $$
@@ -37,17 +47,23 @@ $$
 > 這個性質也常被用在「九數檢驗」(casting out nines)中，用來快速檢查計算錯誤。
 
 對於 Punishment Number 來說，我們需要 $i^2$ 的各個子數字之和能夠組合成 $i$ 本身。注意到依據上面的性質，
+
 $$
 i^2 \equiv \text{(數字和)} \pmod{9}.
 $$
+
 若能將 $i^2$ 分割後的數字和組合得到 $i$，則必須有
+
 $$
 i^2 \equiv i \pmod{9}.
 $$
+
 這等價於
+
 $$
 i^2 - i \equiv 0 \pmod{9} \quad \Longrightarrow \quad i(i-1) \equiv 0 \pmod{9}.
 $$
+
 由於 $i$ 與 $i-1$ 互質，因此這個式子成立的充分必要條件是 $i$ 或 $i-1$ 必須被 9 整除。也就是說：
 - 如果 $i$ 被 9 整除，則 $i \equiv 0 \pmod{9}$；
 - 如果 $i-1$ 被 9 整除，則 $i \equiv 1 \pmod{9}$。
@@ -122,19 +138,24 @@ function punishmentNumber(n: number): number {
 ## 時間複雜度
 
 - 對於每個從 $1$ 到 $n$ 的 $i$，我們需要處理 $i^2$ 的字串表示，其長度約為 $O(\log i)$ 位數。在最壞情況下，遞迴分割可能的方式數約為  
-$$
-2^{O(\log i)} = i^{2\log_{10}(2)}
-$$
-- 將所有 $i$ 的情況加總，總複雜度為  
-$$
-\sum_{i=1}^{n} O\Bigl(i^{2\log_{10}(2)}\Bigr) = O\Bigl(n^{1+2\log_{10}(2)}\Bigr).
-$$
 
-> $O\Bigl(n^{\,1+2\log_{10}(2)}\Bigr) \approx O(n^{1.60206})$
+    $$
+    2^{O(\log i)} = i^{2\log_{10}(2)}
+    $$
+
+- 將所有 $i$ 的情況加總，總複雜度為  
+
+    $$
+    \sum_{i=1}^{n} O\Bigl(i^{2\log_{10}(2)}\Bigr) = O\Bigl(n^{1+2\log_{10}(2)}\Bigr).
+    $$
+
+- 總時間複雜度為 $O\Bigl(n^{\,1+2\log_{10}(2)}\Bigr) \approx O(n^{1.60206})$。
+
+> $O\Bigl(n^{\,1+2\log_{10}(2)}\Bigr)$
 
 ## 空間複雜度
 
 - 遞迴的最大深度受 $i^2$ 的位數影響，約為 $O(\log i)$。當 $i \le n$ 時，最大深度為 $O(\log n)$。
-- 總體空間複雜度為 $O(\log n)$。
+- 總空間複雜度為 $O(\log n)$。
 
 > $O(\log n)$

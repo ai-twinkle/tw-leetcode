@@ -1,4 +1,4 @@
-# 916. 2661. First Completely Painted Row or Column
+# 2661. First Completely Painted Row or Column
 
 You are given a 0-indexed integer array `arr`, and an `m x n` integer matrix `mat`. 
 `arr` and `mat` both contain all the integers in the range `[1, m * n]`.
@@ -8,10 +8,32 @@ paint the cell in `mat` containing the integer `arr[i]`.
 
 Return the smallest index `i` at which either a row or a column will be completely painted in `mat`.
 
+**Constraints:**
+
+- `m == mat.length`
+- `n = mat[i].length`
+- `arr.length == m * n`
+- `1 <= m, n <= 10^5`
+- `1 <= m * n <= 10^5`
+- `1 <= arr[i], mat[r][c] <= m * n`
+- All the integers of `arr` are unique.
+- All the integers of `mat` are unique.
+
 ## 基礎思路
-這題很重要的是建立索引列表，即數字對應到的行列，這樣可以快速找到對應的行列，然後進行計數，當計數等於m或n時，即找到答案。
-對應表比較有效率的是構建兩個陣列，一個是行對應表，一個是列對應表，這樣可以快速找到對應的行列。
-當然字典也是一個不錯的選擇，但是字典的查找效率比較低。
+
+題目要求我們依序「塗色」矩陣中的格子，並在**第一個整行或整列被完全塗色**時回傳當前的步驟。
+因為每個數字只會出現在 `mat` 中的唯一一格，所以我們能把「每個數字在矩陣中的位置」預先記錄起來。
+
+**為了高效完成這件事，我們要做的事情包括：**
+
+1. **建立數字對應格子的行列索引**：
+   這樣每次根據 `arr[i]` 取數字，就能在 $O(1)$ 時間知道該塗色的位置。
+2. **維護每行與每列已塗色的格子數量**：
+   每次塗色時，將對應行、列的計數加一，並檢查是否已經全部塗滿。
+3. **即時判斷是否出現首個完全被塗色的行或列**：
+   當某行或某列的計數達到該行/列總格數，立即回傳答案。
+
+這樣可以確保在**遍歷過程中，隨時快速判斷是否完成條件**，而不需重複掃描整個矩陣，達到最優效率。
 
 ## 解題步驟
 
@@ -63,25 +85,27 @@ for (let i = 0; i < arr.length; i++) {
 }
 ```
 
-## Step 4: 返回-1
+## Step 4: 返回 -1
+
+雖然本題不會出現找不到答案的情況，但是實際應用中，這個是個好習慣。
 
 ```typescript
 // 如果沒有找到答案，返回-1
 return -1;
 ```
-雖然本題不會出現找不到答案的情況，但是實際應用中，這個是個好習慣。
 
 ## 時間複雜度
-- 建立索引表的時間複雜度為$O(n \times m)$
-- 遍歷arr的時間複雜度為$O(n \times m)$
-- 總的時間複雜度為$O(n \times m)$
+
+- 建立索引表的時間複雜度為$O(n \times m)$。
+- 遍歷arr的時間複雜度為$O(n \times m)$。
+- 總時間複雜度為 $O(n \times m)$。
 
 > $O(n \times m)$
 
 ## 空間複雜度
 
-- 兩個索引表的空間複雜度為$O(n \times m)$
-- 兩個計數表的空間複雜度為$O(n + m)$
-- 總的空間複雜度為$O(n \times m)$
+- 兩個索引表的空間複雜度為$O(n \times m)$。
+- 兩個計數表的空間複雜度為$O(n + m)$。
+- 總空間複雜度為 $O(n \times m)$。
 
 > $O(n \times m)$
