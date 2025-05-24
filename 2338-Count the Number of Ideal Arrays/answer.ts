@@ -4,15 +4,15 @@ const MAX_PRIME_FACTORS = 15;
 
 // ———— Preallocated, typed buffers for max efficiency ————
 
-/** Minimum prime factor for each integer in [0…MAX_N) */
+// Minimum prime factor for each integer in [0…MAX_N)
 const minimumPrimeFactor = new Uint16Array(MAX_N);
 
-/** Flattened list of all prime‑exponent counts, for values 0…MAX_N */
+// Flattened list of all prime‑exponent counts, for values 0…MAX_N
 let primeExponentsFlat: Uint8Array;
-/** Offsets into `primeExponentsFlat` for each value */
+// Offsets into `primeExponentsFlat` for each value
 const primeExponentsOffset = new Int32Array(MAX_N + 1);
 
-/** combinationCoefficients[i][j] = C(i, j) mod MODULO, stored as BigInt */
+// combinationCoefficients[i][j] = C(i, j) mod MODULO, stored as BigInt
 const combinationCoefficients: bigint[][] = new Array(MAX_N + MAX_PRIME_FACTORS);
 
 /** One‑time precompute of:

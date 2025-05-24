@@ -11,6 +11,12 @@ Each child can be allocated `candies` from only one pile of `candies` and some p
 
 Return the maximum number of `candies` each child can get.
 
+**Constraints:**
+
+- `1 <= candies.length <= 10^5`
+- `1 <= candies[i] <= 10^7`
+- `1 <= k <= 10^12`
+
 ## 基礎思路
 
 這題的核心目標是「把一堆糖果公平地分給一群小朋友，每個人都拿到盡可能多的糖果」。一開始，我們會先把所有糖果堆加總，算出總共到底有多少顆糖果，同時記錄一下最大的糖果堆有多少顆，因為這會決定每個小朋友最多可能拿到幾顆糖果。

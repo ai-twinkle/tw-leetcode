@@ -9,6 +9,12 @@ You need to divide `nums` into n pairs such that:
 
 Return `true` if nums can be divided into `n` pairs, otherwise return `false`.
 
+**Constraints:**
+
+- `nums.length == 2 * n`
+- `1 <= n <= 500`
+- `1 <= nums[i] <= 500`
+
 ## 基礎思路
 
 這題最簡單的方式就是用 Hash Table 來記錄每個數字出現的次數，然後再去檢查每個數字出現的次數是否為偶數。
@@ -66,7 +72,7 @@ return oddCount === 0;
 
 ## 時間複雜度
 
-- 遍歷一次 nums 陣列，時間複雜度為 $O(n)$
+- 遍歷一次 `nums` 陣列，時間複雜度為 $O(n)$
 - 總時間複雜度為 $O(n)$
 
 > $O(n)$

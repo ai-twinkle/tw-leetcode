@@ -10,6 +10,11 @@ A 0-indexed integer array `arr` of length `n` is considered ideal if the followi
 Return the number of distinct ideal arrays of length `n`. 
 Since the answer may be very large, return it modulo $10^9 + 7$.
 
+**Constraints:**
+
+- `2 <= n <= 10^4`
+- `1 <= maxValue <= 10^4`
+
 ## 基礎思路
 
 題目要求計算長度為 $n$ 且每個元素範圍在 $[1, maxValue]$ 內的「理想陣列」總數，且必須滿足以下條件：
@@ -44,23 +49,24 @@ const MAX_N = 10010;
 // 質因數最大種類數量
 const MAX_PRIME_FACTORS = 15;
 
-/** 最小質因數 */
+// 最小質因數
 const minimumPrimeFactor = new Uint16Array(MAX_N);
-/** 扁平化質因子指數陣列 */
+// 扁平化質因子指數陣列
 let primeExponentsFlat: Uint8Array;
-/** 扁平化陣列的索引位置 */
+// 扁平化陣列的索引位置
 const primeExponentsOffset = new Int32Array(MAX_N + 1);
-/** 組合數陣列 C(i, k) mod MODULO，以 BigInt 存放 */
+// 組合數陣列 C(i, k) mod MODULO，以 BigInt 存放
 const combinationCoefficients: Array<Array<bigint>> = new Array(MAX_N + MAX_PRIME_FACTORS);
 ```
 
 ### Step 2：前置計算函式 `precomputeAll()`
 
-執行一次性計算，包含四個部分：
+#### Step 2.1：計算最小質因數（線性篩法）
+
+線性複雜度取得每個整數的最小質因數，後續分解時只需連續除法即可。
 
 ```typescript
 (function precomputeAll() {
-  // 1. 篩法計算最小質因子
   for (let v = 2; v < MAX_N; v++) {
     if (minimumPrimeFactor[v] === 0) {
       for (let m = v; m < MAX_N; m += v) {
@@ -71,7 +77,19 @@ const combinationCoefficients: Array<Array<bigint>> = new Array(MAX_N + MAX_PRIM
     }
   }
 
-  // 2. 統計每個數的質因子指數
+  //...
+})();
+```
+
+### Step 2.2：統計每個數的質因子指數
+
+以質因數分解將每個數的結構攤平，利於後續組合數運算。
+
+```typescript
+(function precomputeAll() {
+  // Step 2.1：計算最小質因數
+  
+  // Step 2.2：統計每個數的質因子指數
   const tempExponents: number[][] = Array.from({ length: MAX_N }, () => []);
   for (let v = 2; v < MAX_N; v++) {
     let x = v;
@@ -86,7 +104,24 @@ const combinationCoefficients: Array<Array<bigint>> = new Array(MAX_N + MAX_PRIM
     }
   }
 
-  // 3. 扁平化質因子指數並記錄索引位置
+  //...
+})();
+```
+
+### Step 2.3：扁平化質因子指數並記錄索引位置
+
+將所有數的質因數指數線性化存到一個大陣列，並記下每個數的起始與結束索引。
+
+- 避免多層陣列存取的不連續性，提高查詢效能。
+- `primeExponentsOffset[v]` ~ `primeExponentsOffset[v+1]` 即為值 $v$ 的質因數指數。
+
+```typescript
+(function precomputeAll() {
+  // Step 2.1：計算最小質因數
+
+  // Step 2.2：統計每個數的質因子指數
+  
+  // Step 2.3：扁平化質因子指數並記錄索引位置
   let totalCounts = 0;
   for (let v = 0; v < MAX_N; v++) {
     totalCounts += tempExponents[v].length;
@@ -101,8 +136,27 @@ const combinationCoefficients: Array<Array<bigint>> = new Array(MAX_N + MAX_PRIM
     }
   }
   primeExponentsOffset[MAX_N] = writePtr;
+  
+  // ...
+})();
+```
 
-  // 4. 構建 Pascal 三角（組合數表）
+#### Step 2.4：構建 Pascal 三角（組合數表）
+
+預先構建 $C(n, k)$ 查表，方便高效計算組合數。
+
+- Pascal 三角遞推可保證 $C(n, k)$ 計算無溢位且查表極快。
+- 儲存為 $bigint$ 是為了支持極大數運算取模。
+
+```typescript
+(function precomputeAll() {
+  // Step 2.1：計算最小質因數
+
+  // Step 2.2：統計每個數的質因子指數
+  
+  // Step 2.3：扁平化質因子指數並記錄索引位置
+  
+  // Step 2.4：構建 Pascal 三角（組合數表）
   const totalRows = MAX_N + MAX_PRIME_FACTORS;
   for (let i = 0; i < totalRows; i++) {
     const row: Array<bigint> = new Array(MAX_PRIME_FACTORS + 1);
@@ -120,6 +174,10 @@ const combinationCoefficients: Array<Array<bigint>> = new Array(MAX_N + MAX_PRIM
 ### Step 3：主函式 `idealArrays` 實作
 
 利用前置計算的資料，計算理想陣列總數：
+
+- **外層**：從 $1$ 到 $maxValue$ 枚舉所有可能最終元素。
+- **內層**：將每個質數指數對應的組合數相乘得到單一元素的陣列數目。
+- **累加**：將每個結果累加，最後取模返回。
 
 ```typescript
 function idealArrays(n: number, maxValue: number): number {
@@ -149,22 +207,17 @@ function idealArrays(n: number, maxValue: number): number {
 }
 ```
 
-- **外層**：從 $1$ 到 $maxValue$ 枚舉所有可能最終元素。
-- **內層**：將每個質數指數對應的組合數相乘得到單一元素的陣列數目。
-- **累加**：將每個結果累加，最後取模返回。
-
 ## 時間複雜度
 
 - **前置計算**
-    - 篩法計算最小質因子：$O(n\log\log nN)$
+    - 篩法計算最小質因子：$O(n\log\log n)$
     - 質因子分解與扁平化：$O(n\log n)$
     - Pascal 三角構建：$O(n)$
 - **主函式**
-    - 枚舉結尾值並計算：$O(maxValue \times P)=O(n)$
+    - 枚舉結尾值並計算：$O(maxValue \cdot P)$，$P$ 為最大質因數個數（常數級）
+- 總時間複雜度為 $O(n\log n)$
 
-- **總時間複雜度**：$O(n\log n)$
-
-> $O(N\log N)$
+> $O(n\log n)$
 
 ## 空間複雜度
 
@@ -172,6 +225,6 @@ function idealArrays(n: number, maxValue: number): number {
 - `primeExponentsFlat`：$O(n\log n)$
 - `primeExponentsOffset`：$O(n)$
 - `combinationCoefficients`：$O(n)$
-- **總空間複雜度**：$O(nlog n$，其中 $n = \max(n,\,maxValue)$，且質因數上限 $P$ 為常數。
+- 總空間複雜度為 $O(nlog n)$，其中 $n = \max(n,\,maxValue)$，且質因數上限 $P$ 為常數。
 
 > $O(n\log n)$

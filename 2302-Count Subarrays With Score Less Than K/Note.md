@@ -9,6 +9,12 @@ return the number of non-empty subarrays of `nums` whose score is strictly less 
 
 A subarray is a contiguous sequence of elements within an array.
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `1 <= nums[i] <= 10^5`
+- `1 <= k <= 10^15`
+
 ## 基礎思路
 
 題目要求計算陣列中所有子陣列的「分數」小於指定數值 `k` 的數量，其中子陣列的分數定義為其元素總和乘以子陣列的長度：
