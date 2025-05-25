@@ -15,6 +15,13 @@ that the hidden sequence can contain.
 
 Return the number of possible hidden sequences there are. If there are no possible sequences, return `0`.
 
+**Constraints:**
+
+- `n == differences.length`
+- `1 <= n <= 10^5`
+- `-10^5 <= differences[i] <= 10^5`
+- `-10^5 <= lower <= upper <= 10^5`
+
 ## 基礎思路
 
 題目給定一個差分陣列 `differences`，代表某個隱藏數列中連續兩數之間的差值，並給出該隱藏數列所有元素的上下界 `[lower, upper]`。

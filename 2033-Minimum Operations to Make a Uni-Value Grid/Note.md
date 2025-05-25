@@ -8,6 +8,14 @@ A uni-value grid is a grid where all the elements of it are equal.
 Return the minimum number of operations to make the grid uni-value. 
 If it is not possible, return `-1`.
 
+**Constraints:**
+
+- `m == grid.length`
+- `n == grid[i].length`
+- `1 <= m, n <= 10^5`
+- `1 <= m * n <= 10^5`
+- `1 <= x, grid[i][j] <= 10^4`
+
 ## 基礎思路
 
 這道題要求將給定的二維整數矩陣（grid）透過加或減一個固定的數字 `x`，讓所有數字變得完全相同（稱為「統一矩陣」）。

@@ -19,82 +19,112 @@ The first robot wants to minimize the number of points collected by the second r
 In contrast, the second robot wants to maximize the number of points it collects. 
 If both robots play optimally, return the number of points collected by the second robot.
 
+**Constraints:**
+
+- `grid.length == 2`
+- `n == grid[r].length`
+- `1 <= n <= 5 * 10^4`
+- `1 <= grid[r][c] <= 10^5`
+
 ## 基礎思路
 
-我們可以將問題轉換為分析 `grid` 的兩個獨立一維陣列：`grid[0]` 和 `grid[1]`。  
-考慮 **第一機器人**的行動邏輯：
+此題核心在於：兩台機器人在同一條 $2\times n$ 的矩陣上從左上角走到右下角，且第一台機器人會改變它走過的格子分數（將其設為 0），第二台機器人則在剩下的分數中盡可能拿最多分。
 
-1. **第一機器人轉移點**：  
-   當第一機器人在第 `index` 位置從 `grid[0]` 切換到 `grid[1]` 時：
-    - `grid[0]`：第 `index` 位置之前（包含 `index`）的所有分數會被清空。
-    - `grid[1]`：第 `index` 位置之後（包含 `index`）的所有分數會被清空。
+觀察可知，對於第一台機器人，由於只能往右或往下，它轉折（由上排到下排）的列位置 $i$ 決定了：
 
-2. **剩餘的有效分數**：  
-   經過上述清空後：
-    - `grid[0]` 有效分數範圍為第 `index + 1` 之後的部分。
-    - `grid[1]` 有效分數範圍為第 `index - 1` 之前的部分。
+- **剩餘頂排分數** = 頂排在列 $i+1$ 到 $n-1$ 的所有格子之和（第一機器人將列 $0\ldots i$ 的頂排格子清零）。
+- **已收集底排分數** = 底排在列 $0$ 到 $i-1$ 的所有格子之和（第一機器人在轉折前會沿底排走過這些格子）。
 
-**機器人二**的目標是最大化分數，根據剩餘分數，其得分可能來自以下兩種情況：
-1. **選擇剩餘的 `grid[0]` 分數**：吃完 `grid[0]` 的所有分數。
-2. **選擇剩餘的 `grid[1]` 分數**：吃完 `grid[1]` 的所有分數。
+第二台機器人面對同樣的限制，也會在轉折列 $i$ 選擇能拿到更多分的一條路徑，因此它的得分為
 
-由於機器人二會選擇最大化得分的路徑，因此其最終得分為上述兩者中的較大值。
+$$
+\max(\text{剩餘頂排分數},\;\text{已收集底排分數}).
+$$
 
-我們的目標是檢索所有可能的 `index`，對每個 `index` 計算機器人二的得分，並在所有情況中選擇 **最小化機器人二得分** 的情況。最小值即為答案。
-
-> 小技巧:
-> - 一個節省空間的方法是先紀錄 topSum 是整個 `grid[0]` 加總。並先把 bottomSum 的設為 `0`。
-> - 當是 index 時，此時的上方的分數是 topSum 減去 `grid[0][index]`，下方的分數是 bottomSum 加上 `grid[1][index]`。
-> - 這樣能大幅減少計算量與所需暫存空間。
+而第一台機器人要**最小化**這個最大值，故只要對所有可能的轉折列 $i$ 計算上述兩個分數並取最小的那個即為答案。利用一次從左到右的掃描，動態維護**頂排後綴和**與**底排前綴和**，即可在 $O(n)$ 時間內完成。
 
 ## 解題步驟
 
-### Step 1: 紀錄 N 長度
+### Step 1：初始化與設定列數及行快取
 
 ```typescript
-const n = grid[0].length;
+// 欄位數    
+const columns = grid[0].length;
+
+// 快取頂排與底排
+const topRow = grid[0];
+const bottomRow = grid[1];
 ```
 
-### Step 2: 初始化 `topSum` 以及 `bottomSum`
+### Step 2：計算頂排分數總和（後綴總和初始值）
+
+將頂排所有格子的分數累加到 `remainingTopPoints`，此時即代表轉折前第一台機器人尚未走任何列時，頂排的後綴和。
 
 ```typescript
-let topSum = grid[0].reduce((a, b) => a + b, 0);  // 紀錄 topSum 是整個 `grid[0]` 加總
-let bottomSum = 0;                                // 初始化 bottomSum為 `0`
+// 計算頂排剩餘分數總和
+let remainingTopPoints = 0;
+for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
+  remainingTopPoints += topRow[columnIndex];
+}
+```
+### Step 3：初始化底排累計分數與結果變數
+
+```typescript
+// 底排已收集分數
+let collectedBottomPoints = 0;
+// 第一機器人希望最小化第二機器人得分，初始化為無限大
+let bestSecondRobotPoints = Infinity;
 ```
 
-### Step 3: 計算每個 `index` 的得分並記錄最小值
+### Step 4：從左到右掃描，模擬每個轉折點並更新最佳結果
+
+這個 for 迴圈從左到右掃描每個欄位，模擬第一台機器人在每個欄位往下的情況，我們需要：
+
+- 扣掉當前欄頂排分數（表示這格被第一台機器人拿走）。
+- 計算第二台機器人此情境下最大可能拿到的分數，必為「剩餘頂排分數」與「已拿到底排分數」的最大值。
+- 記錄這些最大分數中的最小值。
+- 將當前欄底排分數加進前綴和。
 
 ```typescript
-// 初始化最小值
-let minSecondRobotScore = Infinity;
+// 從左往右掃描，每個位置模擬 Robot1 在此處轉折
+for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
+  // Robot1 跳過此頂排格子，減少剩餘頂排分數
+  remainingTopPoints -= topRow[columnIndex];
 
-// 模擬每個 index 的情況
-for (let i = 0; i < n; i++) {
-  // 先減去 當前 index 在 grid[0] 的分數
-  // 因為對於 topSum 來說，需要的是 index 之後的累積分數
-  topSum -= grid[0][i];
+  // 第二機器人能獲取較大值：剩餘頂排或已收集底排
+  const secondRobotPoints =
+    remainingTopPoints > collectedBottomPoints
+      ? remainingTopPoints
+      : collectedBottomPoints;
 
-  // 計算第二機器人再該 index 分割下的能獲取的最大分數
-  const secondRobotScore = Math.max(topSum, bottomSum);
+  // Robot1 以最小化第二機器人得分為目標
+  if (secondRobotPoints < bestSecondRobotPoints) {
+    bestSecondRobotPoints = secondRobotPoints;
+  }
 
-  // 更新第二機器人可能獲取的最小分數
-  minSecondRobotScore = Math.min(minSecondRobotScore, secondRobotScore);
-
-  // 移動到下一個 index 須把當前 index 的分數加入 bottomSum
-  // 因為 bottomSum 是從計算 index 之前的累積分數
-  bottomSum += grid[1][i];
+  // Robot1 收集此底排格子的分數
+  collectedBottomPoints += bottomRow[columnIndex];
 }
 ```
 
+### Step 5：回傳最終結果
+
+回傳第一台機器人能讓第二台機器人拿到的最小分數。
+
+```typescript
+return bestSecondRobotPoints;
+```
+
 ## 時間複雜度
-- 計算加總需要 $O(n)$ 時間
-- 計算每個 index 的得分需要 $O(n)$ 時間
-- 因此總時間複雜度為 $O(n)$。
+
+- 頂排分數初始化一次 $O(n)$，模擬所有欄位一次 $O(n)$。
+- 總時間複雜度為 $O(n)$。
 
 > $O(n)$
 
 ## 空間複雜度
-- 我們只使用了常數額外空間，因此空間複雜度為 $O(1)$。
-- 這是一個非常高效的解決方案。
+
+- 僅用到固定數量變數記錄累加和、答案。
+- 總空間複雜度為 $O(1)$
 
 > $O(1)$

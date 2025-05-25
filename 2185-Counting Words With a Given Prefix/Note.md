@@ -4,9 +4,18 @@ You are given an array of strings words and a string pref.
 Return the number of strings in words that contain pref as a prefix.
 A prefix of a string s is any leading contiguous substring of s.
 
+**Constraints:**
+
+- `1 <= words.length <= 100`
+- `1 <= words[i].length, pref.length <= 100`
+- `words[i]` and `pref` consist of lowercase English letters.
+
 ## 基礎思路
-我們需要找出所有以 `pref` 開頭的字串，並計算這些字串的總數。  
-可以利用內建的字串操作與陣列過濾函式來高效實現。
+
+本題目標在於統計陣列 words 中，有多少個字串以指定前綴 `pref` 開頭。
+直觀來說，只需對每個字串檢查其開頭是否與 `pref` 完全一致即可。
+
+一個直觀方法是直接利用內建函式 `startsWith` 來達成，這樣可以簡化前綴匹配的過程。
 
 ## 解題步驟
 
@@ -22,10 +31,10 @@ return words.filter((word) => word.startsWith(pref)).length;
 
 ## 時間複雜度
 
-- 字串陣列的長度為 $n$，每個字串的前綴長度為 $m$，因為需要遍歷陣列中的每個字串，並檢查其前綴，則時間複雜度為 $O(n \cdot m)$ 
-- 總時間複雜度為 $O(n \cdot m)$
+- 字串陣列的長度為 $n$，每個字串的前綴長度為 $m$，因為需要遍歷陣列中的每個字串，並檢查其前綴，則時間複雜度為 $O(n \times m)$ 
+- 總時間複雜度為 $O(n \times m)$
 
-> $O(n \cdot m)$
+> $O(n \times m)$
 
 ## 空間複雜度
 
@@ -33,4 +42,3 @@ return words.filter((word) => word.startsWith(pref)).length;
 - 總空間複雜度為 $O(k)$
 
 > $O(k)$
-

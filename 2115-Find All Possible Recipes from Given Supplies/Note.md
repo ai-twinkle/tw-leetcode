@@ -13,6 +13,16 @@ Return a list of all the recipes that you can create. You may return the answer 
 
 Note that two recipes may contain each other in their ingredients.
 
+**Constraints:**
+
+- `n == recipes.length == ingredients.length`
+- `1 <= n <= 100`
+- `1 <= ingredients[i].length, supplies.length <= 100`
+- `1 <= recipes[i].length, ingredients[i][j].length, supplies[k].length <= 10`
+- `recipes[i], ingredients[i][j]`, and `supplies[k]` consist only of lowercase English letters.
+- All the values of `recipes` and `supplies` combined are unique.
+- Each `ingredients[i]` does not contain any duplicate values.
+
 ## 基礎思路
 
 我們可以透過 **深度優先搜尋 (Depth-First Search, DFS)** 來解決這個問題。
@@ -108,11 +118,9 @@ return creatableRecipes;
 
 - **預處理階段：**  
   建立 `supplySet`、`recipeIndexMap` 以及初始化 `inRecursion` 陣列均需遍歷所有食譜，故耗時 $O(n)$，其中 $n$ 為食譜數量。
-
 - **DFS 搜索階段：**  
   在最壞情況下，DFS 會遍歷所有食譜及其依賴關係，假設所有食譜的依賴總數為 $E$，則 DFS 部分的時間複雜度為 $O(n + E)$。  
   由於每個食譜只被處理一次（利用 memoization 將可製作的食譜加入 `supplySet` 避免重複計算），所以總時間複雜度維持在 $O(n + E)$。
-
 - 總時間複雜度為 $O(n + E)$。
 
 > $O(n + E)$
@@ -122,10 +130,8 @@ return creatableRecipes;
 - **資料結構：**
     - `supplySet` 與 `recipeIndexMap` 需要 $O(n)$ 空間。
     - `inRecursion` 陣列亦需 $O(n)$ 空間。
-
 - **遞迴堆疊分析：**  
   在 DFS 最壞情況下，依賴鏈極長（每個食譜依賴下一個食譜），遞迴堆疊深度可能達到 $O(n)$。
-
 - 總空間複雜度為 $O(n)$。
 
 > $O(n)$

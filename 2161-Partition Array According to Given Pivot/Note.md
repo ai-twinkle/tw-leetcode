@@ -11,6 +11,12 @@ Rearrange `nums` such that the following conditions are satisfied:
 
 Return `nums` after the rearrangement.
 
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `-10^6 <= nums[i] <= 10^6`
+- `pivot` equals to an element of `nums`.
+
 ## 基礎思路
 
 首先，這個問題的基本思路是將數字依據與 pivot 的大小關係分成三個部分：

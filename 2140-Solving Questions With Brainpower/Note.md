@@ -14,6 +14,12 @@ If you skip question i, you get to make the decision on the next question.
 
 Return the maximum points you can earn for the exam.
 
+**Constraints:**
+
+- `1 <= questions.length <= 10^5`
+- `questions[i].length == 2`
+- `1 <= points_i, brainpower_i <= 10^5`
+
 ## 基礎思路
 
 題目要求在考試中取得最高分，考試由一系列題目組成，每題都有分數與「腦力消耗」。
@@ -24,10 +30,12 @@ Return the maximum points you can earn for the exam.
 此問題適合用動態規劃來求解，我們定義 `dp[i]` 表示從第 `i` 題開始能取得的最高分。
 
 對於每一題，我們有兩種選擇：
+
 1. **跳過該題**：此時最高分為 `dp[i+1]`。
 2. **解該題**：此時可獲得的分數為 `questions[i][0]` 加上跳過後（即第 `i + questions[i][1] + 1` 題）的 dp 值。
 
 因此，我們可以寫出遞推關係：
+
 > dp[i] = max(dp[i+1], questions[i][0] + dp[min(i + questions[i][1] + 1, n)])
 
 ## 解題步驟

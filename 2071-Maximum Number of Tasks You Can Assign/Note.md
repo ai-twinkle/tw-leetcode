@@ -15,6 +15,14 @@ however, you may only give each worker at most one magical pill.
 Given the 0-indexed integer arrays `tasks` and `workers` and 
 the integers `pills` and `strength`, return the maximum number of tasks that can be completed.
 
+**Constraints:**
+
+- `n == tasks.length`
+- `m == workers.length`
+- `1 <= n, m <= 5 * 10^4`
+- `0 <= pills <= m`
+- `0 <= tasks[i], workers[j], strength <= 10^9`
+
 ## 基礎思路
 
 本題要求從給定的任務 (`tasks`) 與工人 (`workers`) 中，分配工人完成盡可能多的任務。每個任務都有最低的力量需求，每個工人亦有自身的力量值。此外，我們還可以使用最多 `pills` 顆魔法藥水，每顆藥水可增加單一工人 `strength` 的力量，每位工人至多可服用一顆藥水。
@@ -160,7 +168,7 @@ return best;
 
 - **排序**：將任務及工人力量排序，所需時間為 $O(n\log n + m\log m)$。
 - **二分搜尋與貪婪檢驗**：二分搜尋 $O(\log \min(n,m))$ 次，每次貪婪檢驗最多需遍歷 $O(m)$ 名工人。
-- 總時間複雜度為：$O\bigl(n\log n + m\log m + m\log \min(n,m)\bigr) \approx O\bigl((n+m)\log(n+m)\bigr)$。
+- 總時間複雜度為 $O\bigl(n\log n + m\log m + m\log \min(n,m)\bigr) \approx O\bigl((n+m)\log(n+m)\bigr)$。
 
 > $O\bigl((n+m)\log(n+m)\bigr)$
 
@@ -170,7 +178,6 @@ return best;
   使用額外陣列儲存排序後的任務 (`sortedTasks`) 與工人力量 (`sortedWorkers`, `boostedWorkers`)，總空間複雜度為 $O(n+m)$。
 - **貪婪檢驗暫存陣列** (`candidateBuffer`) 空間亦為 $O(m)$。
 - 其他變數僅佔用常數空間。
-
-- 總空間複雜度為：$O(n+m)$。
+- 總空間複雜度為 $O(n+m)$。
 
 > $O(n+m)$

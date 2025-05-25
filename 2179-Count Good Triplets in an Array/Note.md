@@ -12,6 +12,13 @@ such that $\text{pos1}_x$ < $\text{pos1}_y$ < $\text{pos1}_z$ and $\text{pos2}_x
 
 Return the total number of good triplets.
 
+**Constraints:**
+
+- `n == nums1.length == nums2.length`
+- `3 <= n <= 10^5`
+- `0 <= nums1[i], nums2[i] <= n - 1`
+- `nums1` and `nums2` are permutations of `[0, 1, ..., n - 1]`.
+
 ## 基礎思路
 
 題目要求找出好三元組，即在兩個陣列 `nums1` 與 `nums2`（皆為 $[0, 1, ..., n - 1]$ 的排列）中，選出三個不同的值 $(x, y, z)$，使得：
