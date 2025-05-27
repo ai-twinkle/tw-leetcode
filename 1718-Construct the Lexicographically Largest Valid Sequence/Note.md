@@ -16,9 +16,15 @@ sequence `a` has `a` number greater than the corresponding number in `b`.
 For example, `[0,1,9,0]` is lexicographically larger than `[0,1,5,6]` because 
 the first position they differ is at the third number, and `9` is greater than `5`.
 
+**Constraints:**
+
+- `1 <= n <= 20`
+
 ## 基礎思路
 
-這題的解法可以透過優先分配最大數字到最前面，然後依序分配其餘數字至符合條件的位置。當遇到無法分配的情況時，則回溯至上一個決策點並重新嘗試其他可能的選擇。為了確保找到字典序最大的序列，分配過程應遵循從大到小的順序。
+這題的解法可以透過優先分配最大數字到最前面，然後依序分配其餘數字至符合條件的位置。
+當遇到無法分配的情況時，則回溯至上一個決策點並重新嘗試其他可能的選擇。
+為了確保找到字典序最大的序列，分配過程應遵循從大到小的順序。
 
 由於每個數字 $i$ 需要滿足「兩個相同數字間的距離恰好為 $i$」的約束，因此每一步的決策不僅影響當前的數字分配，也會影響後續數字的可行性。
 這使得問題具有明顯的「選擇—驗證—回溯」特性，適合使用深度優先搜索（Depth-First Search, DFS）來依序嘗試所有可能的數字分配方式。
@@ -127,6 +133,14 @@ const dfs = (index: number, result: number[], used: boolean[], n: number): boole
 
 ```typescript
 dfs(0, result, used, n);
+```
+
+### Step 4: 返回結果
+
+最後，我們返回 `result` 數組作為最終結果。
+
+```typescript
+return result;
 ```
 
 ## 時間複雜度
