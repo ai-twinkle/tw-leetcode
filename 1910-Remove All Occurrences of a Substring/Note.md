@@ -7,10 +7,27 @@ Given two strings `s` and `part`, perform the following operation on `s` until a
 
 A substring is a contiguous sequence of characters in a string.
 
+**Constraints:**
+
+- `1 <= s.length <= 1000`
+- `1 <= part.length <= 1000`
+- `s` and `part` consists of lowercase English letters.
+
 ## 基礎思路
 
-題目要求從字串 `s` 中刪除所有出現的子字串 `part`。
-每次檢查 `s` 是否含有 `part`，若有則移除一次並以新字串再次呼叫自己，直到 `s` 中不再包含 `part`。
+這題要求我們反覆移除字串中所有出現的指定子字串，直到完全不存在為止。
+
+我們可以將這個問題視為一個「持續移除」的過程：
+
+- 每次只移除最左側（第一個出現）的 `part` 子字串。
+- 必須持續這個動作直到整個字串中不再包含 `part`。
+
+針對這種「持續移除、直到條件不再成立」的情境，實作上常見的兩種方式有：
+
+- 遞迴法：不斷判斷字串中是否還有 `part`，有則移除後遞迴處理新的字串；否則結束遞迴。
+- 迴圈法：用迴圈重複檢查與移除，直到再也找不到 `part` 為止。
+
+在本題的約束下，任一方法都可以保證最終結果已經完全清除所有 `part` 子字串。
 
 ## 解題步驟
 

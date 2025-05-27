@@ -4,6 +4,14 @@ Given an array of strings `nums` containing `n` unique binary strings each of le
 return a binary string of length `n` that does not appear in `nums`. 
 If there are multiple answers, you may return any of them.
 
+**Constraints:**
+
+- `n == nums.length`
+- `1 <= n <= 16`
+- `nums[i].length == n`
+- `nums[i]` is either `'0'` or `'1'`.
+- All the strings of `nums` are unique.
+
 ## 基本思路
 
 此題的目標是找出一個與 `nums` 中所有二進位字串長度相同、但又不屬於 `nums` 的二進位數。

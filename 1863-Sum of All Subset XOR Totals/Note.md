@@ -10,6 +10,11 @@ Note: Subsets with the same elements should be counted multiple times.
 
 An array `a` is a subset of an array `b` if `a` can be obtained from `b` by deleting some (possibly zero) elements of `b`.
 
+**Constraints:**
+
+- `1 <= nums.length <= 12`
+- `1 <= nums[i] <= 20`
+
 ## 基礎思路
 
 題目要求計算一個陣列所有子集的 XOR 總和。

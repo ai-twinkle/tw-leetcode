@@ -12,6 +12,10 @@ Since the answer may be large, return it modulo $10^9 + 7$.
 
 A digit string is a string consisting of digits `0` through `9` that may contain leading zeros.
 
+**Constraints:**
+
+- `1 <= n <= 10^15`
+
 ## 基礎思路
 
 題目要求計算長度為 `n` 的**好數字字串**的數量。好數字字串定義如下：
@@ -123,7 +127,7 @@ function countGoodNumbers(n: number): number {
 
 - **快速模冪函數 (`modPow`)**：指數每次減半，因此時間複雜度為 $O(\log n)$。
 - 主函數僅調用一次快速模冪函數，因此整體的時間複雜度亦為 $O(\log n)$。
-- 總時間複雜度 $O(\log n)$。
+- 總時間複雜度為 $O(\log n)$。
 
 > $O(\log n)$
 
@@ -131,6 +135,6 @@ function countGoodNumbers(n: number): number {
 
 - 使用常數數量的額外空間 (`MOD`, `evenCount`, `oddCount`, `half`)，因此空間複雜度為 $O(1)$。
 - 快速模冪函數中亦僅使用常數空間。
-- 總空間複雜度 $O(1)$。
+- 總空間複雜度為 $O(1)$。
 
 > $O(1)$

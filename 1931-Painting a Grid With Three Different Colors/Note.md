@@ -215,7 +215,7 @@ function colorTheGrid(rowCount: number, columnCount: number): number {
 - 枚舉合法模式約需 $O(m \cdot 2^m)$。
 - 模式間相容性建表 $O(m \cdot 4^m)$。
 - 動態規劃每一欄計算時間為 $O(n \cdot 4^m)$。
-- 總時間複雜度為：$O(n \times 4^m)$。
+- 總時間複雜度為 $O(n \times 4^m)$。
 
 > $O(n \times 4^m)$
 
@@ -223,6 +223,6 @@ function colorTheGrid(rowCount: number, columnCount: number): number {
 
 - 快取模式相容性列表的空間複雜度為 $O(4^m)$。
 - DP 狀態緩衝區需 $O(2^m)$ 空間。
-- 總空間複雜度為：$O(4^m)$。
+- 總空間複雜度為 $O(4^m)$。
 
 > $O(4^m)$

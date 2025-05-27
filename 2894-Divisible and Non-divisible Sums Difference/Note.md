@@ -52,7 +52,6 @@ Return the integer `num1 - num2`.
 
 ## 解題步驟
 
-
 ### Step 1：計算整體總和與可整除數量
 
 首先計算整個區間 $[1, n]$ 的總和 `totalSum`，以及能被 `m` 整除的整數數量 `divisibleCount`：
