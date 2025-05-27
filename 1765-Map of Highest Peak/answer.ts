@@ -1,53 +1,84 @@
-// Direction array for moving north, east, south, and west
-// This using sliding window technique, for less memory usage
-const HIGHEST_PEEK_DIRECTIONS: number[] = [0, 1, 0, -1, 0];
-
 function highestPeak(isWater: number[][]): number[][] {
-  // Get the number of rows and columns
-  const m = isWater.length;
-  const n = isWater[0].length;
-
-  // Initialize the result matrix
-  const heights = Array.from({ length: m }, () => Array(n).fill(-1));
-
-  // Queue for BFS, starting with all water cells
-  let queue: [number, number, number][] = [];
-  for (let row = 0; row < m; row++) {
-    for (let col = 0; col < n; col++) {
-      // If the cell is water, set the height to 0 and add to the queue
-      if (isWater[row][col] === 1) {
-        heights[row][col] = 0;
-        queue.push([row, col, 0]);
-      }
-    }
+  const rowCount = isWater.length;
+  if (rowCount === 0) {
+    return [];
   }
 
-  // Perform BFS to calculate heights for land cells
-  while (queue.length > 0) {
-    const nextQueue: [number, number, number][] = [];
-    for (const [currentRow, currentCol, currentHeight] of queue) {
-      for (let i = 0; i < 4; i++) {
-        const nextRow = currentRow + HIGHEST_PEEK_DIRECTIONS[i];
-        const nextCol = currentCol + HIGHEST_PEEK_DIRECTIONS[i + 1];
+  const columnCount = isWater[0].length;
+  const totalCells = rowCount * columnCount;
+  const maximumPossibleHeight = rowCount + columnCount;
 
-        // Check bounds and if the cell is unvisited
-        if (
-          nextRow < 0 ||
-          nextRow >= m ||
-          nextCol < 0 ||
-          nextCol >= n ||
-          heights[nextRow][nextCol] !== -1
-        ) {
-          continue;
+  // 1. Allocate and initialize flat height buffer
+  const flatHeightBuffer = new Int16Array(totalCells);
+  flatHeightBuffer.fill(maximumPossibleHeight);
+
+  // 2. First pass: top‐left → bottom‐right
+  let currentIndex = 0;
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    const waterRow = isWater[rowIndex];
+    for (let columnIndex = 0; columnIndex < columnCount; columnIndex++, currentIndex++) {
+      if (waterRow[columnIndex] === 1) {
+        flatHeightBuffer[currentIndex] = 0;
+      } else {
+        let bestHeight = flatHeightBuffer[currentIndex];
+
+        // from above
+        if (rowIndex > 0) {
+          const heightFromAbove = flatHeightBuffer[currentIndex - columnCount] + 1;
+          if (heightFromAbove < bestHeight) {
+            bestHeight = heightFromAbove;
+          }
         }
 
-        heights[nextRow][nextCol] = currentHeight + 1;
-        queue.push([nextRow, nextCol, currentHeight + 1]);
+        // from left
+        if (columnIndex > 0) {
+          const heightFromLeft = flatHeightBuffer[currentIndex - 1] + 1;
+          if (heightFromLeft < bestHeight) {
+            bestHeight = heightFromLeft;
+          }
+        }
+
+        flatHeightBuffer[currentIndex] = bestHeight;
       }
     }
-    // Move to the next BFS level
-    queue = nextQueue;
   }
 
-  return heights;
+  // 3. Second pass: bottom‐right → top‐left
+  currentIndex = totalCells - 1;
+  for (let rowIndex = rowCount - 1; rowIndex >= 0; rowIndex--) {
+    for (let columnIndex = columnCount - 1; columnIndex >= 0; columnIndex--, currentIndex--) {
+      let bestHeight = flatHeightBuffer[currentIndex];
+
+      // from below
+      if (rowIndex < rowCount - 1) {
+        const heightFromBelow = flatHeightBuffer[currentIndex + columnCount] + 1;
+        if (heightFromBelow < bestHeight) {
+          bestHeight = heightFromBelow;
+        }
+      }
+
+      // from right
+      if (columnIndex < columnCount - 1) {
+        const heightFromRight = flatHeightBuffer[currentIndex + 1] + 1;
+        if (heightFromRight < bestHeight) {
+          bestHeight = heightFromRight;
+        }
+      }
+
+      flatHeightBuffer[currentIndex] = bestHeight;
+    }
+  }
+
+  // 4. Un-flatten into 2D result matrix
+  const heightMatrix: number[][] = new Array(rowCount);
+  let writeIndex = 0;
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    const resultRow = new Array<number>(columnCount);
+    for (let columnIndex = 0; columnIndex < columnCount; columnIndex++, writeIndex++) {
+      resultRow[columnIndex] = flatHeightBuffer[writeIndex];
+    }
+    heightMatrix[rowIndex] = resultRow;
+  }
+
+  return heightMatrix;
 }
