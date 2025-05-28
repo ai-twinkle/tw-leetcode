@@ -14,92 +14,104 @@ For the `j_th` query, you should answer whether course `u_j` is a prerequisite o
 
 Return a boolean array answer, where `answer[j]` is the answer to the `j_th` query.
 
+**Constraints:**
+
+- `2 <= numCourses <= 100`
+- `0 <= prerequisites.length <= (numCourses * (numCourses - 1) / 2)`
+- `prerequisites[i].length == 2`
+- `0 <= a_i, b_i <= numCourses - 1`
+- `a_i != b_i`
+- All the pairs `[a_i, b_i]` are unique.
+- The prerequisites graph has no cycles.
+- `1 <= queries.length <= 10^4`
+- `0 <= u_i, v_i <= numCourses - 1`
+- `u_i != v_i`
+
 ## 基礎思路
-這題需要構建關聯表，然後查詢是否有關聯。我們可以把這題轉化成一個有向圖，然後查詢是否有路徑。
-在這題我將採取深度優先搜索的方式來解決這個問題。
+
+本題的核心在於如何高效判斷兩門課之間是否存在直接或間接的先修關係。
+由於先修關係構成一個有向無環圖（DAG），而查詢次數可能很多，最佳策略是在查詢前先利用 **傳遞閉包（transitive closure）** 預先計算所有課程間的可達性。
+
+這裡可使用 Floyd–Warshall 演算法，將所有先修關係（無論直接或間接）預先存進一個矩陣。
+如此，每次查詢僅需 $O(1)$ 查表，即可判斷一門課是否為另一門課的先修。
 
 ## 解題步驟
 
-### Step 1: 初始化圖，並將直接關聯的節點加入圖中
+### Step 1：初始化可達性矩陣
+
+建立一個 $n \times n$ 的矩陣，預設所有課程對之間不可達。
 
 ```typescript
-// 圖會是一個二維數組，用來記錄每個節點的關聯性
-const graph: number[][] = Array.from({ length: numCourses }, () => []);
-
-// 先把直接關聯的節點加入圖中
-for (const [u, v] of prerequisites) {
-   graph[u].push(v);
-}
-```
-
-### Step 2: 深度優先搜索
-
-```typescript
-// 定義可到達的節點
-const reachable = Array.from({ length: numCourses }, () => new Set<number>());
-
-// 深度優先搜索
-const dfs = (node: number) => {
-   for (const neighbor of graph[node]) {
-      // 如果已經建構過這個節點的關聯性，則跳過
-      if (reachable[node].has(neighbor)) {
-         continue;
-      }
-
-      // 新增節點到可到達的節點中
-      reachable[node].add(neighbor);
-
-      // 遞迴搜索其鄰居
-      dfs(neighbor);
-
-      // 新增鄰居的可到達節點到當前節點的可到達節點中
-      for (const n of reachable[neighbor]) {
-         reachable[node].add(n);
-      }
-   }
-};
-```
-
-### Step 3: 遍歷所有節點，並進行深度優先搜索
-
-```typescript
+// 1. 分配 reachabilityMatrix[i][j]：若課程 i 是課程 j 的（直接或間接）先修，則為 1，否則為 0。
+const reachabilityMatrix: Uint8Array[] = new Array(numCourses);
 for (let i = 0; i < numCourses; i++) {
-  dfs(i);
+  reachabilityMatrix[i] = new Uint8Array(numCourses);
 }
 ```
 
-### Step 4: 查詢是否有關聯
+### Step 2：標記直接先修關係
+
+將所有 prerequisites 資料中的直接先修邊，標記到矩陣中。
 
 ```typescript
-return queries.map(([u, v]) => reachable[u].has(v));
+// 2. 在可達性矩陣中標記所有直接先修關係。
+for (let p = 0; p < prerequisites.length; p++) {
+  const prerequisiteCourse = prerequisites[p][0];
+  const targetCourse = prerequisites[p][1];
+  reachabilityMatrix[prerequisiteCourse][targetCourse] = 1;
+}
+```
+
+### Step 3：利用 Floyd–Warshall 算法計算間接可達性
+
+三重迴圈分別枚舉中繼點 $k$、起點 $i$、終點 $j$，如果 $i \to k$ 且 $k \to j$，則補上 $i \to j$，也就是所有直接、間接的可達路徑都被填滿。
+
+```typescript
+// 3. 使用 Floyd–Warshall 算法計算傳遞閉包：
+//    若 i 可以到 k，且 k 可以到 j，則 i 可以到 j。
+for (let k = 0; k < numCourses; k++) {
+  const rowK = reachabilityMatrix[k];
+  for (let i = 0; i < numCourses; i++) {
+    if (reachabilityMatrix[i][k] === 1) {
+      const rowI = reachabilityMatrix[i];
+      for (let j = 0; j < numCourses; j++) {
+        if (rowK[j] === 1) {
+          rowI[j] = 1;
+        }
+      }
+    }
+  }
+}
+```
+
+### Step 4：查詢回應
+
+每次查詢只需直接查表即可。
+
+```typescript
+// 4. 根據計算好的矩陣，O(1) 回答所有查詢。
+const result: boolean[] = new Array(queries.length);
+for (let index = 0; index < queries.length; index++) {
+  const fromCourse = queries[index][0];
+  const toCourse = queries[index][1];
+  result[index] = reachabilityMatrix[fromCourse][toCourse] === 1;
+}
+
+return result;
 ```
 
 ## 時間複雜度
-- **建圖成本：**
-   - 用鄰接表建圖的時間複雜度是 $O(m)$，這是所有預修課程所構成的邊的數量。
 
-- **DFS 及可達性集合 (Union 操作)：**
-   - **DFS 遍歷的部分：** 每次從一個節點開始進行 DFS，在遍歷的過程中，每條邊最多被訪問一次，所以這部分的遍歷成本為 $O(m)$。
-   - **更新集合的部分：** 每次進行集合合併操作時，可能需要將 $reachable[neighbor]$ 的所有節點合併到 $reachable[node]$。在最壞情況下，這個集合可能包含最多 $O(n)$ 節點。  
-     因此，每次合併的成本是 $O(n)$，而且每條邊的操作成本因此變為 $O(n)$。  
-     DFS 和集合合併操作的總成本是：  
-     $$
-     O(n \cdot (n + m)) = O(n^2 + n \cdot m)
-     $$  
-     因為我們需要對每個節點執行 DFS，總成本乘以 $n$，得到：
-     $$
-     O(n \cdot (n^2 + n \cdot m)) = O(n^3 + n^2 \cdot m)
-     $$
+- 進行 Floyd–Warshall 三重迴圈計算遞移閉包，需 $O(\text{numCourses}^3)$。
+- 回答 $\text{queries.length}$ 個查詢，每個 $O(1)$，共 $O(\text{queries.length})$。
+- 總時間複雜度為 $O(n^3 + m)$ （其中 $n = numCourses,\ m = queries.length$）。
 
-- **查詢成本：**  
-   每次查詢 $reachable[u]$ 是否包含 $v$ 是 $O(1)$，對於 $q$ 個查詢，總成本是 $O(q)$。
-
-> $O(n^3 + n^2 \cdot m + m + q) \approx O(n^3 + n^2 \cdot m)$
+> $O(n^3 + m)$
 
 ## 空間複雜度
 
-- **鄰接表儲存空間：** $O(n + m)$。
-- **Reachable 集合儲存空間：** $O(n^2)$，因為每個節點最多需要儲存 $n$ 個可達節點。
-- **遞歸堆疊：** 最深可能達到 $O(n)$。
+- 使用了 $n \times n$ 的可到達性矩陣，需 $O(n^2)$。
+- 使用結果陣列需 $O(m)$。
+- 總空間複雜度為 $O(n^2 + m)$。
 
 > $O(n^2 + m)$

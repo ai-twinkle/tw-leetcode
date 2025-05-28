@@ -5,18 +5,32 @@ You need to find the number of good triplets.
 
 A triplet `(arr[i], arr[j], arr[k])` is good if the following conditions are true:
 
-* `0 <= i < j < k < arr.length`
-* `|arr[i] - arr[j]| <= a`
-* `|arr[j] - arr[k]| <= b`
-* `|arr[i] - arr[k]| <= c`
+- `0 <= i < j < k < arr.length`
+- `|arr[i] - arr[j]| <= a`
+- `|arr[j] - arr[k]| <= b`
+- `|arr[i] - arr[k]| <= c`
 
 Where `|x|` denotes the absolute value of `x`.
 
 Return the number of good triplets.
 
+**Constraints:**
+
+- `3 <= arr.length <= 100`
+- `0 <= arr[i] <= 1000`
+- `0 <= a, b, c <= 1000`
+
 ## 基礎思路
 
-這題由於需要檢查三個位數互相之間的差距，所以可以利用三重迴圈來解題。
+本題要求我們計算陣列中滿足特定條件的三元組數量。
+也就是說，要找出有多少組 $(i, j, k)$ 滿足 $0 \leq i < j < k < n$，並且三者之間的差距同時滿足 $|arr[i] - arr[j]| \leq a$、$|arr[j] - arr[k]| \leq b$、$|arr[i] - arr[k]| \leq c$ 這三個條件。
+
+根據題目特性，我們可以做如下判斷：
+
+- 每個三元組都必須同時滿足這三個限制條件，且三個索引需嚴格遞增且互不重複。
+- 由於 $n$ 最大為 100，採用三重迴圈最多運算 $O(100^3)$，在本題的範圍內是可以接受的。
+
+因此，由於其他進階做法提升有限，本題直接使用三重迴圈暴力檢查每個可能的三元組，即可有效求解。
 
 ## 解題步驟
 
