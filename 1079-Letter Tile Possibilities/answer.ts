@@ -1,9 +1,3 @@
-/**
- * You have `n` tiles, where each tile has one letter `tiles[i]` printed on it.
- * Return the number of possible non-empty sequences of letters you can make using the letters printed on those `tiles`.
- * @param {string} tiles The string of tiles.
- * @returns {number} The number of possible non-empty sequences of letters.
- */
 function numTilePossibilities(tiles: string): number {
   // Step 1: Build frequency table.
   const freq: { [letter: string]: number } = {};
