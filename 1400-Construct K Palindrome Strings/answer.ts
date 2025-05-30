@@ -1,38 +1,31 @@
 function canConstruct(s: string, k: number): boolean {
-  // Early return if the length of the string is less than the number of palindrome strings
-  if (s.length < k) {
+  const stringLength = s.length;
+  // Quick reject: not enough characters to give each palindrome at least one odd center
+  if (stringLength < k) {
     return false;
   }
 
-  // Count the amount of each character
-  const charCount = new Array(26).fill(0);
-  for (const char of s) {
-    charCount[char.charCodeAt(0) - 97]++;
+  // Build a 26-bit mask: bit i is 1 if the i-th letter ('a'+i) appears an odd number of times
+  const baseCharCode = 97; // 'a'
+  let letterParityBitmask = 0;
+
+  for (let i = 0; i < stringLength; ++i) {
+    const letterIndex = s.charCodeAt(i) - baseCharCode;
+    letterParityBitmask ^= (1 << letterIndex);
   }
 
-  // Count the number of odd count characters
-  let oddCount = 0;
-  for (const count of charCount) {
-    if (count % 2 === 1) {
-      oddCount++;
+  // Count how many bits are set (i.e., how many letters have odd counts).
+  // Stop early if we exceed k.
+  let oddCharacterCount = 0;
+  while (letterParityBitmask !== 0) {
+    // Clear lowest set bit
+    letterParityBitmask &= (letterParityBitmask - 1);
+    ++oddCharacterCount;
+
+    if (oddCharacterCount > k) {
+      return false;
     }
   }
 
-  // Return if the number of odd count characters is less than or equal to the number of palindrome strings
-  return oddCount <= k;
-}
-
-/**
- * The pure functional version of the above solution (Just for fun)
- * @param s String
- * @param k Number of palindrome strings
- * @returns Whether the string can be constructed
- */
-function canConstruct2(s: string, k: number): boolean {
-  return s.length >= k &&
-    s.split('')
-      .reduce(
-        (counts, char) => counts.map((count, index) => index === char.charCodeAt(0) - 97 ? count + 1 : count),
-        new Array(26).fill(0),
-      ).filter(count => count % 2 === 1).length <= k;
+  return true;
 }
