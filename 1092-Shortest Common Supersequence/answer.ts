@@ -1,19 +1,8 @@
-/**
- * Returns the shortest common supersequence of two strings.
- * A supersequence is a string that contains both input strings as subsequences.
- *
- * Optimizations:
- * 1. Remove the common prefix and suffix to reduce the DP table size.
- * 2. Use push() to collect characters and reverse the array later,
- *    which is generally more efficient than using unshift().
- *
- * @param str1 - The first input string.
- * @param str2 - The second input string.
- * @returns The shortest common supersequence containing both str1 and str2.
- */
 function shortestCommonSupersequence(str1: string, str2: string): string {
   // If both strings are identical, return one directly.
-  if (str1 === str2) return str1;
+  if (str1 === str2) {
+    return str1;
+  }
 
   // Remove common prefix
   let commonPrefix = "";

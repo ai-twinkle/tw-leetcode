@@ -5,6 +5,11 @@ If there are multiple valid strings, return any of them.
 
 A string `s` is a subsequence of string `t` if deleting some number of characters from `t` (possibly `0`) results in the string `s`.
 
+**Constraints:**
+
+- `1 <= str1.length, str2.length <= 1000`
+- `str1` and `str2` consist of lowercase English letters.
+
 ## 基礎思路
 
 這題關鍵在於找到最短的共同超序列（Shortest Common Supersequence, SCS）， 
@@ -32,7 +37,9 @@ A string `s` is a subsequence of string `t` if deleting some number of character
 如果 `str1` 與 `str2` 相同，那麼最短的 SCS 就是 `str1` 或 `str2` 本身。
 
 ```typescript
-if (str1 === str2) return str1;
+if (str1 === str2) {
+  return str1;
+}
 ```
 
 ### Step 2: 移除共同前綴與共同後綴
@@ -143,16 +150,12 @@ return commonPrefix + middleSequence + commonSuffix;
 
 - **Prefix/Suffix Removal:**  
   檢查共同前綴與後綴需要逐個比對，最壞情況下為 $O(\min(m, n))$ （其中 $m$ 與 $n$ 分別為兩字串的長度）。
-
 - **DP Table Construction:**  
   建立並填充 DP 表需要兩層迴圈，最壞情況下會進行 $O(m \times n)$ 的運算。
-
 - **Backtracking:**  
   從 DP 表回溯來構造中間序列，最壞情況下需要 $O(m + n)$ 的時間。
-
 - **Array Reverse:**  
   將收集結果反轉的操作時間為 $O(m + n)$。
-
 - 總時間複雜度為 $O(\min(m, n)) + O(m \times n) + O(m+n) \approx O(m \times n)$。
 
 > $O(m \times n)$
@@ -161,10 +164,8 @@ return commonPrefix + middleSequence + commonSuffix;
 
 - **DP Table:**  
   儲存 DP 表需要 $O((m+1) \times (n+1))$ 空間，簡化後為 $O(m \times n)$。
-
 - **Sequence Array:**  
   回溯過程中存放結果的陣列最壞情況下大小為 $O(m+n)$。
-
 - 總空間複雜度為 $O(m \times n)$。
 
 > $O(m \times n)$

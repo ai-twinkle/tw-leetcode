@@ -10,6 +10,12 @@ Recall that:
 - The lowest common ancestor of a set `S` of nodes, is the node `A` with the largest depth such 
   that every node in `S` is in the subtree with root `A`.
 
+**Constraints:**
+
+- The number of nodes in the tree will be in the range `[1, 1000]`.
+- `0 <= Node.val <= 1000`
+- The values of the nodes in the tree are unique.
+
 ## 基礎思路
 
 這題要求找到一棵二叉樹中，**所有深度最大的葉子節點**之間的**最低共同祖先 (Lowest Common Ancestor, LCA)**。

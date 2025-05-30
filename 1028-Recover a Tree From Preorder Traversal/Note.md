@@ -10,6 +10,11 @@ If a node has only one child, that child is guaranteed to be the left child.
 
 Given the output `traversal` of this traversal, recover the tree and return its `root`.
 
+**Constraints:**
+
+- The number of nodes in the original tree is in the range `[1, 1000]`.
+- `1 <= Node.val <= 10^9`
+
 ## 基礎思路
 
 這題我直覺是採用深度優先搜尋（DFS）的方式來重建樹的結構。
@@ -261,7 +266,7 @@ return parseNode(0);
 ## 時間複雜度
 
 - 算法只需對輸入字串進行一次遍歷，每個字符只被處理一次，故時間複雜度為 $O(n)$。
-- 總時間複雜度是 $O(n)$。
+- 總時間複雜度為 $O(n)$。
 
 > $O(n)$
 
@@ -269,6 +274,6 @@ return parseNode(0);
 
 - 如果是一個平衡二叉樹，遞迴深度最多為 $O(\log n)$。
 - 在最壞情況下，遞迴深度可能達到 $O(n)$，因此空間複雜度為 $O(n)$。
-- 總空間複雜度是 $O(n)$。
+- 總空間複雜度為 $O(n)$。
 
 > $O(n)$
