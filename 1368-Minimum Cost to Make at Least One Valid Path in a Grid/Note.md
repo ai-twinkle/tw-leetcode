@@ -4,145 +4,173 @@ Given an `m x n` grid. Each cell of the grid has a sign pointing to the next cel
 you should visit if you are currently in this cell. 
 The sign of `grid[i][j]` can be:
 
-* 1 which means go to the cell to the right. (i.e go from `grid[i][j]` to `grid[i][j + 1]`)
-* 2 which means go to the cell to the left. (i.e go from `grid[i][j]` to `grid[i][j - 1]`)
-* 3 which means go to the lower cell. (i.e go from `grid[i][j]` to `grid[i + 1][j]`)
-* 4 which means go to the upper cell. (i.e go from `grid[i][j]` to `grid[i - 1][j]`)
+- `1` which means go to the cell to the right. (i.e go from `grid[i][j]` to `grid[i][j + 1]`)
+- `2` which means go to the cell to the left. (i.e go from `grid[i][j]` to `grid[i][j - 1]`)
+- `3` which means go to the lower cell. (i.e go from `grid[i][j]` to `grid[i + 1][j]`)
+- `4` which means go to the upper cell. (i.e go from `grid[i][j]` to `grid[i - 1][j]`)
 
 Notice that there could be some signs on the cells of the grid that point outside the grid.
 
-You will initially start at the upper left cell (0, 0). 
-A valid path in the grid is a path that starts from the upper left cell (0, 0) and ends at the bottom-right cell (m - 1, n - 1) 
+You will initially start at the upper left cell `(0, 0)`. 
+A valid path in the grid is a path that starts from the upper left cell `(0, 0)` and ends at the bottom-right cell `(m - 1, n - 1)` 
 following the signs on the grid. 
 The valid path does not have to be the shortest.
 
-You can modify the sign on a cell with cost = 1. You can modify the sign on a cell one time only.
+You can modify the sign on a cell with `cost = 1`. 
+You can modify the sign on a cell one time only.
 
 Return the minimum cost to make the grid have at least one valid path.
 
+**Constraints:**
+
+- `m == grid.length`
+- `n == grid[i].length`
+- `1 <= m, n <= 100`
+- `1 <= grid[i][j] <= 4`
+
 ## 基礎思路
 
-這是一個計算最小代價的問題，並不要求走最短路徑，而是要以最小的修改次數到達終點 `(m-1, n-1)`。我們採用 BFS（廣度優先搜尋）來解決問題。
+本題的核心在於求解從左上角 `(0,0)` 到右下角 `(m-1,n-1)` 的一條「有效路徑」，而每個格子上的箭頭決定了若不修改就只能沿箭頭方向前進。
+修改一次箭頭方向的花費為 1，否則為 0。
 
-可以將問題抽象成這樣：
-- 想像你現在是一個機器人，站在格子 A 的位置。你可以選擇向右、向左、向上、向下移動到鄰近的格子 B。
-- 如果 A 格子的箭頭方向剛好指向 B，那麼移動的代價是 `0`；
-- 如果 A 格子的箭頭方向與你想走的方向不同，你需要付出代價 `1` 來修改箭頭方向。
+由於花費僅有 0 或 1，可使用 **0–1 BFS**（雙端佇列 BFS）來高效地計算最小修改花費：
 
-### 演算法操作
-1. **初始化**：
-    - 起點 `(0, 0)` 的代價初始化為 0，並將其加入隊列。
-    - 使用一個二維數組 `cost` 記錄到達每個格子的最小代價，初始值設為無限大 `Infinity`，無限大表示未訪問過。
-    - 使用雙端隊列（deque），方便根據代價將新節點加入隊列的前端或後端。
+- 對於額外花費為 0 的移動，將鄰居節點推到佇列前端；
+- 對於額外花費為 1 的移動，將鄰居節點推到佇列後端。
 
-2. **探索相鄰格子**：
-    - 從當前格子 A 出發，檢查所有可能移動的方向：
-        - 如果目標格子 B 超出邊界，跳過。
-        - 根據箭頭方向與實際移動方向的對比，計算新的代價。
-    - 如果新的代價比之前紀錄的代價小，更新 `cost`，並將 B 加入隊列：
-        - 如果代價為 `0`，將 B 加入隊列的**前端**，代表該格子會被優先處理；
-        - 如果代價為 `1`，將 B 加入隊列的**後端**，會較晚處理。
-
-3. **保證正確性**：
-    - 雙端隊列保證了優先處理代價較低的路徑（`0` 的路徑先處理）。
-    - BFS 的層次遍歷保證了，每次到達某個格子時，都是用最小代價到達的。
-
-4. **結束條件**：
-    - 當隊列為空時，說明所有路徑都已經探索完成，此時終點 `(m-1, n-1)` 的 `cost` 值即為最小代價。
-
-這個演算法能確保優先選定代價為 `0` 的路徑，並且保證了到達每個格子的代價都是最小的，那麼當抵達終點時，終點的代價就是最小代價。
+如此一來，即可在 $O(m \times n)$ 時間內找到從起點到終點的最小修改次數。
 
 ## 解題步驟
 
-### Step 1: 先暫存行與列的數量與定義方向
+### Step 1：初始化與常數定義
+
+程式開始時，先取得格子的行數 `rowCount`、列數 `columnCount`，以及總格子數 `totalCells`，並定義四個方向的偏移陣列，方便之後遍歷。
 
 ```typescript
-// 依照題意定義四個方向，我們用 Delta 來表示
-const DIRECTIONS = [
-  { dx: 0, dy: 1 },
-  { dx: 0, dy: -1 },
-  { dx: 1, dy: 0 },
-  { dx: -1, dy: 0 }
-];
+// 1. 初始化與常數定義
+const rowCount = grid.length;
+const columnCount = grid[0].length;
+const totalCells = rowCount * columnCount;
 
-const m = grid.length;    // 行數
-const n = grid[0].length; // 列數
+// 方向：右、左、下、上
+const rowOffsets = new Int8Array([0,  0,  1, -1]);
+const colOffsets = new Int8Array([1, -1,  0,  0]);
 ```
 
-### Step 2: 初始化代價數組 `cost` 與雙端隊列 `deque`
+### Step 2：將格子預處理為一維陣列
+
+為了提升存取效率並利用快取局部性，將二維的 `grid` 攤平成長度為 `totalCells` 的 `Uint8Array`。
 
 ```typescript
-// 用 2 維數組記錄到達每個格子的最小代價
-const cost: number[][] = Array.from({ length: m }, () => Array(n).fill(Infinity));
-// 我們是出發自 (0, 0) 的，所以代價為 0
-cost[0][0] = 0;
-
-// 初始化雙端隊列
-const deque: { x: number; y: number; c: number }[] = [];
-// 將起點加入隊列
-deque.push({ x: 0, y: 0, c: 0 });
+// 2. 預處理格子（攤平成一維陣列以加速存取）
+const flattenedGrid = new Uint8Array(totalCells);
+for (let row = 0; row < rowCount; row++) {
+  const baseIndex = row * columnCount;
+  for (let col = 0; col < columnCount; col++) {
+    flattenedGrid[baseIndex + col] = grid[row][col];
+  }
+}
 ```
 
-### Step 3: 開始 BFS 探索
+### Step 3：設置花費追蹤結構
+
+使用 `Uint16Array` 儲存從起點到每個格子的最小修改次數，並以 `sentinelCost`（大於可能最大花費）初始化。起點索引 `0` 的花費設為 `0`。
 
 ```typescript
-// 我們使用雙端隊列來實現 BFS，直到隊列為空
-while (deque.length > 0) {
-  // 取出隊列的第一個要處理的格子，為了方便解釋，我們稱之為 A
-  const { x, y, c } = deque.shift()!;
+// 3. 設置花費追蹤（使用哨兵值初始化，並將起點花費設為 0）
+const sentinelCost = totalCells + 1;
+const costGrid = new Uint16Array(totalCells);
+for (let i = 0; i < totalCells; i++) {
+  costGrid[i] = sentinelCost;
+}
+costGrid[0] = 0; // 起點格子的花費為 0
+```
 
-  // 探索四個方向
-  for (let i = 0; i < 4; i++) {
-    // 獲取方向的增量
-    const { dx, dy } = DIRECTIONS[i];
-    // 計算相鄰格子的坐標
-    const nx = x + dx;
-    const ny = y + dy;
+### Step 4：初始化 0–1 BFS 專用的雙端佇列
 
-    // 如果相鄰格子超出邊界，跳過
-    if (nx < 0 || nx >= m || ny < 0 || ny >= n) {
+使用固定大小為 `totalCells + 1` 的 `Uint32Array` 作為環形緩衝區，並透過 `head`、`tail` 指標構建雙端佇列，將起點推入。
+
+```typescript
+// 4. 0-1 BFS 雙端佇列初始化（環形緩衝區）
+const capacity = totalCells + 1;
+const dequeBuffer = new Uint32Array(capacity);
+let head = 0;
+let tail = 1;
+dequeBuffer[0] = 0; // 從左上角格子的序號 0 開始
+```
+
+### Step 5：執行 0–1 BFS 主迴圈
+
+反覆從佇列前端取出目前格子，解析其座標與原始箭頭方向，並嘗試四個可能方向的移動。
+
+- 若移動方向與原箭頭相同，額外花費 `0`，否則為 `1`。
+- 更新鄰居格子的最小花費後，依額外花費分別推入佇列前端或後端。
+
+```typescript
+// 5. 0-1 BFS 主迴圈
+while (head !== tail) {
+  // 從前端彈出當前索引
+  const currentIndex = dequeBuffer[head];
+  head = head + 1 < capacity ? head + 1 : 0;
+
+  // 解析當前狀態
+  const currentCost = costGrid[currentIndex];
+  const currentRow = (currentIndex / columnCount) | 0;
+  const currentCol = currentIndex - currentRow * columnCount;
+  const currentSign = flattenedGrid[currentIndex];
+
+  // 嘗試所有四個方向
+  for (let directionIndex = 0; directionIndex < 4; directionIndex++) {
+    const newRow = currentRow + rowOffsets[directionIndex];
+    const newCol = currentCol + colOffsets[directionIndex];
+
+    // 如果越界就跳過
+    if (newRow < 0 || newRow >= rowCount || newCol < 0 || newCol >= columnCount) {
       continue;
     }
+    const neighborIndex = newRow * columnCount + newCol;
 
-    // 計算由 A 格子到 B 格子的代價
-    // A 格子的代價為 c，B 格子的代價取決於箭頭方向是否與移動方向一致 (須注意: 箭頭是 1~4，而索引是 0~3)
-    const newCost = c + (grid[x][y] === i + 1 ? 0 : 1);
+    // 計算移動花費：若原箭頭方向相符則為 0，否則為 1
+    const additionalCost = (currentSign === directionIndex + 1 ? 0 : 1);
+    const newCost = currentCost + additionalCost;
 
-    // 如果 A 格子到 B 格子的代價大於等於 B 格子的代價，跳過
-    if (newCost >= cost[nx][ny]) {
-      continue;
-    }
-
-    // 更新 B 格子的代價
-    cost[nx][ny] = newCost;
-
-    // 如果移動代價為 0，我們將格子加入隊列的前端 (unshift) (同樣須注意: 箭頭是 1~4，而索引是 0~3)
-    // 這樣可以保證代價為 0 的格子優先處理
-    if (grid[x][y] === i + 1) {
-      deque.unshift({ x: nx, y: ny, c: newCost });
-    } else {
-      deque.push({ x: nx, y: ny, c: newCost });
+    // 若找到更小花費，則更新並依花費類型選擇推入佇列前端或後端
+    if (newCost < costGrid[neighborIndex]) {
+      costGrid[neighborIndex] = newCost;
+      if (additionalCost === 0) {
+        head = head - 1 >= 0 ? head - 1 : capacity - 1;
+        dequeBuffer[head] = neighborIndex;
+      } else {
+        dequeBuffer[tail] = neighborIndex;
+        tail = tail + 1 < capacity ? tail + 1 : 0;
+      }
     }
   }
 }
 ```
 
-### Step 4: 返回終點 `(m-1, n-1)` 的最小代價
+### Step 6：回傳結果
+
+當佇列處理完畢後，右下角格子的索引為 `totalCells - 1`，其對應的 `costGrid` 值即為最小修改花費，直接回傳。
 
 ```typescript
-return cost[m - 1][n - 1];
+// 6. 回傳到達右下角的最小花費
+return costGrid[totalCells - 1];
 ```
 
 ## 時間複雜度
-網格的大小是 $m×n$，每個節點在最壞情況下會被處理一次。
-雙端隊列（deque）在每次操作中，插入或刪除的時間複雜度為 $O(1)$。即使所有節點都進入隊列多次，仍然是線性的。
-因此，總的時間複雜度為 $O(m×n)$。
 
-> $O(m×n)$
+- 每個格子最多進入佇列 $1$ 次（因為只會用更低的花費更新），對每個格子最多考察 $4$ 個方向。
+- BFS 遍歷所有 $m \times n$ 格子，操作均為 $O(1)$，主流程為 $O(m \times n)$。
+- 佇列推入/彈出操作皆為常數時間。
+- 總時間複雜度為 $O(m \times n)$。
+
+> $O(m \times n)$
 
 ## 空間複雜度
-我們使用了一個二維數組 `cost` 來記錄到達每個格子的最小代價，因此空間複雜度為 $O(m×n)$。
-雙端隊列 `deque` 最壞情況下會包含所有節點，因此空間複雜度為 $O(m×n)$。
-因此，總的空間複雜度為 $O(m×n)$。
 
-> $O(m×n)$
+- 額外使用了一維陣列 `flattenedGrid`、`costGrid` 以及雙端佇列 `dequeBuffer`，長度皆與格子總數成正比。
+- 未產生多餘遞迴或深度堆疊。
+- 總空間複雜度為 $O(m \times n)$。
+
+> $O(m \times n)$

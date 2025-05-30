@@ -6,26 +6,21 @@ Each number from `1` to `n` is grouped according to the sum of its digits.
 
 Return the number of groups that have the largest size.
 
+**Constraints:**
+
+- `1 <= n <= 10^4`
+
 ## 基礎思路
 
-題目要求將整數範圍 $1 \dots n$ 根據「數字和」（digit sum）分組，並返回「擁有最大群組大小」的群組數量。由於題目範圍限制為 $1 \le n \le 10^4$，我們可以採用**預計算（Precomputation）搭配動態規劃（Dynamic Programming）及查表法**來優化查詢效率：
+本題要求將整數範圍 $1 \dots n$ 根據「數字和」（digit sum）分組，最後返回「具有最大群組大小」的群組數量。
 
-### 主要步驟：
+鑒於 $1 \le n \le 10^4$，我們可以結合預計算（precomputation）與動態規劃，並利用查表方式優化查詢效率：
 
-1. **預計算數字和**  
-   使用動態規劃快速得到每個數字的 digit sum：
-   $$
-   \text{digitSumArray}[x] = \text{digitSumArray}\left(\lfloor x/10 \rfloor\right) + (x \bmod 10)
-   $$
+- **數字和預計算**：運用動態規劃遞推關係，線性時間快速計算每個數字的 digit sum，避免重複計算。
+- **分組統計與最大群組動態維護**：透過輔助陣列統計各個 digit sum 的出現次數，同時動態維護目前的最大群組大小及其對應數量。
+- **快取查詢**：將每個 $1 \dots n$ 的最終查詢結果預先存入快取陣列，使任意 $n$ 的查詢皆可 $O(1)$ 取得。
 
-2. **確認最大數字和範圍**  
-   找出所有 digit sum 中的最大值，以便分配合適大小的陣列空間。
-
-3. **動態維護最大群組數量**  
-   再次遍歷 $1 \dots n$，透過輔助陣列紀錄各個數字和的出現次數，動態更新並儲存每個前綴範圍的最大群組數量。
-
-4. **快速查詢**  
-   對於任意輸入 $n$，直接透過事先計算好的緩存陣列以 $O(1)$ 查詢。
+由於所有預處理僅需 $O(n)$，查詢複雜度則為 $O(1)$，因此這種做法在多次查詢和大 $n$ 範圍下特別高效且適用。
 
 ## 解題步驟
 
@@ -113,23 +108,20 @@ function countLargestGroup(n: number): number {
 
 ## 時間複雜度
 
-- **預計算階段**：
-    - 計算 digit sum：$O(n)$
-    - 找出最大 digit sum：$O(n)$
-    - 填充最大群組快取：$O(n)$
-- **查詢階段**：
-    - 直接查詢：$O(1)$
-
-- 總時間複雜度為：$O(n)$，其中 $1 \le n \le 10^4$
+- **預計算階段：**
+    - 計算每個數字的 digit sum：$O(n)$
+    - 統計 digit sum 的最大值：$O(n)$
+    - 動態更新並填充最大群組快取：$O(n)$
+- **查詢階段：** 直接查詢快取結果：$O(1)$
+- 總時間複雜度為 $O(n)$。
 
 > $O(n)$
 
 ## 空間複雜度
 
-- **digitSumArray** 陣列：$O(n)$
-- **largestGroupCountCache** 陣列：$O(n)$
-- **groupSizeBySum** 陣列（輔助）：最多為最大 digit sum 長度，可視為 $O(n)$。
-
-整體空間複雜度為：
+- **digitSumArray**：存儲每個數字的數字和，佔用 $O(n)$ 空間。
+- **largestGroupCountCache**：快取每個查詢範圍的答案，佔用 $O(n)$ 空間。
+- **groupSizeBySum**：統計各種數字和的出現次數，最大長度與 $n$ 同階，故視為 $O(n)$。
+- 總空間複雜度為 $O(n)$。
 
 > $O(n)$

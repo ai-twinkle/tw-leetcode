@@ -1,62 +1,80 @@
-const DIRECTIONS = [
-  { dx: 0, dy: 1 },
-  { dx: 0, dy: -1 },
-  { dx: 1, dy: 0 },
-  { dx: -1, dy: 0 }
-];
-
 function minCost(grid: number[][]): number {
-  // Store the number of rows and columns
-  const m = grid.length;    // Number of rows
-  const n = grid[0].length; // Number of columns
+  // 1. Initialization and Constant Definitions
+  const rowCount = grid.length;
+  const columnCount = grid[0].length;
+  const totalCells = rowCount * columnCount;
 
-  // Create a 2D array to store the cost of reaching each cell
-  const cost: number[][] = Array.from({ length: m }, () => Array(n).fill(Infinity));
-  // Set the cost of reaching the starting cell to 0 as it the starting point
-  cost[0][0] = 0;
+  // Directions: right, left, down, up
+  const rowOffsets = new Int8Array([0, 0, 1, -1]);
+  const colOffsets = new Int8Array([1, -1, 0, 0]);
 
-  // Initialize the deque with the starting
-  const deque: { x: number; y: number; c: number }[] = [];
-  // Add the starting cell to the deque
-  deque.push({ x: 0, y: 0, c: 0 });
+  // 2. Preprocessing the grid for fast access (flatten into 1D array)
+  const flattenedGrid = new Uint8Array(totalCells);
+  for (let row = 0; row < rowCount; row++) {
+    const baseIndex = row * columnCount;
+    for (let col = 0; col < columnCount; col++) {
+      flattenedGrid[baseIndex + col] = grid[row][col];
+    }
+  }
 
-  while (deque.length > 0) {
-    const { x, y, c } = deque.shift()!;
+  // 3. Cost tracking setup using typed array for fast access
+  const sentinelCost = totalCells + 1;
+  const costGrid = new Uint16Array(totalCells);
+  for (let i = 0; i < totalCells; i++) {
+    costGrid[i] = sentinelCost;
+  }
+  costGrid[0] = 0; // Start cell has zero cost
 
-    for (let i = 0; i < 4; i++) {
-      const { dx, dy } = DIRECTIONS[i];
-      // The nearby cell
-      const nx = x + dx;
-      const ny = y + dy;
+  // 4. Circular-buffer deque for 0–1 BFS (store flattened indices)
+  const capacity = totalCells + 1;
+  const dequeBuffer = new Uint32Array(capacity);
+  let head = 0;
+  let tail = 1;
+  dequeBuffer[0] = 0; // Start with the top-left cell
 
-      // We skip the cell if it is out of bounds
-      if (nx < 0 || nx >= m || ny < 0 || ny >= n) {
+  // 5. 0–1 BFS main loop
+  while (head !== tail) {
+    // Pop front of deque
+    const currentIndex = dequeBuffer[head];
+    head = head + 1 < capacity ? head + 1 : 0;
+
+    // Compute current position and state
+    const currentCost = costGrid[currentIndex];
+    const currentRow = (currentIndex / columnCount) | 0;
+    const currentCol = currentIndex - currentRow * columnCount;
+    const currentSign = flattenedGrid[currentIndex];
+
+    // Try all four directions
+    for (let directionIndex = 0; directionIndex < 4; directionIndex++) {
+      const newRow = currentRow + rowOffsets[directionIndex];
+      const newCol = currentCol + colOffsets[directionIndex];
+
+      // Skip if out of grid bounds
+      if (newRow < 0 || newRow >= rowCount || newCol < 0 || newCol >= columnCount) {
         continue;
       }
+      const neighborIndex = newRow * columnCount + newCol;
 
-      // Calculate the cost of reaching the nearby cell
-      // The cost to reach this cell is the cost of current cell + 1 if we need to modify the sign otherwise it is 0
-      const newCost = c + (grid[x][y] === i + 1 ? 0 : 1);
+      // Cost to move: 0 if sign matches, 1 otherwise (need to modify)
+      const additionalCost = (currentSign === directionIndex + 1 ? 0 : 1);
+      const newCost = currentCost + additionalCost;
 
-      // Skip the cell if the cost to reach this cell is greater than the cost we have already calculated
-      if (newCost >= cost[nx][ny]) {
-        continue;
-      }
+      // Only update if found a cheaper path
+      if (newCost < costGrid[neighborIndex]) {
+        costGrid[neighborIndex] = newCost;
 
-      // Update the cost of reaching the nearby cell
-      cost[nx][ny] = newCost;
-
-      // If the sign of the cell is the same as the direction we are moving,
-      // we add the cell to the front of the deque
-      // Because we want to explore the cells with lower cost first
-      if (grid[x][y] === i + 1) {
-        deque.unshift({ x: nx, y: ny, c: newCost });
-      } else {
-        deque.push({ x: nx, y: ny, c: newCost });
+        // If no modification needed, push to front; else, push to back
+        if (additionalCost === 0) {
+          head = head - 1 >= 0 ? head - 1 : capacity - 1;
+          dequeBuffer[head] = neighborIndex;
+        } else {
+          dequeBuffer[tail] = neighborIndex;
+          tail = tail + 1 < capacity ? tail + 1 : 0;
+        }
       }
     }
   }
 
-  // Return the cost of reaching the last cell
-  return cost[m - 1][n - 1];
+  // 6. Return the minimal cost to reach the bottom-right cell
+  return costGrid[totalCells - 1];
 }
