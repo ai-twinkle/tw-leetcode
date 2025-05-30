@@ -11,13 +11,33 @@ Now the binary tree is contaminated, which means all `treeNode.val` have been ch
 
 Implement the `FindElements` class:
 
-* `FindElements(TreeNode* root)` Initializes the object with a contaminated binary tree and recovers it.
-* `bool find(int target)` Returns `true` if the `target` value exists in the recovered binary tree.
+- `FindElements(TreeNode* root)` Initializes the object with a contaminated binary tree and recovers it.
+- `bool find(int target)` Returns `true` if the `target` value exists in the recovered binary tree.
+
+**Constraints:**
+
+- `TreeNode.val == -1`
+- The height of the binary tree is less than or equal to `20`
+- The total number of nodes is between `[1, 10^4]`
+- Total calls of find() is between `[1, 10^4]`
+- `0 <= target <= 10^6`
 
 ## 基礎思路
 
-這題我們需要模擬 `Recover` 的過程，也就是依照上述的規則，恢復數據。
-但直接查找的話，時間複雜度會很高，因此我們可以使用 `recoveredSet` 來存儲所有的數據，這樣查找的時間複雜度就會降低到 $O(1)$。
+這題的本質是在於復原已知規則的二元樹結構，並支援高效查找任一節點是否存在。
+
+已知規則如下：
+
+- 根節點值為 $0$。
+- 對於任何節點值 $x$，左子節點值為 $2x+1$，右子節點值為 $2x+2$。
+
+但所有節點值都被污染成 $-1$，所以我們必須依據規則遞迴還原所有正確節點值。
+
+此外，考慮到 `find(target)` 查找次數可達 $10^4$，若每次都從根節點往下搜尋，會導致效能瓶頸。
+因此，我們在復原的同時，直接將所有節點值存入一個雜湊集合（Set），
+如此查找任一值只需 $O(1)$ 時間，大幅提升查找效率。
+
+我們可以利用數學規則和 DFS **一次性「重建+備份」**，換取未來每次查詢的秒查效率。
 
 ## 解題步驟
 
@@ -28,6 +48,8 @@ Implement the `FindElements` class:
 ```typescript
 class FindElements {
   private readonly recoveredSet: Set<number>;
+  
+  // ...
 }
 ```
 
@@ -37,7 +59,7 @@ class FindElements {
 
 ```typescript
 class FindElements {
-  // ...
+  // Step 1: 初始化 `recoveredSet`
   
   constructor(root: TreeNode | null) {
     this.recoveredSet = new Set();
@@ -61,6 +83,8 @@ class FindElements {
     this.recover(node.left, 2 * val + 1);
     this.recover(node.right, 2 * val + 2);
   }
+  
+  // ...
 }
 ```
 
@@ -70,7 +94,9 @@ class FindElements {
 
 ```typescript
 class FindElements {
-  // ...
+  // Step 1: 初始化 `recoveredSet`
+   
+  // Step 2: 構造函數
 
   find(target: number): boolean {
     return this.recoveredSet.has(target);
