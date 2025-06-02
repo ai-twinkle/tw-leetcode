@@ -55,8 +55,6 @@ for (let index = 0; index < lengthOfArray; index++) {
 }
 ```
 
----
-
 ### Step 2: 計算分段位置，準備原地填入
 
 根據上一步計算的數量，我們可決定：
@@ -68,8 +66,6 @@ for (let index = 0; index < lengthOfArray; index++) {
 const firstPartitionEnd = zeroCount;
 const secondPartitionEnd = zeroCount + oneCount;
 ```
-
----
 
 ### Step 3: 原地填回數字以完成排序
 
@@ -84,10 +80,6 @@ nums.fill(0, 0, firstPartitionEnd); // 填入紅色
 nums.fill(1, firstPartitionEnd, secondPartitionEnd); // 填入白色
 nums.fill(2, secondPartitionEnd, lengthOfArray); // 填入藍色
 ```
-
-完成以上步驟，即可達成題目的原地排序要求。
-
----
 
 ## 時間複雜度
 
