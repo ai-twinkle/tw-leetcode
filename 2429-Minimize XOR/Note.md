@@ -37,7 +37,6 @@ The number of set bits of an integer is the number of `1`'s in its binary repres
    - 首先複製 `num1` 的位元值。
    - 接著計算需要移除的 `1` 的數量，並從低位到高位依次將多餘的 `1` 變為 `0` (以滿足 XOR 最小值)，直到達到需求為止。
 
-
 ## 解題步驟
 
 ### Step 1: 計算 `num1` 和 `num2` 的 `1` 的數量
