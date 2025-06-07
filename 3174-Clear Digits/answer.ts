@@ -1,9 +1,3 @@
-/**
- * Remove all digits by doing this operation repeatedly:
- * - Delete the first digit and the closest non-digit character to its left.
- * @param s the input string
- * @returns the resulting string after removing all digits
- */
 function clearDigits(s: string): string {
   const stack: string[] = [];
   for (const char of s) {
