@@ -23,7 +23,7 @@ function clearStars(s: string): string {
       deletionFlags[currentPosition] = 1;
       totalStarCount++;
 
-      // Find smallest non-empty bucket in O(1)
+      // Find the smallest non-empty bucket in O(1)
       const lowestSetBit = nonEmptyBucketMask & -nonEmptyBucketMask;
       const smallestNonEmptyBucketIndex = 31 - Math.clz32(lowestSetBit);
 

@@ -1,6 +1,6 @@
-const UPDATE_MATRIX_DIRECTIONS: number[] = [0, 1, 0, -1, 0];
-
 function updateMatrix(mat: number[][]): number[][] {
+  const UPDATE_MATRIX_DIRECTIONS: number[] = [0, 1, 0, -1, 0];
+
   // Get the number of rows and columns
   const m = mat.length;
   const n = mat[0].length;
