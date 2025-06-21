@@ -39,7 +39,7 @@ The Manhattan Distance between two cells `(x_i, y_i)` and `(x_j, y_j)` is `|x_i 
 首先將方向字串解碼成 ASCII 編碼，以便於之後快速比較。
 
 ```typescript
-const length: number = s.length;
+const length = s.length;
 
 // 預先將所有方向字元解碼成 char code 存入 Uint16Array
 const directionCodes = new Uint16Array(length);

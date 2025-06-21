@@ -1,5 +1,5 @@
 function maxDistance(s: string, k: number): number {
-  const length: number = s.length;
+  const length = s.length;
 
   // Pre-decode all direction chars into a Uint16Array of char-codes
   const directionCodes = new Uint16Array(length);
