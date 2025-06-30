@@ -81,7 +81,7 @@ return maximumHarmoniousSubsequenceLength;
 
 - 陣列排序階段為 $O(n \log n)$。
 - 後續的滑動視窗掃描只需掃描一次，因此為 $O(n)$。
-- 總時間複雜度由排序主導，為 $O(n \log n)$。
+- 總時間複雜度為 $O(n \log n)$。
 
 > $O(n \log n)$
 
