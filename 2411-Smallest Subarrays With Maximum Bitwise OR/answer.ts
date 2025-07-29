@@ -5,6 +5,7 @@ function smallestSubarrays(nums: number[]): number[] {
   nextSetBitIndices.fill(-1);
 
   // Traverse the array backwards
+  for (let index = length - 1; index >= 0; index--) {
     let currentValue = nums[index] >>> 0;
     let bitPosition = 0;
 
