@@ -26,7 +26,7 @@ Return the number of possible non-empty sequences of letters you can make using 
 ### 數學原理
 
 1. **單一字母的選取**
-   若某字母 $L$ 共出現 $f$ 次，則這個字母的選法可用生成函數 $G\_L(x)$ 表示：
+   若某字母 $L$ 共出現 $f$ 次，則這個字母的選法可用生成函數 $G_L(x)$ 表示：
 
    $$
    G_L(x) = 1 + \frac{x}{1!} + \frac{x^2}{2!} + \cdots + \frac{x^f}{f!}
@@ -47,13 +47,13 @@ Return the number of possible non-empty sequences of letters you can make using 
    P(x) = \sum_{k=0}^n a_k x^k
    $$
 
-   - 其中 $n$ 為瓷磚總數，$a\_k$ 為選 $k$ 個瓷磚的所有方案的權重和。
+   - 其中 $n$ 為瓷磚總數，$a_k$ 為選 $k$ 個瓷磚的所有方案的權重和。
 
 3. **如何計算總排列數？**
 
-  - 若選取方案為 $(c\_1, ..., c\_m)$，每種字母取 $c\_i$ 個，排列數為 $\frac{k!}{c\_1!c\_2!...c\_m!}$。
-  - 生成函數中 $a\_k$ 累計的正好是所有選 $k$ 個字母的 $\frac{1}{c\_1!...c\_m!}$。
-  - 所以總數就是 $k! \cdot a\_k$。
+  - 若選取方案為 $(c_1, ..., c_m)$，每種字母取 $c_i$ 個，排列數為 $\frac{k!}{c_1!c_2!...c_m!}$。
+  - 生成函數中 $a_k$ 累計的正好是所有選 $k$ 個字母的 $\frac{1}{c_1!...c_m!}$。
+  - 所以總數就是 $k! \cdot a_k$。
   - 最終答案為所有 $k \geq 1$ 的總和：
 
     $$

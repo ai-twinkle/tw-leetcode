@@ -24,7 +24,7 @@ A permutation is a rearrangement of all the characters of a string.
    這個問題可以建模為一個**受限背包問題（bounded knapsack）**：
 
     - 要選擇 $\lceil n/2\rceil$ 個數字（對應偶數索引個數）；
-    - 總和必須是 $\frac{1}{2}\sum\_{\text{所有數字}}d$；
+    - 總和必須是 $\frac{1}{2}\sum_{\text{所有數字}}d$；
     - 每個數字 $d \in [0,9]$ 最多可使用其在 `num` 中出現的次數。
 
 2. **排列計數與重複修正（排列階段）**
