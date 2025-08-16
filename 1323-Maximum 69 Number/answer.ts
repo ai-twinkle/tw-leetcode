@@ -6,7 +6,7 @@ const PRECOMPUTED_POWER_OF_TEN: Int32Array = new Int32Array([
 function maximum69Number (num: number): number {
   const originalNumber = num;
 
-  // Find highest place value ≤ num using the precomputed typed array.
+  // Find the highest place value <= num using the precomputed typed array.
   let index = PRECOMPUTED_POWER_OF_TEN.length - 1;
   while (index > 0 && PRECOMPUTED_POWER_OF_TEN[index] > num) {
     index--;
@@ -16,7 +16,7 @@ function maximum69Number (num: number): number {
   let currentPlace = PRECOMPUTED_POWER_OF_TEN[index];
   while (currentPlace > 0) {
     const quotient = Math.trunc(num / currentPlace);
-    const digit = quotient % 10; // safe integer arithmetic under problem constraints
+    const digit = quotient % 10; // Safe integer arithmetic under problem constraints
 
     if (digit === 6) {
       // Turn this 6 into 9 -> add 3 * place once and return.
