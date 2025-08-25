@@ -1,4 +1,4 @@
-export function findDiagonalOrder(mat: number[][]): number[] {
+function findDiagonalOrder(mat: number[][]): number[] {
   const totalRows = mat.length;
   const totalColumns = mat[0].length;
   const totalElements = totalRows * totalColumns;
