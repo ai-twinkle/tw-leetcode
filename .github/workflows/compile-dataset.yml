@@ -144,89 +144,36 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python -c "
-          import os
-          from huggingface_hub import HfApi, create_repo, login
-          from pathlib import Path
-          import subprocess
+          # First try using the CLI tool which often works better with permissions
+          echo "Setting up Hugging Face CLI..."
+          huggingface-cli login --token $HF_TOKEN
           
-          # Login with token
-          try:
-              login(token=os.environ['HF_TOKEN'])
-              print('Successfully logged in to Hugging Face')
-          except Exception as e:
-              print(f'Login failed: {e}')
-              exit(1)
+          echo "Current branch: $(git branch --show-current)"
+          echo "Files in current directory:"
+          find . -type f -not -path './.git/*' | head -20
           
-          # Initialize HF API with token
-          api = HfApi(token=os.environ['HF_TOKEN'])
+          # Create the repository if it doesn't exist
+          echo "Creating/checking repository..."
+          huggingface-cli repo create twinkle-ai/tw-leetcode --type dataset --exist-ok || echo "Repository exists or creation skipped"
           
-          # Repository details
-          repo_id = 'twinkle-ai/tw-leetcode'
+          # Upload files using git-based approach which is more reliable
+          echo "Initializing git-lfs and uploading..."
+          git lfs install
           
-          # Create repository if it doesn't exist (will skip if exists)
-          try:
-              create_repo(repo_id, repo_type='dataset', exist_ok=True, token=os.environ['HF_TOKEN'])
-              print(f'Repository {repo_id} is ready')
-          except Exception as e:
-              print(f'Repository creation/check result: {e}')
+          # Clone the HF repo to a temporary directory
+          git clone https://huggingface.co/datasets/twinkle-ai/tw-leetcode hf_repo || git clone https://oauth2:$HF_TOKEN@huggingface.co/datasets/twinkle-ai/tw-leetcode hf_repo
           
-          # Verify we're on dataset branch and list files
-          branch_result = subprocess.run(['git', 'branch', '--show-current'], capture_output=True, text=True)
-          print(f'Current branch: {branch_result.stdout.strip()}')
+          # Copy our files to the HF repo
+          cp -r data/ hf_repo/
+          cp README.md hf_repo/
+          cp .gitattributes hf_repo/ 2>/dev/null || echo "No .gitattributes to copy"
           
-          # List files to upload (should only be clean dataset files)
-          import glob
-          files = glob.glob('**/*', recursive=True)
-          files = [f for f in files if os.path.isfile(f) and not f.startswith('.git') and 'node_modules' not in f]
-          print(f'Files to upload: {files}')
+          # Commit and push to HF
+          cd hf_repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Auto-update dataset - $(date -u +%Y-%m-%d)" || echo "No changes to commit"
+          git push https://oauth2:$HF_TOKEN@huggingface.co/datasets/twinkle-ai/tw-leetcode main
           
-          # Upload files individually to avoid permission issues
-          try:
-              # Upload data directory
-              if os.path.exists('data'):
-                  api.upload_folder(
-                      folder_path='data',
-                      path_in_repo='data',
-                      repo_id=repo_id,
-                      repo_type='dataset',
-                      commit_message=f'Auto-update dataset - {subprocess.check_output([\"date\", \"-u\", \"+%Y-%m-%d\"]).decode().strip()}',
-                      token=os.environ['HF_TOKEN']
-                  )
-                  print('Successfully uploaded data folder!')
-              
-              # Upload README if exists
-              if os.path.exists('README.md'):
-                  api.upload_file(
-                      path_or_fileobj='README.md',
-                      path_in_repo='README.md',
-                      repo_id=repo_id,
-                      repo_type='dataset',
-                      commit_message=f'Auto-update README - {subprocess.check_output([\"date\", \"-u\", \"+%Y-%m-%d\"]).decode().strip()}',
-                      token=os.environ['HF_TOKEN']
-                  )
-                  print('Successfully uploaded README.md!')
-              
-              # Upload other root files (like .gitattributes, .gitignore) but exclude node_modules
-              for file in files:
-                  if file not in ['README.md'] and not file.startswith('data/') and 'node_modules' not in file and 'scripts/' not in file:
-                      try:
-                          api.upload_file(
-                              path_or_fileobj=file,
-                              path_in_repo=file,
-                              repo_id=repo_id,
-                              repo_type='dataset',
-                              commit_message=f'Auto-update {file} - {subprocess.check_output([\"date\", \"-u\", \"+%Y-%m-%d\"]).decode().strip()}',
-                              token=os.environ['HF_TOKEN']
-                          )
-                          print(f'Successfully uploaded {file}!')
-                      except Exception as e:
-                          print(f'Failed to upload {file}: {e}')
-              
-              print('Dataset upload completed successfully!')
-              
-          except Exception as e:
-              print(f'Upload failed: {e}')
-              print(f'Error type: {type(e).__name__}')
-              exit(1)
-          "
+          echo "Dataset uploaded successfully to Hugging Face!"
