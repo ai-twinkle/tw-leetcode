@@ -137,6 +137,7 @@ jobs:
       - name: Install Hugging Face Hub
         run: pip install --upgrade huggingface_hub
 
+      # make sure we’re on the dataset branch in your Git repo (local only)
       - name: Switch to dataset branch for upload
         run: git checkout dataset
 
@@ -144,53 +145,51 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Option A: use the new 'hf' CLI
+          pip install --upgrade "huggingface_hub>=0.24.6"
           hf auth login --token "$HF_TOKEN"
           hf auth whoami
 
-      - name: Ensure dataset repo exists (idempotent)
+      # ensure the dataset repo exists
+      - name: Ensure dataset repo exists
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python - <<'PY'
           import os
           from huggingface_hub import create_repo
-          create_repo(
-              repo_id="twinkle-ai/tw-leetcode",
-              repo_type="dataset",
-              exist_ok=True,
-              token=os.environ["HF_TOKEN"],
-          )
+          create_repo("twinkle-ai/tw-leetcode", repo_type="dataset",
+                      exist_ok=True, token=os.environ["HF_TOKEN"])
           PY
 
-      - name: Upload to Hugging Face (via PR)
+      # Upload via PR to the existing 'main' branch
+      - name: Upload to Hugging Face (via PR to main)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -e
-          BR="dataset-sync-$(date -u +%Y%m%d%H%M%S)"
-          echo "Current branch: $(git branch --show-current)"
-          echo "Uploading via PR branch: $BR"
+          BASE_BRANCH=main
+          COMMIT_MSG="Auto-update dataset - $(date -u +%Y-%m-%d)"
 
-          # Data folder -> /data
+          echo "Uploading via PR to base branch: $BASE_BRANCH"
+
           hf upload twinkle-ai/tw-leetcode data/ data/ \
             --repo-type dataset \
-            --revision "$BR" \
+            --revision "$BASE_BRANCH" \
             --create-pr \
-            --commit-message "Auto-update dataset - $(date -u +%Y-%m-%d)"
+            --commit-message "$COMMIT_MSG"
 
-          # README -> /README.md
           hf upload twinkle-ai/tw-leetcode README.md README.md \
             --repo-type dataset \
-            --revision "$BR" \
+            --revision "$BASE_BRANCH" \
             --create-pr \
-            --commit-message "Auto-update README - $(date -u +%Y-%m-%d)"
+            --commit-message "$COMMIT_MSG"
 
-          # .gitattributes (optional)
           if [ -f ".gitattributes" ]; then
             hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes \
               --repo-type dataset \
-              --revision "$BR" \
+              --revision "$BASE_BRANCH" \
               --create-pr \
-              --commit-message "Auto-update .gitattributes - $(date -u +%Y-%m-%d)"
+              --commit-message "$COMMIT_MSG"
           fi
+
+          echo "Uploads pushed as a Pull Request on Hugging Face."
