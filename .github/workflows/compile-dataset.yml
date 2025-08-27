@@ -97,9 +97,9 @@ jobs:
           # Restore essential files from main
           git checkout main -- .gitattributes .gitignore README.md || true
           
-          # Create data directory and move compiled dataset
+          # Create data directory (if not exists)
           mkdir -p data
-          mv tw-leetcode.jsonl data/
+          # File is already created in data/ by the compile script
           
           # Update .gitignore for dataset branch
           echo "# Dataset branch - only contains compiled data" > .gitignore
