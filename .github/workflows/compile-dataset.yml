@@ -169,27 +169,27 @@ jobs:
           set -e
           BASE_BRANCH=main
           COMMIT_MSG="Auto-update dataset - $(date -u +%Y-%m-%d)"
+          PR_BRANCH="auto-update-$(date -u +%Y%m%d-%H%M%S)"
 
-          echo "Uploading via PR to base branch: $BASE_BRANCH"
+          echo "Uploading to PR branch: $PR_BRANCH"
 
+          # Upload all files to the same PR branch
           hf upload twinkle-ai/tw-leetcode data/ data/ \
             --repo-type dataset \
-            --revision "$BASE_BRANCH" \
+            --revision "$PR_BRANCH" \
             --create-pr \
             --commit-message "$COMMIT_MSG"
 
           hf upload twinkle-ai/tw-leetcode README.md README.md \
             --repo-type dataset \
-            --revision "$BASE_BRANCH" \
-            --create-pr \
+            --revision "$PR_BRANCH" \
             --commit-message "$COMMIT_MSG"
 
           if [ -f ".gitattributes" ]; then
             hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes \
               --repo-type dataset \
-              --revision "$BASE_BRANCH" \
-              --create-pr \
+              --revision "$PR_BRANCH" \
               --commit-message "$COMMIT_MSG"
           fi
 
-          echo "Uploads pushed as a Pull Request on Hugging Face."
+          echo "All uploads pushed to single Pull Request branch: $PR_BRANCH"
