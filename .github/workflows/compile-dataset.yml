@@ -135,50 +135,56 @@ jobs:
           python-version: '3.9'
 
       - name: Install Hugging Face Hub
-        run: pip install huggingface_hub
+        run: pip install --upgrade huggingface_hub
 
       - name: Switch to dataset branch for upload
         run: git checkout dataset
 
-      - name: Upload to Hugging Face
+      - name: Authenticate to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Use the newer hf CLI commands instead of deprecated huggingface-cli
-          echo "Setting up Hugging Face CLI..."
-          echo "$HF_TOKEN" | hf auth login --token-stdin
-          
-          # Check token permissions
-          echo "Checking token permissions..."
-          hf whoami
-          
+          # Option A: use the new 'hf' CLI
+          hf auth login --token "$HF_TOKEN"
+          hf auth whoami
+
+          # (Optional) verify CLI version
+          hf --version
+
+      - name: Ensure dataset repo exists (idempotent)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          from huggingface_hub import create_repo
+          create_repo(
+              repo_id="twinkle-ai/tw-leetcode",
+              repo_type="dataset",
+              exist_ok=True,
+              token=os.environ["HF_TOKEN"],
+          )
+          PY
+
+      - name: Upload to Hugging Face (CLI)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
           echo "Current branch: $(git branch --show-current)"
-          echo "Files in current directory:"
-          find . -type f -not -path './.git/*' -not -path './scripts/*' | head -10
-          
-          # Create the repository if it doesn't exist using newer CLI
-          echo "Creating/checking repository..."
-          hf repo create twinkle-ai/tw-leetcode --type dataset --exist-ok || echo "Repository exists or creation skipped"
-          
-          # Try using the hf upload command which is more reliable
-          echo "Uploading files using hf upload..."
-          
-          # Upload data directory
-          if [ -d "data" ]; then
-            hf upload twinkle-ai/tw-leetcode data/ data/ --repo-type dataset --commit-message "Auto-update dataset - $(date -u +%Y-%m-%d)"
-            echo "Successfully uploaded data directory!"
-          fi
-          
-          # Upload README
-          if [ -f "README.md" ]; then
-            hf upload twinkle-ai/tw-leetcode README.md README.md --repo-type dataset --commit-message "Auto-update README - $(date -u +%Y-%m-%d)"
-            echo "Successfully uploaded README.md!"
-          fi
-          
-          # Upload .gitattributes if exists
+          echo "Uploading files…"
+
+          # Upload the whole data folder to /data in the repo
+          hf upload twinkle-ai/tw-leetcode data/ data/ --repo-type=dataset \
+            --commit-message "Auto-update dataset - $(date -u +%Y-%m-%d)"
+
+          # Upload README.md at repo root
+          hf upload twinkle-ai/tw-leetcode README.md README.md --repo-type=dataset \
+            --commit-message "Auto-update README - $(date -u +%Y-%m-%d)"
+
+          # Upload .gitattributes at repo root (optional)
           if [ -f ".gitattributes" ]; then
-            hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes --repo-type dataset --commit-message "Auto-update .gitattributes - $(date -u +%Y-%m-%d)"
-            echo "Successfully uploaded .gitattributes!"
+            hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes --repo-type=dataset \
+              --commit-message "Auto-update .gitattributes - $(date -u +%Y-%m-%d)"
           fi
-          
-          echo "Dataset uploaded successfully to Hugging Face!"
+
+          echo "Dataset uploaded successfully!"
