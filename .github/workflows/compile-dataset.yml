@@ -128,3 +128,51 @@ jobs:
           
           # Push to dataset branch with proper authentication
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git dataset --force
+
+      - name: Setup Python for Hugging Face
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Hugging Face Hub
+        run: pip install huggingface_hub
+
+      - name: Upload to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c "
+          import os
+          from huggingface_hub import HfApi, create_repo
+          from pathlib import Path
+          
+          # Initialize HF API
+          api = HfApi()
+          
+          # Repository details
+          repo_id = 'twinkle-ai/tw-leetcode'
+          
+          # Create repository if it doesn't exist (will skip if exists)
+          try:
+              create_repo(repo_id, repo_type='dataset', exist_ok=True)
+              print(f'Repository {repo_id} is ready')
+          except Exception as e:
+              print(f'Repository creation/check result: {e}')
+          
+          # Switch to dataset branch to get the clean dataset files
+          os.system('git checkout dataset')
+          
+          # Upload all files from current directory (should be dataset branch)
+          try:
+              api.upload_folder(
+                  folder_path='.',
+                  repo_id=repo_id,
+                  repo_type='dataset',
+                  commit_message=f'Auto-update dataset - {os.popen(\"date -u +%Y-%m-%d\").read().strip()}',
+                  ignore_patterns=['.git*', '__pycache__', '*.pyc', '.DS_Store']
+              )
+              print('Successfully uploaded dataset to Hugging Face!')
+          except Exception as e:
+              print(f'Upload failed: {e}')
+              exit(1)
+          "
