@@ -99,40 +99,26 @@ jobs:
           cp data/datasets.jsonl datasets-backup.jsonl
           cp scripts/README.md.dataset readme-backup.md
           
-          # Copy any additional data files that might exist
-          if [ -f data/dataset_summary.json ]; then
-            cp data/dataset_summary.json dataset_summary-backup.json
-          fi
+          # Remove all files except the ones we want to keep
+          git rm -rf . || true
           
-          # Remove ALL files and directories (including hidden ones)
-          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          # Restore essential files from main
+          git checkout main -- .gitattributes .gitignore || true
           
-          # Create clean directory structure
+          # Create data directory and restore the dataset and README
           mkdir -p data
-          
-          # Restore only the files we want
           mv datasets-backup.jsonl data/datasets.jsonl
           mv readme-backup.md README.md
           
-          # Restore additional data files if they exist
-          if [ -f dataset_summary-backup.json ]; then
-            mv dataset_summary-backup.json data/dataset_summary.json
-          fi
-          
-          # Create .gitignore for dataset branch
+          # Update .gitignore for dataset branch
           echo "# Dataset branch - only contains compiled data" > .gitignore
           echo "node_modules/" >> .gitignore
           echo "*.log" >> .gitignore
           echo ".DS_Store" >> .gitignore
-          echo "scripts/" >> .gitignore
           
           # Create .gitattributes for large files
           echo "*.jsonl filter=lfs diff=lfs merge=lfs -text" > .gitattributes
           echo "data/*.jsonl filter=lfs diff=lfs merge=lfs -text" >> .gitattributes
-          
-          # Verify what files we have
-          echo "Files in dataset branch:"
-          find . -type f ! -path './.git/*' | sort
           
           # Add and commit files
           git add .
@@ -150,6 +136,9 @@ jobs:
 
       - name: Install Hugging Face Hub
         run: pip install huggingface_hub
+
+      - name: Switch to dataset branch for upload
+        run: git checkout dataset
 
       - name: Upload to Hugging Face
         env:
@@ -182,28 +171,15 @@ jobs:
           except Exception as e:
               print(f'Repository creation/check result: {e}')
           
-          # Switch to dataset branch to get the clean dataset files
-          result = subprocess.run(['git', 'checkout', 'dataset'], capture_output=True, text=True)
-          if result.returncode != 0:
-              print(f'Git checkout failed: {result.stderr}')
-              exit(1)
+          # Verify we're on dataset branch and list files
+          branch_result = subprocess.run(['git', 'branch', '--show-current'], capture_output=True, text=True)
+          print(f'Current branch: {branch_result.stdout.strip()}')
           
-          print('Switched to dataset branch')
-          
-          # List files to upload (filter out unwanted files)
+          # List files to upload (should only be clean dataset files)
           import glob
-          all_files = glob.glob('**/*', recursive=True)
-          files = [f for f in all_files if os.path.isfile(f) and not f.startswith('.git') and 'node_modules' not in f and 'scripts' not in f]
+          files = glob.glob('**/*', recursive=True)
+          files = [f for f in files if os.path.isfile(f) and not f.startswith('.git') and 'node_modules' not in f]
           print(f'Files to upload: {files}')
-          
-          # Ensure we only have the expected files
-          expected_files = ['README.md', 'data/datasets.jsonl', '.gitignore', '.gitattributes']
-          if os.path.exists('data/dataset_summary.json'):
-              expected_files.append('data/dataset_summary.json')
-          
-          # Filter to only upload expected files
-          files_to_upload = [f for f in files if f in expected_files or f.startswith('data/')]
-          print(f'Filtered files to upload: {files_to_upload}')
           
           # Upload files individually to avoid permission issues
           try:
@@ -231,9 +207,9 @@ jobs:
                   )
                   print('Successfully uploaded README.md!')
               
-              # Upload other files in root (like .gitattributes, .gitignore)
-              for file in files_to_upload:
-                  if file not in ['README.md'] and not file.startswith('data/'):
+              # Upload other root files (like .gitattributes, .gitignore) but exclude node_modules
+              for file in files:
+                  if file not in ['README.md'] and not file.startswith('data/') and 'node_modules' not in file and 'scripts/' not in file:
                       try:
                           api.upload_file(
                               path_or_fileobj=file,
