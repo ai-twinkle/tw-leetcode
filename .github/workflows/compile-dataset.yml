@@ -149,7 +149,7 @@ jobs:
           
           # Login with token
           try:
-              login(token=os.environ['HF_TOKEN'], write_access=True)
+              login(token=os.environ['HF_TOKEN'])
               print('Successfully logged in to Hugging Face')
           except Exception as e:
               print(f'Login failed: {e}')
