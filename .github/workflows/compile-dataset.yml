@@ -143,36 +143,91 @@ jobs:
         run: |
           python -c "
           import os
-          from huggingface_hub import HfApi, create_repo
+          from huggingface_hub import HfApi, create_repo, login
           from pathlib import Path
+          import subprocess
           
-          # Initialize HF API
-          api = HfApi()
+          # Login with token
+          try:
+              login(token=os.environ['HF_TOKEN'], write_access=True)
+              print('Successfully logged in to Hugging Face')
+          except Exception as e:
+              print(f'Login failed: {e}')
+              exit(1)
+          
+          # Initialize HF API with token
+          api = HfApi(token=os.environ['HF_TOKEN'])
           
           # Repository details
           repo_id = 'twinkle-ai/tw-leetcode'
           
           # Create repository if it doesn't exist (will skip if exists)
           try:
-              create_repo(repo_id, repo_type='dataset', exist_ok=True)
+              create_repo(repo_id, repo_type='dataset', exist_ok=True, token=os.environ['HF_TOKEN'])
               print(f'Repository {repo_id} is ready')
           except Exception as e:
               print(f'Repository creation/check result: {e}')
           
           # Switch to dataset branch to get the clean dataset files
-          os.system('git checkout dataset')
+          result = subprocess.run(['git', 'checkout', 'dataset'], capture_output=True, text=True)
+          if result.returncode != 0:
+              print(f'Git checkout failed: {result.stderr}')
+              exit(1)
           
-          # Upload all files from current directory (should be dataset branch)
+          print('Switched to dataset branch')
+          
+          # List files to upload
+          import glob
+          files = glob.glob('**/*', recursive=True)
+          files = [f for f in files if os.path.isfile(f) and not f.startswith('.git')]
+          print(f'Files to upload: {files}')
+          
+          # Upload files individually to avoid permission issues
           try:
-              api.upload_folder(
-                  folder_path='.',
-                  repo_id=repo_id,
-                  repo_type='dataset',
-                  commit_message=f'Auto-update dataset - {os.popen(\"date -u +%Y-%m-%d\").read().strip()}',
-                  ignore_patterns=['.git*', '__pycache__', '*.pyc', '.DS_Store']
-              )
-              print('Successfully uploaded dataset to Hugging Face!')
+              # Upload data directory
+              if os.path.exists('data'):
+                  api.upload_folder(
+                      folder_path='data',
+                      path_in_repo='data',
+                      repo_id=repo_id,
+                      repo_type='dataset',
+                      commit_message=f'Auto-update dataset - {subprocess.check_output([\"date\", \"-u\", \"+%Y-%m-%d\"]).decode().strip()}',
+                      token=os.environ['HF_TOKEN']
+                  )
+                  print('Successfully uploaded data folder!')
+              
+              # Upload README if exists
+              if os.path.exists('README.md'):
+                  api.upload_file(
+                      path_or_fileobj='README.md',
+                      path_in_repo='README.md',
+                      repo_id=repo_id,
+                      repo_type='dataset',
+                      commit_message=f'Auto-update README - {subprocess.check_output([\"date\", \"-u\", \"+%Y-%m-%d\"]).decode().strip()}',
+                      token=os.environ['HF_TOKEN']
+                  )
+                  print('Successfully uploaded README.md!')
+              
+              # Upload other files in root (like .gitattributes, .gitignore)
+              for file in files:
+                  if file not in ['README.md'] and not file.startswith('data/'):
+                      try:
+                          api.upload_file(
+                              path_or_fileobj=file,
+                              path_in_repo=file,
+                              repo_id=repo_id,
+                              repo_type='dataset',
+                              commit_message=f'Auto-update {file} - {subprocess.check_output([\"date\", \"-u\", \"+%Y-%m-%d\"]).decode().strip()}',
+                              token=os.environ['HF_TOKEN']
+                          )
+                          print(f'Successfully uploaded {file}!')
+                      except Exception as e:
+                          print(f'Failed to upload {file}: {e}')
+              
+              print('Dataset upload completed successfully!')
+              
           except Exception as e:
               print(f'Upload failed: {e}')
+              print(f'Error type: {type(e).__name__}')
               exit(1)
           "
