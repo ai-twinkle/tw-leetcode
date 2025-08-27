@@ -162,34 +162,25 @@ jobs:
           PY
 
       # Upload via PR to the existing 'main' branch
-      - name: Upload to Hugging Face (via PR to main)
+      - name: Upload to Hugging Face (single PR)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -e
+          pip install --upgrade "huggingface_hub>=0.24.6"
+
+          # login (non-interactive)
+          hf auth login --token "$HF_TOKEN"
+
+          # We are on the 'dataset' branch locally which only has what we need:
+          #   data/, README.md, .gitattributes
+          # Push EVERYTHING at repo root in one shot to avoid multiple PRs.
           BASE_BRANCH=main
           COMMIT_MSG="Auto-update dataset - $(date -u +%Y-%m-%d)"
-          PR_BRANCH="auto-update-$(date -u +%Y%m%d-%H%M%S)"
 
-          echo "Uploading to PR branch: $PR_BRANCH"
-
-          # Upload all files to the same PR branch
-          hf upload twinkle-ai/tw-leetcode data/ data/ \
+          # Single upload => single PR
+          hf upload twinkle-ai/tw-leetcode . . \
             --repo-type dataset \
-            --revision "$PR_BRANCH" \
+            --revision "$BASE_BRANCH" \
             --create-pr \
             --commit-message "$COMMIT_MSG"
-
-          hf upload twinkle-ai/tw-leetcode README.md README.md \
-            --repo-type dataset \
-            --revision "$PR_BRANCH" \
-            --commit-message "$COMMIT_MSG"
-
-          if [ -f ".gitattributes" ]; then
-            hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes \
-              --repo-type dataset \
-              --revision "$PR_BRANCH" \
-              --commit-message "$COMMIT_MSG"
-          fi
-
-          echo "All uploads pushed to single Pull Request branch: $PR_BRANCH"
