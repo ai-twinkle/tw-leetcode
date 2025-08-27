@@ -163,25 +163,34 @@ jobs:
           )
           PY
 
-      - name: Upload to Hugging Face (CLI)
+      - name: Upload to Hugging Face (via PR)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          set -e
+          BR="dataset-sync-$(date -u +%Y%m%d%H%M%S)"
           echo "Current branch: $(git branch --show-current)"
-          echo "Uploading files…"
+          echo "Uploading via PR branch: $BR"
 
-          # Upload the whole data folder to /data in the repo
-          hf upload twinkle-ai/tw-leetcode data/ data/ --repo-type=dataset \
+          # Data folder -> /data
+          hf upload twinkle-ai/tw-leetcode data/ data/ \
+            --repo-type dataset \
+            --revision "$BR" \
+            --create-pr \
             --commit-message "Auto-update dataset - $(date -u +%Y-%m-%d)"
 
-          # Upload README.md at repo root
-          hf upload twinkle-ai/tw-leetcode README.md README.md --repo-type=dataset \
+          # README -> /README.md
+          hf upload twinkle-ai/tw-leetcode README.md README.md \
+            --repo-type dataset \
+            --revision "$BR" \
+            --create-pr \
             --commit-message "Auto-update README - $(date -u +%Y-%m-%d)"
 
-          # Upload .gitattributes at repo root (optional)
+          # .gitattributes (optional)
           if [ -f ".gitattributes" ]; then
-            hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes --repo-type=dataset \
+            hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes \
+              --repo-type dataset \
+              --revision "$BR" \
+              --create-pr \
               --commit-message "Auto-update .gitattributes - $(date -u +%Y-%m-%d)"
           fi
-
-          echo "Dataset uploaded successfully!"
