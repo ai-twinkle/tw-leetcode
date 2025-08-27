@@ -11,6 +11,9 @@ on:
     - cron: '0 12 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   compile:
     runs-on: ubuntu-latest
@@ -20,6 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch all history for all branches
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -91,15 +95,18 @@ jobs:
           # Create or switch to dataset branch
           git checkout -B dataset
           
+          # Backup the compiled dataset before removing files
+          cp data/tw-leetcode.jsonl tw-leetcode-backup.jsonl
+          
           # Remove all files except the ones we want to keep
           git rm -rf . || true
           
           # Restore essential files from main
           git checkout main -- .gitattributes .gitignore README.md || true
           
-          # Create data directory (if not exists)
+          # Create data directory and restore the dataset
           mkdir -p data
-          # File is already created in data/ by the compile script
+          mv tw-leetcode-backup.jsonl data/tw-leetcode.jsonl
           
           # Update .gitignore for dataset branch
           echo "# Dataset branch - only contains compiled data" > .gitignore
@@ -138,5 +145,5 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git commit -m "Update dataset - $(date -u +%Y-%m-%d)" || echo "No changes to commit"
           
-          # Push to dataset branch
-          git push origin dataset --force
+          # Push to dataset branch with proper authentication
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git dataset --force
