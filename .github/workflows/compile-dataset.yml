@@ -148,9 +148,6 @@ jobs:
           hf auth login --token "$HF_TOKEN"
           hf auth whoami
 
-          # (Optional) verify CLI version
-          hf --version
-
       - name: Ensure dataset repo exists (idempotent)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
