@@ -69,7 +69,7 @@ jobs:
                 lineNumber++;
                 try {
                   const data = JSON.parse(line);
-                  if (!data.text || !data.question || !data.answer || !data.src) {
+                  if (!data.text || !data.question || !data.constraints || !data.thought || !data.answer || !data.src || !data.time_complexity || !data.space_complexity) {
                     console.error(\`Line \${lineNumber}: Missing required fields\`);
                     errors++;
                   } else {
@@ -102,11 +102,17 @@ jobs:
           git rm -rf . || true
           
           # Restore essential files from main
-          git checkout main -- .gitattributes .gitignore README.md || true
+          git checkout main -- .gitattributes .gitignore || true
+          
+          # Use the dataset-specific README from scripts directory
+          git checkout main -- scripts/README.md.dataset || true
           
           # Create data directory and restore the dataset
           mkdir -p data
           mv datasets-backup.jsonl data/datasets.jsonl
+          
+          # Copy the dataset README as the main README
+          cp scripts/README.md.dataset README.md
           
           # Update .gitignore for dataset branch
           echo "# Dataset branch - only contains compiled data" > .gitignore
@@ -117,27 +123,6 @@ jobs:
           # Create .gitattributes for large files
           echo "*.jsonl filter=lfs diff=lfs merge=lfs -text" > .gitattributes
           echo "data/*.jsonl filter=lfs diff=lfs merge=lfs -text" >> .gitattributes
-          
-          # Create a dataset-specific README
-          echo "# Tw-LeetCode Dataset" > README.md
-          echo "" >> README.md
-          echo "This branch contains the compiled dataset in JSONL format." >> README.md
-          echo "" >> README.md
-          echo "## Files" >> README.md
-          echo "- \`data/datasets.jsonl\` - Complete dataset in JSONL format" >> README.md
-          echo "" >> README.md
-          echo "## Usage" >> README.md
-          echo "\`\`\`python" >> README.md
-          echo "import json" >> README.md
-          echo "" >> README.md
-          echo "# Load the dataset" >> README.md
-          echo "with open('data/datasets.jsonl', 'r', encoding='utf-8') as f:" >> README.md
-          echo "    for line in f:" >> README.md
-          echo "        data = json.loads(line)" >> README.md
-          echo "        print(data['question'][:100])  # Print first 100 chars of question" >> README.md
-          echo "\`\`\`" >> README.md
-          echo "" >> README.md
-          echo "Generated on: \$(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)" >> README.md
           
           # Add and commit files
           git add .
