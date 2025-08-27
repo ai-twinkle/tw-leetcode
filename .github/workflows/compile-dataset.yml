@@ -95,10 +95,34 @@ jobs:
           # Create or switch to dataset branch
           git checkout -B dataset
           
-          # Backup only the essential files we want to keep
-          cp data/datasets.jsonl datasets-backup.jsonl
-          [ -f data/dataset_summary.json ] && cp data/dataset_summary.json dataset-summary-backup.json || echo "No dataset_summary.json found"
-          cp scripts/README.md.dataset readme-backup.md
+          # Check if required files exist before backing up
+          echo "Checking for required files..."
+          ls -la data/ || echo "No data directory found"
+          ls -la scripts/ || echo "No scripts directory found"
+          
+          # Backup only the essential files we want to keep (with error checking)
+          if [ -f data/datasets.jsonl ]; then
+            cp data/datasets.jsonl datasets-backup.jsonl
+            echo "Backed up datasets.jsonl"
+          else
+            echo "Error: data/datasets.jsonl not found!"
+            exit 1
+          fi
+          
+          if [ -f data/dataset_summary.json ]; then
+            cp data/dataset_summary.json dataset-summary-backup.json
+            echo "Backed up dataset_summary.json"
+          else
+            echo "No dataset_summary.json found (optional)"
+          fi
+          
+          if [ -f scripts/README.md.dataset ]; then
+            cp scripts/README.md.dataset readme-backup.md
+            echo "Backed up README.md.dataset"
+          else
+            echo "Error: scripts/README.md.dataset not found!"
+            exit 1
+          fi
           
           # Remove ALL files and directories (including node_modules)
           rm -rf *
@@ -107,7 +131,10 @@ jobs:
           # Create clean data directory and restore only the dataset files
           mkdir -p data
           mv datasets-backup.jsonl data/datasets.jsonl
-          [ -f dataset-summary-backup.json ] && mv dataset-summary-backup.json data/dataset_summary.json || echo "No summary to restore"
+          if [ -f dataset-summary-backup.json ]; then
+            mv dataset-summary-backup.json data/dataset_summary.json
+            echo "Restored dataset_summary.json"
+          fi
           mv readme-backup.md README.md
           
           # Create clean .gitignore for dataset branch
