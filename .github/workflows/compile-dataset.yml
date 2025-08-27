@@ -95,49 +95,22 @@ jobs:
           # Create or switch to dataset branch
           git checkout -B dataset
           
-          # Check if required files exist before backing up
-          echo "Checking for required files..."
-          ls -la data/ || echo "No data directory found"
-          ls -la scripts/ || echo "No scripts directory found"
+          # Backup the compiled dataset and README before removing files
+          cp data/datasets.jsonl datasets-backup.jsonl
+          cp scripts/README.md.dataset readme-backup.md
           
-          # Backup only the essential files we want to keep (with error checking)
-          if [ -f data/datasets.jsonl ]; then
-            cp data/datasets.jsonl datasets-backup.jsonl
-            echo "Backed up datasets.jsonl"
-          else
-            echo "Error: data/datasets.jsonl not found!"
-            exit 1
-          fi
+          # Remove all files except the ones we want to keep
+          git rm -rf . || true
           
-          if [ -f data/dataset_summary.json ]; then
-            cp data/dataset_summary.json dataset-summary-backup.json
-            echo "Backed up dataset_summary.json"
-          else
-            echo "No dataset_summary.json found (optional)"
-          fi
+          # Restore essential files from main
+          git checkout main -- .gitattributes .gitignore || true
           
-          if [ -f scripts/README.md.dataset ]; then
-            cp scripts/README.md.dataset readme-backup.md
-            echo "Backed up README.md.dataset"
-          else
-            echo "Error: scripts/README.md.dataset not found!"
-            exit 1
-          fi
-          
-          # Remove ALL files and directories (including node_modules)
-          rm -rf *
-          rm -rf .*gitignore .*gitattributes 2>/dev/null || true
-          
-          # Create clean data directory and restore only the dataset files
+          # Create data directory and restore the dataset and README
           mkdir -p data
           mv datasets-backup.jsonl data/datasets.jsonl
-          if [ -f dataset-summary-backup.json ]; then
-            mv dataset-summary-backup.json data/dataset_summary.json
-            echo "Restored dataset_summary.json"
-          fi
           mv readme-backup.md README.md
           
-          # Create clean .gitignore for dataset branch
+          # Update .gitignore for dataset branch
           echo "# Dataset branch - only contains compiled data" > .gitignore
           echo "node_modules/" >> .gitignore
           echo "*.log" >> .gitignore
@@ -146,10 +119,6 @@ jobs:
           # Create .gitattributes for large files
           echo "*.jsonl filter=lfs diff=lfs merge=lfs -text" > .gitattributes
           echo "data/*.jsonl filter=lfs diff=lfs merge=lfs -text" >> .gitattributes
-          
-          # Verify clean state
-          echo "Files in dataset branch:"
-          find . -type f | head -20
           
           # Add and commit files
           git add .
@@ -175,39 +144,43 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Use the newer hf CLI and add git credentials
+          # First try using the CLI tool which often works better with permissions
           echo "Setting up Hugging Face CLI..."
-          hf auth login --token $HF_TOKEN --add-to-git-credential
+          huggingface-cli login --token $HF_TOKEN --add-to-git-credential
           
           echo "Current branch: $(git branch --show-current)"
           echo "Files in current directory:"
-          find . -type f -not -path './.git/*'
+          find . -type f -not -path './.git/*' -not -path './scripts/*' | head -20
           
           # Create the repository if it doesn't exist
           echo "Creating/checking repository..."
-          hf repo create twinkle-ai/tw-leetcode --repo-type dataset --exist-ok || echo "Repository exists or creation skipped"
+          huggingface-cli repo create twinkle-ai/tw-leetcode --repo-type dataset --exist-ok || echo "Repository exists or creation skipped"
           
           # Upload files using git-based approach which is more reliable
           echo "Initializing git-lfs and uploading..."
           git lfs install
           
           # Clone the HF repo to a temporary directory
-          echo "Cloning HF repository..."
-          git clone https://huggingface.co/datasets/twinkle-ai/tw-leetcode hf_repo
+          git clone https://huggingface.co/datasets/twinkle-ai/tw-leetcode hf_repo || git clone https://oauth2:$HF_TOKEN@huggingface.co/datasets/twinkle-ai/tw-leetcode hf_repo
           
-          # Copy our files to the HF repo
+          # Copy only the essential files to the HF repo (exclude scripts and node_modules)
           echo "Copying files to HF repo..."
-          cp -r data/ hf_repo/
-          cp README.md hf_repo/
+          cp -r data/ hf_repo/ || echo "No data directory to copy"
+          cp README.md hf_repo/ || echo "No README.md to copy"
           cp .gitattributes hf_repo/ 2>/dev/null || echo "No .gitattributes to copy"
+          cp .gitignore hf_repo/ 2>/dev/null || echo "No .gitignore to copy"
+          
+          echo "Files copied to HF repo:"
+          find hf_repo/ -type f | head -20
           
           # Commit and push to HF
-          echo "Committing and pushing to HF..."
           cd hf_repo
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Auto-update dataset - $(date -u +%Y-%m-%d)" || echo "No changes to commit"
-          git push
+          
+          # Use the git credential helper for authentication
+          git push origin main
           
           echo "Dataset uploaded successfully to Hugging Face!"
