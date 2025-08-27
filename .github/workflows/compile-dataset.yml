@@ -144,43 +144,41 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # First try using the CLI tool which often works better with permissions
+          # Use the newer hf CLI commands instead of deprecated huggingface-cli
           echo "Setting up Hugging Face CLI..."
-          huggingface-cli login --token $HF_TOKEN --add-to-git-credential
+          echo "$HF_TOKEN" | hf auth login --token-stdin
+          
+          # Check token permissions
+          echo "Checking token permissions..."
+          hf whoami
           
           echo "Current branch: $(git branch --show-current)"
           echo "Files in current directory:"
-          find . -type f -not -path './.git/*' -not -path './scripts/*' | head -20
+          find . -type f -not -path './.git/*' -not -path './scripts/*' | head -10
           
-          # Create the repository if it doesn't exist
+          # Create the repository if it doesn't exist using newer CLI
           echo "Creating/checking repository..."
-          huggingface-cli repo create twinkle-ai/tw-leetcode --repo-type dataset --exist-ok || echo "Repository exists or creation skipped"
+          hf repo create twinkle-ai/tw-leetcode --type dataset --exist-ok || echo "Repository exists or creation skipped"
           
-          # Upload files using git-based approach which is more reliable
-          echo "Initializing git-lfs and uploading..."
-          git lfs install
+          # Try using the hf upload command which is more reliable
+          echo "Uploading files using hf upload..."
           
-          # Clone the HF repo to a temporary directory
-          git clone https://huggingface.co/datasets/twinkle-ai/tw-leetcode hf_repo || git clone https://oauth2:$HF_TOKEN@huggingface.co/datasets/twinkle-ai/tw-leetcode hf_repo
+          # Upload data directory
+          if [ -d "data" ]; then
+            hf upload twinkle-ai/tw-leetcode data/ data/ --repo-type dataset --commit-message "Auto-update dataset - $(date -u +%Y-%m-%d)"
+            echo "Successfully uploaded data directory!"
+          fi
           
-          # Copy only the essential files to the HF repo (exclude scripts and node_modules)
-          echo "Copying files to HF repo..."
-          cp -r data/ hf_repo/ || echo "No data directory to copy"
-          cp README.md hf_repo/ || echo "No README.md to copy"
-          cp .gitattributes hf_repo/ 2>/dev/null || echo "No .gitattributes to copy"
-          cp .gitignore hf_repo/ 2>/dev/null || echo "No .gitignore to copy"
+          # Upload README
+          if [ -f "README.md" ]; then
+            hf upload twinkle-ai/tw-leetcode README.md README.md --repo-type dataset --commit-message "Auto-update README - $(date -u +%Y-%m-%d)"
+            echo "Successfully uploaded README.md!"
+          fi
           
-          echo "Files copied to HF repo:"
-          find hf_repo/ -type f | head -20
-          
-          # Commit and push to HF
-          cd hf_repo
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Auto-update dataset - $(date -u +%Y-%m-%d)" || echo "No changes to commit"
-          
-          # Use direct token authentication in the URL
-          git push https://oauth2:$HF_TOKEN@huggingface.co/datasets/twinkle-ai/tw-leetcode main
+          # Upload .gitattributes if exists
+          if [ -f ".gitattributes" ]; then
+            hf upload twinkle-ai/tw-leetcode .gitattributes .gitattributes --repo-type dataset --commit-message "Auto-update .gitattributes - $(date -u +%Y-%m-%d)"
+            echo "Successfully uploaded .gitattributes!"
+          fi
           
           echo "Dataset uploaded successfully to Hugging Face!"
