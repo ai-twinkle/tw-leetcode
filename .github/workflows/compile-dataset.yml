@@ -41,11 +41,11 @@ jobs:
       - name: Show dataset stats
         run: |
           echo "Dataset compilation completed!"
-          echo "Dataset size: $(wc -l < data/tw-leetcode.jsonl) problems"
-          echo "File size: $(du -h data/tw-leetcode.jsonl | cut -f1)"
+          echo "Dataset size: $(wc -l < data/datasets.jsonl) problems"
+          echo "File size: $(du -h data/datasets.jsonl | cut -f1)"
           echo ""
           echo "Sample entries:"
-          head -2 data/tw-leetcode.jsonl | jq '.'
+          head -2 data/datasets.jsonl | jq '.'
 
       - name: Validate JSONL format
         run: |
@@ -55,7 +55,7 @@ jobs:
             const readline = require('readline');
             
             async function validateJSONL() {
-              const fileStream = fs.createReadStream('data/tw-leetcode.jsonl');
+              const fileStream = fs.createReadStream('data/datasets.jsonl');
               const rl = readline.createInterface({
                 input: fileStream,
                 crlfDelay: Infinity
@@ -96,7 +96,7 @@ jobs:
           git checkout -B dataset
           
           # Backup the compiled dataset before removing files
-          cp data/tw-leetcode.jsonl tw-leetcode-backup.jsonl
+          cp data/datasets.jsonl datasets-backup.jsonl
           
           # Remove all files except the ones we want to keep
           git rm -rf . || true
@@ -106,7 +106,7 @@ jobs:
           
           # Create data directory and restore the dataset
           mkdir -p data
-          mv tw-leetcode-backup.jsonl data/tw-leetcode.jsonl
+          mv datasets-backup.jsonl data/datasets.jsonl
           
           # Update .gitignore for dataset branch
           echo "# Dataset branch - only contains compiled data" > .gitignore
@@ -124,14 +124,14 @@ jobs:
           echo "This branch contains the compiled dataset in JSONL format." >> README.md
           echo "" >> README.md
           echo "## Files" >> README.md
-          echo "- \`data/tw-leetcode.jsonl\` - Complete dataset in JSONL format" >> README.md
+          echo "- \`data/datasets.jsonl\` - Complete dataset in JSONL format" >> README.md
           echo "" >> README.md
           echo "## Usage" >> README.md
           echo "\`\`\`python" >> README.md
           echo "import json" >> README.md
           echo "" >> README.md
           echo "# Load the dataset" >> README.md
-          echo "with open('data/tw-leetcode.jsonl', 'r', encoding='utf-8') as f:" >> README.md
+          echo "with open('data/datasets.jsonl', 'r', encoding='utf-8') as f:" >> README.md
           echo "    for line in f:" >> README.md
           echo "        data = json.loads(line)" >> README.md
           echo "        print(data['question'][:100])  # Print first 100 chars of question" >> README.md

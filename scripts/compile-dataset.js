@@ -225,7 +225,7 @@ class DatasetCompiler {
 async function main() {
   const args = process.argv.slice(2);
   const rootDir = args[0] || process.cwd();
-  const outputPath = args[1] || join(rootDir, 'data', 'tw-leetcode.jsonl');
+  const outputPath = args[1] || join(rootDir, 'data', 'datasets.jsonl');
   
   // Ensure data directory exists
   const outputDir = dirname(outputPath);
