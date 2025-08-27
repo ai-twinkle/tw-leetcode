@@ -180,7 +180,7 @@ jobs:
           git add .
           git commit -m "Auto-update dataset - $(date -u +%Y-%m-%d)" || echo "No changes to commit"
           
-          # Use the git credential helper for authentication
-          git push origin main
+          # Use direct token authentication in the URL
+          git push https://oauth2:$HF_TOKEN@huggingface.co/datasets/twinkle-ai/tw-leetcode main
           
           echo "Dataset uploaded successfully to Hugging Face!"
