@@ -1,0 +1,142 @@
+name: Compile Dataset
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '*/answer.ts'
+      - '*/Note.md'
+  schedule:
+    # Run daily at 12:00 UTC
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd scripts
+          npm install
+
+      - name: Compile dataset
+        run: node scripts/compile-dataset.js
+
+      - name: Show dataset stats
+        run: |
+          echo "Dataset compilation completed!"
+          echo "Dataset size: $(wc -l < data/tw-leetcode.jsonl) problems"
+          echo "File size: $(du -h data/tw-leetcode.jsonl | cut -f1)"
+          echo ""
+          echo "Sample entries:"
+          head -2 data/tw-leetcode.jsonl | jq '.'
+
+      - name: Validate JSONL format
+        run: |
+          echo "Validating JSONL format..."
+          node -e "
+            const fs = require('fs');
+            const readline = require('readline');
+            
+            async function validateJSONL() {
+              const fileStream = fs.createReadStream('data/tw-leetcode.jsonl');
+              const rl = readline.createInterface({
+                input: fileStream,
+                crlfDelay: Infinity
+              });
+              
+              let lineNumber = 0;
+              let validEntries = 0;
+              let errors = 0;
+              
+              for await (const line of rl) {
+                lineNumber++;
+                try {
+                  const data = JSON.parse(line);
+                  if (!data.text || !data.question || !data.answer || !data.src) {
+                    console.error(\`Line \${lineNumber}: Missing required fields\`);
+                    errors++;
+                  } else {
+                    validEntries++;
+                  }
+                } catch (e) {
+                  console.error(\`Line \${lineNumber}: Invalid JSON - \${e.message}\`);
+                  errors++;
+                }
+              }
+              
+              console.log(\`Validation complete: \${validEntries} valid entries, \${errors} errors\`);
+              if (errors > 0) {
+                process.exit(1);
+              }
+            }
+            
+            validateJSONL();
+          "
+
+      - name: Create dataset branch
+        run: |
+          # Create or switch to dataset branch
+          git checkout -B dataset
+          
+          # Remove all files except the ones we want to keep
+          git rm -rf . || true
+          
+          # Restore essential files from main
+          git checkout main -- .gitattributes .gitignore README.md || true
+          
+          # Create data directory and move compiled dataset
+          mkdir -p data
+          mv tw-leetcode.jsonl data/
+          
+          # Update .gitignore for dataset branch
+          echo "# Dataset branch - only contains compiled data" > .gitignore
+          echo "node_modules/" >> .gitignore
+          echo "*.log" >> .gitignore
+          echo ".DS_Store" >> .gitignore
+          
+          # Create .gitattributes for large files
+          echo "*.jsonl filter=lfs diff=lfs merge=lfs -text" > .gitattributes
+          echo "data/*.jsonl filter=lfs diff=lfs merge=lfs -text" >> .gitattributes
+          
+          # Create a dataset-specific README
+          echo "# Tw-LeetCode Dataset" > README.md
+          echo "" >> README.md
+          echo "This branch contains the compiled dataset in JSONL format." >> README.md
+          echo "" >> README.md
+          echo "## Files" >> README.md
+          echo "- \`data/tw-leetcode.jsonl\` - Complete dataset in JSONL format" >> README.md
+          echo "" >> README.md
+          echo "## Usage" >> README.md
+          echo "\`\`\`python" >> README.md
+          echo "import json" >> README.md
+          echo "" >> README.md
+          echo "# Load the dataset" >> README.md
+          echo "with open('data/tw-leetcode.jsonl', 'r', encoding='utf-8') as f:" >> README.md
+          echo "    for line in f:" >> README.md
+          echo "        data = json.loads(line)" >> README.md
+          echo "        print(data['question'][:100])  # Print first 100 chars of question" >> README.md
+          echo "\`\`\`" >> README.md
+          echo "" >> README.md
+          echo "Generated on: \$(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)" >> README.md
+          
+          # Add and commit files
+          git add .
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit -m "Update dataset - $(date -u +%Y-%m-%d)" || echo "No changes to commit"
+          
+          # Push to dataset branch
+          git push origin dataset --force

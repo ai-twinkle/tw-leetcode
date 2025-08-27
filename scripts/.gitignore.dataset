@@ -1,0 +1,6 @@
+# Dataset branch - only contains compiled data
+node_modules/
+*.log
+.DS_Store
+*.tmp
+.env
