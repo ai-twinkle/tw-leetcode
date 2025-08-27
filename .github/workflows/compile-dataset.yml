@@ -95,8 +95,9 @@ jobs:
           # Create or switch to dataset branch
           git checkout -B dataset
           
-          # Backup the compiled dataset before removing files
+          # Backup the compiled dataset and README before removing files
           cp data/datasets.jsonl datasets-backup.jsonl
+          cp scripts/README.md.dataset readme-backup.md
           
           # Remove all files except the ones we want to keep
           git rm -rf . || true
@@ -104,15 +105,10 @@ jobs:
           # Restore essential files from main
           git checkout main -- .gitattributes .gitignore || true
           
-          # Use the dataset-specific README from scripts directory
-          git checkout main -- scripts/README.md.dataset || true
-          
-          # Create data directory and restore the dataset
+          # Create data directory and restore the dataset and README
           mkdir -p data
           mv datasets-backup.jsonl data/datasets.jsonl
-          
-          # Copy the dataset README as the main README
-          cp scripts/README.md.dataset README.md
+          mv readme-backup.md README.md
           
           # Update .gitignore for dataset branch
           echo "# Dataset branch - only contains compiled data" > .gitignore
