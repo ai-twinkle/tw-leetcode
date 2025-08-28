@@ -130,18 +130,22 @@ jobs:
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git dataset --force
 
       - name: Setup Python for Hugging Face
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
       - name: Install Hugging Face Hub
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: pip install --upgrade huggingface_hub
 
       # make sure we’re on the dataset branch in your Git repo (local only)
       - name: Switch to dataset branch for upload
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: git checkout dataset
 
       - name: Authenticate to Hugging Face
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
@@ -151,6 +155,7 @@ jobs:
 
       # ensure the dataset repo exists
       - name: Ensure dataset repo exists
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
@@ -163,6 +168,7 @@ jobs:
 
       # Upload via PR to the existing 'main' branch
       - name: Upload to Hugging Face (single PR)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
