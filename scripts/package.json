@@ -5,6 +5,7 @@
   "main": "compile-dataset.js",
   "scripts": {
     "compile": "node compile-dataset.js",
+    "enhance": "node enhance-with-metadata.js",
     "test": "node test-compiler.js"
   },
   "dependencies": {},

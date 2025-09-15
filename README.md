@@ -28,6 +28,7 @@ This dataset contains the solutions to the problems on LeetCode.
 - Update Frequency: At least one problem every day.
 - Language: TypeScript
 - Model: Solutions and explanations are generated using OpenAI's GPT-4.5 and GPT-4.1 models with human cleanup.
+- Question Code Source: TypeScript starter code is extracted from the [whiskwhite/leetcode-complete](https://huggingface.co/datasets/whiskwhite/leetcode-complete) dataset. Missing problems not covered by this dataset are manually collected to ensure completeness.
 
 ---
 
