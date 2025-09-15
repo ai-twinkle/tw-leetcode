@@ -79,10 +79,10 @@ A curated Traditional Chinese LeetCode solution dataset with high-efficiency ans
 <!-- This section provides a description of the dataset fields, and additional information about the dataset structure such as criteria used to create the splits, relationships between data points, etc. -->
 本資料集以 `.jsonl` 格式儲存，每一行為一筆 JSON 物件，包含以下欄位：
 - **text（string）**：繁體中文撰寫的完整題解說明，依序包含「概念總覽 → 實作步驟 → 複雜度分析」，內容經人工清洗與優化，重視可讀性與效率。
-- **question（string）**：從題解中擷取的「題目理解與問題描述」段落，對應於 ## 基礎思路 章節之前的內容，通常為對題目的初步分析與任務目標拆解。
+- **question（string）**：有關於題目的詳細描述，包含題目背景、要求等資訊。
 - **constraints（string）**：題目的限制條件說明，包含輸入範圍、邊界條件等重要資訊，有助於理解解法的適用範圍。
-- **thought（string）**：對應於 ## 基礎思路 之後的內容，包含作者對解法邏輯、步驟與策略的說明，亦可能涵蓋程式碼導引與複雜度評估等推理過程。
-- **answer（string）**：對應題目的實際程式碼解法，來自該資料夾中的 answer.ts 檔案（若存在），提供完整可執行的 TypeScript 解答，對應於前述 thought 的實作。
+- **thought（string）**：對應於 ## 基礎思路 之後的內容，包含作者對解法邏輯、步驟與策略的說明。
+- **answer（string）**：對應題目的實際程式碼解法，提供完整可執行的 TypeScript 解答，對應於前述 thought 的實作。
 - **src（string）**：原始 .md 檔案所屬資料夾的名稱，通常對應該題的 LeetCode 題號或標題，作為來源參考。
 - **time_complexity（string）**：詳細的時間複雜度分析，包含演算法效率說明與大 O 表示法。
 - **space_complexity（string）**：詳細的空間複雜度分析，包含記憶體使用效率說明與大 O 表示法。
