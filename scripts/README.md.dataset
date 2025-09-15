@@ -63,9 +63,9 @@ A curated Traditional Chinese LeetCode solution dataset with high-efficiency ans
 本資料集適用於以下用途：
 - **訓練與評估程式邏輯推理模型**：透過「Top Concept → Step Implement → Complexity Explanation」的結構化說明，有助於模型學習具可解釋性的程式邏輯。
 - **用於語言模型（LLM）的微調或持續預訓練**，特別是針對程式碼與技術文本領域，並支援繁體中文語境（zh-Hant）。
-- **作為程式教學或線上課程的素材**，可協助學習者以母語理解高效且高可讀性的 LeetCode 題解，並透過 questionCode 欄位提供的函數框架進行練習。
-- **演算法邏輯與步驟拆解能力的評測基準**：適合用於建立自動解題（auto-solver）或邏輯步驟生成任務的資料來源，questionCode 欄位可作為起始程式碼模板。
-- **程式碼補全與生成任務**：利用 questionCode 提供的函數簽名作為輸入，訓練模型從函數框架生成完整解法。
+- **作為程式教學或線上課程的素材**，可協助學習者以母語理解高效且高可讀性的 LeetCode 題解，並透過 question_code 欄位提供的函數框架進行練習。
+- **演算法邏輯與步驟拆解能力的評測基準**：適合用於建立自動解題（auto-solver）或邏輯步驟生成任務的資料來源，question_code 欄位可作為起始程式碼模板。
+- **程式碼補全與生成任務**：利用 question_code 提供的函數簽名作為輸入，訓練模型從函數框架生成完整解法。
 
 ### Out-of-Scope Use
 
@@ -84,7 +84,7 @@ A curated Traditional Chinese LeetCode solution dataset with high-efficiency ans
 - **constraints（string）**：題目的限制條件說明，包含輸入範圍、邊界條件等重要資訊，有助於理解解法的適用範圍。
 - **thought（string）**：對應於 ## 基礎思路 之後的內容，包含作者對解法邏輯、步驟與策略的說明。
 - **answer（string）**：對應題目的實際程式碼解法，提供完整可執行的 TypeScript 解答，對應於前述 thought 的實作。
-- **questionCode（string）**：TypeScript 函數簽名的起始程式碼框架，提供題目的基礎函數定義與參數型別。此欄位內容來源於 HuggingFace 上的 `whiskwhite/leetcode-complete` 資料集，部分缺失則由人工收集。
+- **question_code（string）**：TypeScript 函數簽名的起始程式碼框架，提供題目的基礎函數定義與參數型別。此欄位內容來源於 HuggingFace 上的 `whiskwhite/leetcode-complete` 資料集，部分缺失則由人工收集。
 - **src（string）**：原始 .md 檔案所屬資料夾的名稱，通常對應該題的 LeetCode 題號或標題，作為來源參考。
 - **time_complexity（string）**：詳細的時間複雜度分析，包含演算法效率說明與大 O 表示法。
 - **space_complexity（string）**：詳細的空間複雜度分析，包含記憶體使用效率說明與大 O 表示法。

@@ -104,9 +104,9 @@ class DatasetCompiler {
       const answer = this.parseAnswerFile(answerPath);
       
       // Parse questionCode - this is now required
-      let questionCode = '';
+      let question_code = '';
       if (existsSync(questionCodePath)) {
-        questionCode = this.parseQuestionCodeFile(questionCodePath);
+        question_code = this.parseQuestionCodeFile(questionCodePath);
       }
       
       // Use full raw content as the text field
@@ -118,7 +118,7 @@ class DatasetCompiler {
         constraints,
         thought,
         answer,
-        questionCode,
+        question_code,
         src: problemDir,
         time_complexity,
         space_complexity
@@ -134,7 +134,7 @@ class DatasetCompiler {
    * Validate the compiled entry format
    */
   validateEntry(entry) {
-    const requiredFields = ['text', 'question', 'constraints', 'thought', 'answer', 'questionCode', 'src', 'time_complexity', 'space_complexity'];
+    const requiredFields = ['text', 'question', 'constraints', 'thought', 'answer', 'question_code', 'src', 'time_complexity', 'space_complexity'];
     
     for (const field of requiredFields) {
       if (!entry[field] || entry[field].trim() === '') {
@@ -221,7 +221,7 @@ class DatasetCompiler {
    * Generate summary statistics
    */
   generateSummary(entries, outputDir) {
-    const entriesWithQuestionCode = entries.filter(e => e.questionCode && e.questionCode.trim() !== '');
+    const entriesWithQuestionCode = entries.filter(e => e.question_code && e.question_code.trim() !== '');
     
     const summary = {
       total_problems: entries.length,
@@ -234,7 +234,7 @@ class DatasetCompiler {
       average_text_length: Math.round(entries.reduce((sum, e) => sum + e.text.length, 0) / entries.length),
       average_answer_length: Math.round(entries.reduce((sum, e) => sum + e.answer.length, 0) / entries.length),
       average_question_code_length: entriesWithQuestionCode.length > 0 ? 
-        Math.round(entriesWithQuestionCode.reduce((sum, e) => sum + e.questionCode.length, 0) / entriesWithQuestionCode.length) : 0
+        Math.round(entriesWithQuestionCode.reduce((sum, e) => sum + e.question_code.length, 0) / entriesWithQuestionCode.length) : 0
     };
     
     const summaryPath = join(outputDir, 'dataset_summary.json');
