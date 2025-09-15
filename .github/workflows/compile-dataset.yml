@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
+      - '*/questionCode.ts'
       - '*/answer.ts'
       - '*/Note.md'
   schedule:
