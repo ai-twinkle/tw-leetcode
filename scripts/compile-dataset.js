@@ -78,6 +78,16 @@ class DatasetCompiler {
   }
 
   /**
+   * Parse the questionCode.ts file to extract the TypeScript starter code snippet
+   */
+  parseQuestionCodeFile(questionCodePath) {
+    const content = readFileSync(questionCodePath, 'utf-8');
+    
+    // Return the content as-is since it's already a clean TypeScript function signature
+    return content.trim();
+  }
+
+  /**
    * Compile a single problem into a dataset entry
    */
   compileProblem(problemDir) {
@@ -87,10 +97,17 @@ class DatasetCompiler {
       const problemPath = join(this.rootDir, problemDir);
       const notePath = join(problemPath, 'Note.md');
       const answerPath = join(problemPath, 'answer.ts');
+      const questionCodePath = join(problemPath, 'questionCode.ts');
       
       // Parse files
       const { content, question, constraints, thought, time_complexity, space_complexity } = this.parseNoteFile(notePath);
       const answer = this.parseAnswerFile(answerPath);
+      
+      // Parse questionCode - this is now required
+      let questionCode = '';
+      if (existsSync(questionCodePath)) {
+        questionCode = this.parseQuestionCodeFile(questionCodePath);
+      }
       
       // Use full raw content as the text field
       const text = content;
@@ -101,6 +118,7 @@ class DatasetCompiler {
         constraints,
         thought,
         answer,
+        questionCode,
         src: problemDir,
         time_complexity,
         space_complexity
@@ -116,7 +134,7 @@ class DatasetCompiler {
    * Validate the compiled entry format
    */
   validateEntry(entry) {
-    const requiredFields = ['text', 'question', 'constraints', 'thought', 'answer', 'src', 'time_complexity', 'space_complexity'];
+    const requiredFields = ['text', 'question', 'constraints', 'thought', 'answer', 'questionCode', 'src', 'time_complexity', 'space_complexity'];
     
     for (const field of requiredFields) {
       if (!entry[field] || entry[field].trim() === '') {
@@ -203,15 +221,20 @@ class DatasetCompiler {
    * Generate summary statistics
    */
   generateSummary(entries, outputDir) {
+    const entriesWithQuestionCode = entries.filter(e => e.questionCode && e.questionCode.trim() !== '');
+    
     const summary = {
       total_problems: entries.length,
+      problems_with_question_code: entriesWithQuestionCode.length,
       compilation_date: new Date().toISOString(),
       problems_range: {
         min: Math.min(...entries.map(e => parseInt(e.src.match(/^(\d+)-/)?.[1] || '0'))),
         max: Math.max(...entries.map(e => parseInt(e.src.match(/^(\d+)-/)?.[1] || '0')))
       },
       average_text_length: Math.round(entries.reduce((sum, e) => sum + e.text.length, 0) / entries.length),
-      average_answer_length: Math.round(entries.reduce((sum, e) => sum + e.answer.length, 0) / entries.length)
+      average_answer_length: Math.round(entries.reduce((sum, e) => sum + e.answer.length, 0) / entries.length),
+      average_question_code_length: entriesWithQuestionCode.length > 0 ? 
+        Math.round(entriesWithQuestionCode.reduce((sum, e) => sum + e.questionCode.length, 0) / entriesWithQuestionCode.length) : 0
     };
     
     const summaryPath = join(outputDir, 'dataset_summary.json');
