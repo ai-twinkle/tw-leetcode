@@ -81,7 +81,7 @@ for (let currentNumber = 2; currentNumber <= MAX_LIMIT; currentNumber++) {
 如果查詢範圍內包含 2 和 3，就直接回傳 [2, 3]，因為這是已知最小且間距最短的質數組合。
 
 ```typescript
-if (rangeStart <= 2 && rangeEnd >= 3) {
+if (left <= 2 && right >= 3) {
   return [2, 3];
 }
 ```
@@ -130,8 +130,8 @@ function upperBoundIndex(array: number[], target: number): number {
 如果在查詢範圍內沒有任何質數，則直接回傳 [-1, -1]。
 
 ```typescript
-const startIndex = lowerBoundIndex(primeNumbers, rangeStart);
-let endIndex = upperBoundIndex(primeNumbers, rangeEnd) - 1;
+const startIndex = lowerBoundIndex(primeNumbers, left);
+let endIndex = upperBoundIndex(primeNumbers, right) - 1;
 
 // 如果範圍內沒有任何質數，直接回傳 [-1, -1]。
 if (endIndex - startIndex < 1) {

@@ -45,7 +45,7 @@ Return `nums` after the rearrangement.
 - 紀錄等於 pivot 的數量
 
 ```typescript
-const n = numbers.length;
+const n = nums.length;
 
 // 結果陣列與索引 (我們使用固定大小的陣列，用指針方式會比`push`更快)
 let resultIndex = 0;
@@ -61,7 +61,7 @@ let pivotCount = 0;
 
 ```typescript
 for (let i = 0; i < n; i++) {
-  const currentNumber = numbers[i];
+  const currentNumber = nums[i];
   if (currentNumber === pivot) {
     pivotCount++;
   } else if (currentNumber < pivot) {
@@ -89,7 +89,7 @@ while (pivotCount > 0) {
 
 ```typescript
 for (let i = 0; i < n; i++) {
-  const currentNumber = numbers[i];
+  const currentNumber = nums[i];
   if (currentNumber > pivot) {
     resultArray[resultIndex] = currentNumber;
     resultIndex++;

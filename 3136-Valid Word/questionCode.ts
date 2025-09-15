@@ -1,3 +1,3 @@
-function findNumOfValidWords(words: string[], puzzles: string[]): number[] {
-    
+function isValid(word: string): boolean {
+
 }

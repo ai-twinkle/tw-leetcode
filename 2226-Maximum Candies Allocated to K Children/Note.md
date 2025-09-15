@@ -44,7 +44,7 @@ Return the maximum number of `candies` each child can get.
 let totalCandies = 0;      // 紀錄所有糖果的總數
 let largestCandyPile = 0;  // 紀錄糖果數量最多的那一堆
 
-for (const pile of candyPiles) {
+for (const pile of candies) {
   totalCandies += pile;
   largestCandyPile = Math.max(largestCandyPile, pile);
 }
@@ -56,7 +56,7 @@ for (const pile of candyPiles) {
 
 ```typescript
 // 如果總糖果數量連每個小孩分一顆都不足，直接返回 0
-if (totalCandies < numChildren) {
+if (totalCandies < k) {
   return 0;
 }
 ```
@@ -67,7 +67,7 @@ if (totalCandies < numChildren) {
 
 ```typescript
 let minCandies = 1;  // 每個小孩至少分一顆糖果
-let maxCandies = Math.min(largestCandyPile, Math.floor(totalCandies / numChildren));
+let maxCandies = Math.min(largestCandyPile, Math.floor(totalCandies / k));
 let optimalCandies = 0;  // 儲存目前找到的最佳解
 
 while (minCandies <= maxCandies) {
@@ -75,12 +75,12 @@ while (minCandies <= maxCandies) {
   
   // 計算以 midCandies 為標準，每個小孩是否都能分到糖果
   let childrenSatisfied = 0;
-  for (const pile of candyPiles) {
+  for (const pile of candies) {
     childrenSatisfied += Math.floor(pile / midCandies);
-    if (childrenSatisfied >= numChildren) break;  // 提前結束避免浪費時間
+    if (childrenSatisfied >= k) break;  // 提前結束避免浪費時間
   }
 
-  if (childrenSatisfied >= numChildren) {
+  if (childrenSatisfied >= k) {
     // 若能滿足，表示目前答案可行，但仍嘗試找更大的數值
     optimalCandies = midCandies;
     minCandies = midCandies + 1;

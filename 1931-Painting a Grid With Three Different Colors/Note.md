@@ -130,11 +130,11 @@ function ensureCompatibilityList(rows: number): number[][] {
 計算所有合法模式後，初始化 DP 緩衝區。第一欄每一種模式皆可單獨成立，設為 1，其餘欄以 0 起始。
 
 ```typescript
-function colorTheGrid(rowCount: number, columnCount: number): number {
+function colorTheGrid(m: number, n: number): number {
   const MODULO = 1_000_000_007;
 
   // 預先取得單欄的所有相容模式
-  const compatibilityAdjacencyList = ensureCompatibilityList(rowCount);
+  const compatibilityAdjacencyList = ensureCompatibilityList(m);
   const patternCount = compatibilityAdjacencyList.length;
 
   // waysForPreviousColumn[i] 代表目前在第1欄，且末尾為第i種pattern的方案數
@@ -150,11 +150,11 @@ function colorTheGrid(rowCount: number, columnCount: number): number {
 每一欄的每一個 pattern，將所有可從前一欄轉移過來的 pattern 方案數累加起來，並維持模數範圍。
 
 ```typescript
-function colorTheGrid(rowCount: number, columnCount: number): number {
+function colorTheGrid(m: number, n: number): number {
   // Step 2：初始化 DP 緩衝區
 
   // 從第2欄（index=1）到第n欄依序遞推
-  for (let columnIndex = 1; columnIndex < columnCount; columnIndex++) {
+  for (let columnIndex = 1; columnIndex < n; columnIndex++) {
     waysForCurrentColumn.fill(0);
 
     for (let previousPatternIndex = 0; previousPatternIndex < patternCount; previousPatternIndex++) {
@@ -193,7 +193,7 @@ function colorTheGrid(rowCount: number, columnCount: number): number {
 遍歷最後一欄所有模式，將方案數加總即為答案。
 
 ```typescript
-function colorTheGrid(rowCount: number, columnCount: number): number {
+function colorTheGrid(m: number, n: number): number {
   // Step 2：初始化 DP 緩衝區
   
   // Step 3：動態規劃計算每一欄的方法數

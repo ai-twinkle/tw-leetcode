@@ -1,9 +1,4 @@
-function maxTaskAssign(
-  tasks: number[],
-  workers: number[],
-  pills: number,
-  pillStrength: number
-): number {
+function maxTaskAssign(tasks: number[], workers: number[], pills: number, strength: number): number {
   // 1. Cache lengths
   const taskCount = tasks.length;
   const workerCount = workers.length;
@@ -15,7 +10,7 @@ function maxTaskAssign(
   sortedWorkers.sort();
 
   // 3. Special case: no effective pills → simple two-pointer greedy
-  if (pills === 0 || pillStrength === 0) {
+  if (pills === 0 || strength === 0) {
     let taskPtr = taskCount - 1;
     let workerPtr = workerCount - 1;
     let completed = 0;
@@ -34,7 +29,7 @@ function maxTaskAssign(
   // 4. Precompute boosted strengths (still sorted ascending)
   const boostedWorkers = new Uint32Array(workerCount);
   for (let i = 0; i < workerCount; i++) {
-    boostedWorkers[i] = sortedWorkers[i] + pillStrength;
+    boostedWorkers[i] = sortedWorkers[i] + strength;
   }
 
   // 5. Special case: enough pills to boost every worker → greedy on boosted only

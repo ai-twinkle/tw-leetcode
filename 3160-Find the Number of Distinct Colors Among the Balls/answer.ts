@@ -1,4 +1,4 @@
-function queryResults(_limit: number, queries: number[][]): number[] {
+function queryResults(limit: number, queries: number[][]): number[] {
   const ballColor = new Map<number, number>();  // Record the updated color of each ball
   const colorCount = new Map<number, number>(); // Record the count of each color
 

@@ -1,3 +1,3 @@
-function transformArray(arr: number[]): number[] {
+function isZeroArray(nums: number[], queries: number[][]): boolean {
 
 }

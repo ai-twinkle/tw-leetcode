@@ -1,10 +1,10 @@
 /**
  * Check if the rectangles can be cut into three clusters along either the x-axis or y-axis.
- * @param _n {number} - Unused parameter.
+ * @param n {number} - Unused parameter.
  * @param rectangles {number[][]} - The rectangles to check.
  * @returns {boolean} - Whether the rectangles can be cut into three clusters.
  */
-function checkValidCuts(_n: number, rectangles: number[][]): boolean {
+function checkValidCuts(n: number, rectangles: number[][]): boolean {
   // Check vertical (x-axis) and horizontal (y-axis) cuts.
   return checkAxis(rectangles, 0, 2) || checkAxis(rectangles, 1, 3);
 }

@@ -21,11 +21,11 @@ const VOWEL_INDEX = (() => {
 // Vowel characters in nondecreasing ASCII order (parallel to VOWEL_INDEX mapping).
 const VOWEL_CHARACTERS = ['A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u'];
 
-function sortVowels(inputString: string): string {
-  const stringLength = inputString.length;
+function sortVowels(s: string): string {
+  const stringLength = s.length;
 
   if (stringLength <= 1) {
-    return inputString;
+    return s;
   }
 
   // Count vowels by their ASCII order bucket (10 buckets).
@@ -36,7 +36,7 @@ function sortVowels(inputString: string): string {
 
   // Pass 1: count vowels and mark positions.
   for (let characterIndex = 0; characterIndex < stringLength; characterIndex++) {
-    const characterCode = inputString.charCodeAt(characterIndex); // ASCII letters only by constraints
+    const characterCode = s.charCodeAt(characterIndex); // ASCII letters only by constraints
 
     let vowelIndex = -1;
     if (characterCode < 128) {
@@ -68,7 +68,7 @@ function sortVowels(inputString: string): string {
       vowelCountByIndex[vowelBucketPointer]--;
     } else {
       // Keep consonants in place.
-      outputCharacters[characterIndex] = inputString[characterIndex];
+      outputCharacters[characterIndex] = s[characterIndex];
     }
   }
 

@@ -161,10 +161,10 @@ const precomputedGoodIntegers = precomputeGoodIntegers();
  * Returns the count of good integers for the specified number of digits and divisor.
  * This function uses precomputed values, providing an O(1) lookup.
  *
- * @param {number} totalDigits - The number of digits.
- * @param {number} divisor - The divisor.
+ * @param {number} n - The number of digits.
+ * @param {number} k - The divisor.
  * @returns {number} The count of good integers.
  */
-function countGoodIntegers(totalDigits: number, divisor: number): number {
-  return precomputedGoodIntegers[totalDigits][divisor];
+function countGoodIntegers(n: number, k: number): number {
+  return precomputedGoodIntegers[n][k];
 }

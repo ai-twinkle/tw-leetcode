@@ -1,5 +1,5 @@
-function pivotArray(numbers: number[], pivot: number): number[] {
-  const n = numbers.length;
+function pivotArray(nums: number[], pivot: number): number[] {
+  const n = nums.length;
 
   // The result array and its pointer
   let resultIndex = 0;
@@ -8,9 +8,9 @@ function pivotArray(numbers: number[], pivot: number): number[] {
   // Counting the number of pivots
   let pivotCount = 0;
 
-  // Iterating the array, counting the number of pivot and processing the numbers less than pivot
+  // Iterating the array, counting the number of pivot and processing the nums less than pivot
   for (let i = 0; i < n; i++) {
-    const currentNumber = numbers[i];
+    const currentNumber = nums[i];
     if (currentNumber === pivot) {
       pivotCount++;
     } else if (currentNumber < pivot) {
@@ -26,9 +26,9 @@ function pivotArray(numbers: number[], pivot: number): number[] {
     pivotCount--;
   }
 
-  // Iterating the array, processing the numbers greater than pivot
+  // Iterating the array, processing the nums greater than pivot
   for (let i = 0; i < n; i++) {
-    const currentNumber = numbers[i];
+    const currentNumber = nums[i];
     if (currentNumber > pivot) {
       resultArray[resultIndex] = currentNumber;
       resultIndex++;

@@ -53,7 +53,7 @@ const dpEarliest: Int8Array[][] = [];
 const dpLatest: Int8Array[][] = [];
 
 // 預先為所有可能狀態配置記憶體空間
-for (let playerCount = 0; playerCount <= playerCountTotal; playerCount++) {
+for (let playerCount = 0; playerCount <= n; playerCount++) {
   dpEarliest[playerCount] = [];
   dpLatest[playerCount] = [];
   for (let leftPlayerPosition = 0; leftPlayerPosition <= playerCount; leftPlayerPosition++) {
@@ -308,7 +308,7 @@ function computeRounds(
 
 ```typescript
 // 初始呼叫，帶入全體人數與兩目標初始位置
-return computeRounds(playerCountTotal, firstPlayerPosition, secondPlayerPosition);
+return computeRounds(n, firstPlayer, secondPlayer);
 ```
 
 ## 時間複雜度

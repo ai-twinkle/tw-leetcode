@@ -139,9 +139,9 @@ function getKMirrorPrefixSums(radix: number): number[] {
 透過前綴和陣列快取直接返回結果。
 
 ```typescript
-function kMirror(radix: number, count: number): number {
-  const sums = getKMirrorPrefixSums(radix);
-  return sums[count - 1];
+function kMirror(k: number, n: number): number {
+  const sums = getKMirrorPrefixSums(k);
+  return sums[n - 1];
 }
 ```
 

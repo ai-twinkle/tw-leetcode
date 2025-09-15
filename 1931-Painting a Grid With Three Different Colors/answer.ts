@@ -75,15 +75,15 @@ function ensureCompatibilityList(rows: number): number[][] {
 /**
  * Count the number of valid ways to color an m x n grid
  * - No two adjacent cells in a row or column have the same color (3 colors)
- * @param rowCount {number} - number of rows in the grid
- * @param columnCount {number} - number of columns in the grid
+ * @param m {number} - number of rows in the grid
+ * @param n {number} - number of columns in the grid
  * @return {number} - number of valid colorings (modulo 1_000_000_007)
  */
-function colorTheGrid(rowCount: number, columnCount: number): number {
+function colorTheGrid(m: number, n: number): number {
   const MODULO = 1_000_000_007;
 
-  // 1. Precompute compatibility for all patterns of one column (height = rowCount)
-  const compatibilityAdjacencyList = ensureCompatibilityList(rowCount);
+  // 1. Precompute compatibility for all patterns of one column (height = m)
+  const compatibilityAdjacencyList = ensureCompatibilityList(m);
   const patternCount = compatibilityAdjacencyList.length;
 
   // 2. DP buffer: waysForPreviousColumn[i] = #ways to paint up to previous column with the ending pattern i
@@ -91,7 +91,7 @@ function colorTheGrid(rowCount: number, columnCount: number): number {
   let waysForCurrentColumn = new Int32Array(patternCount);          // Temp buffer for new column
 
   // 3. Process each column left-to-right (skip first column, which is the base-case)
-  for (let columnIndex = 1; columnIndex < columnCount; columnIndex++) {
+  for (let columnIndex = 1; columnIndex < n; columnIndex++) {
     waysForCurrentColumn.fill(0);
 
     for (let previousPatternIndex = 0; previousPatternIndex < patternCount; previousPatternIndex++) {

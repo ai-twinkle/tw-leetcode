@@ -59,25 +59,25 @@ class FindSumPairs {
 ```
 ### Step 2：初始化建構子（constructor）
 
-- 對 `numbers1` 做排序後保存至 `sortedNumbers1`。
-- 直接保留 `numbers2` 的參考，以利即時修改。
+- 對 `nums1` 做排序後保存至 `sortedNumbers1`。
+- 直接保留 `nums2` 的參考，以利即時修改。
 - 建立數值出現頻率表，之後查詢時可快速取得數值對應的數量。
 
 ```typescript
 class FindSumPairs {
   // Step 1：定義內部資料結構（成員變數用途）
   
-  constructor(numbers1: number[], numbers2: number[]) {
-    // 對 numbers1 排序，提升查詢時效性
-    this.sortedNumbers1 = numbers1.slice().sort((a, b) => a - b);
+  constructor(nums1: number[], nums2: number[]) {
+    // 對 nums1 排序，提升查詢時效性
+    this.sortedNumbers1 = nums1.slice().sort((a, b) => a - b);
 
-    // 直接參考 numbers2，便於快速修改
-    this.numbers2Array = numbers2;
+    // 直接參考 nums2，便於快速修改
+    this.numbers2Array = nums2;
 
-    // 建立 numbers2 的頻率表，統計每個值出現的次數
+    // 建立 nums2 的頻率表，統計每個值出現的次數
     this.frequencyTableNumbers2 = {};
-    for (let i = 0, n = numbers2.length; i < n; i++) {
-      const value = numbers2[i];
+    for (let i = 0, n = nums2.length; i < n; i++) {
+      const value = nums2[i];
       this.frequencyTableNumbers2[value] = (this.frequencyTableNumbers2[value] || 0) + 1;
     }
   }
@@ -97,9 +97,9 @@ class FindSumPairs {
   
   // Step 2：初始化建構子（constructor）
   
-  add(index: number, valueToAdd: number): void {
+  add(index: number, val: number): void {
     const previousValue = this.numbers2Array[index];
-    const newValue = previousValue + valueToAdd;
+    const newValue = previousValue + val;
     this.numbers2Array[index] = newValue;
 
     // 更新頻率表，舊值數量減少
@@ -121,7 +121,7 @@ class FindSumPairs {
 ### Step 4：查詢操作 (`count` 方法)
 
 - 透過排序後的 `nums1`，在超過目標總和時提前跳出，縮短搜尋範圍。
-- 利用頻率表，快速得知 `targetSum - nums1[i]` 在 `nums2` 出現次數，計入結果。
+- 利用頻率表，快速得知 `tot - nums1[i]` 在 `nums2` 出現次數，計入結果。
 
 ```typescript
 class FindSumPairs {
@@ -131,18 +131,18 @@ class FindSumPairs {
   
   // Step 3：修改操作（add 方法）
   
-  count(targetSum: number): number {
+  count(tot: number): number {
     let result = 0;
     const frequencyTable = this.frequencyTableNumbers2;
     const sortedNumbers1 = this.sortedNumbers1;
 
-    // 遍歷排序後的 numbers1，若當前值已超過目標則提前終止
+    // 遍歷排序後的 nums1，若當前值已超過目標則提前終止
     for (let i = 0, length = sortedNumbers1.length; i < length; i++) {
       const value1 = sortedNumbers1[i];
-      if (value1 > targetSum) {
+      if (value1 > tot) {
         break;
       }
-      result += frequencyTable[targetSum - value1] || 0;
+      result += frequencyTable[tot - value1] || 0;
     }
     return result;
   }

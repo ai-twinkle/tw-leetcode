@@ -1,7 +1,7 @@
-function maxTargetNodes(edgesTree1: number[][], edgesTree2: number[][], maximumDistance: number): number[] {
+function maxTargetNodes(edges1: number[][], edges2: number[][], k: number): number[] {
   // Compute node count for each tree
-  const numberOfNodesInTree1 = edgesTree1.length + 1;
-  const numberOfNodesInTree2 = edgesTree2.length + 1;
+  const numberOfNodesInTree1 = edges1.length + 1;
+  const numberOfNodesInTree2 = edges2.length + 1;
 
   /**
    * Builds a compressed sparse row (CSR) adjacency representation.
@@ -42,12 +42,12 @@ function maxTargetNodes(edgesTree1: number[][], edgesTree2: number[][], maximumD
   const {
     offsets: csrOffsetsTree1,
     neighbors: csrNeighborsTree1
-  } = buildCompressedSparseRow(edgesTree1, numberOfNodesInTree1);
+  } = buildCompressedSparseRow(edges1, numberOfNodesInTree1);
 
   const {
     offsets: csrOffsetsTree2,
     neighbors: csrNeighborsTree2
-  } = buildCompressedSparseRow(edgesTree2, numberOfNodesInTree2);
+  } = buildCompressedSparseRow(edges2, numberOfNodesInTree2);
 
   /**
    * Computes reachable node counts for every start node within a distance limit.
@@ -149,7 +149,7 @@ function maxTargetNodes(edgesTree1: number[][], edgesTree2: number[][], maximumD
     csrOffsetsTree1,
     csrNeighborsTree1,
     numberOfNodesInTree1,
-    maximumDistance
+    k
   );
 
   // Find the best possible addition from tree 2
@@ -157,7 +157,7 @@ function maxTargetNodes(edgesTree1: number[][], edgesTree2: number[][], maximumD
     csrOffsetsTree2,
     csrNeighborsTree2,
     numberOfNodesInTree2,
-    maximumDistance - 1 // Only allow (k-1) in tree 2 due to bridge
+    k - 1 // Only allow (k-1) in tree 2 due to bridge
   );
 
   // Combine both tree results for each node in tree 1

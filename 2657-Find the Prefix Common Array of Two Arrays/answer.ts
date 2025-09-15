@@ -1,10 +1,10 @@
-function findThePrefixCommonArray(arrayA: number[], arrayB: number[]): number[] {
-  const arrayLength = arrayA.length;
+function findThePrefixCommonArray(A: number[], B: number[]): number[] {
+  const arrayLength = A.length;
   const prefixCommonCount = new Array(arrayLength).fill(0);
 
   // Count the appearance of common elements in index i (While prefix common we take the largest index)
   for (let currentIndex = 0; currentIndex < arrayLength; currentIndex++) {
-    const indexInArrayB = arrayB.indexOf(arrayA[currentIndex]);
+    const indexInArrayB = B.indexOf(A[currentIndex]);
 
     if (indexInArrayB === -1) {
       continue;

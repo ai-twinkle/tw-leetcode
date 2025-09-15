@@ -45,7 +45,7 @@ A sequence of `n` integers is called a permutation if it contains all integers f
 ### Step 1：初始化與資料結構
 
 ```typescript
-const arrayLength = arrayA.length;                        // 取得陣列長度 n
+const arrayLength = A.length;                        // 取得陣列長度 n
 const prefixCommonCount = new Array(arrayLength).fill(0); // 紀錄每個索引位置從該位置後才開始計入的共同元素數量
 ```
 
@@ -54,7 +54,7 @@ const prefixCommonCount = new Array(arrayLength).fill(0); // 紀錄每個索引�
 ```typescript
 for (let currentIndex = 0; currentIndex < arrayLength; currentIndex++) {
   // 在 B 中找到 A[i] 的索引位置
-  const indexInArrayB = arrayB.indexOf(arrayA[currentIndex]);
+  const indexInArrayB = B.indexOf(A[currentIndex]);
   
   // （對於排列而言，indexOf 一定能找到，所以這裡檢查可省略，但為通用做法保留）
   if (indexInArrayB === -1) {

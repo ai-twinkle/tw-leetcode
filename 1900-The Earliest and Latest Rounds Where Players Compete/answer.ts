@@ -1,15 +1,11 @@
-function earliestAndLatest(
-  playerCountTotal: number,
-  firstPlayerPosition: number,
-  secondPlayerPosition: number
-): number[] {
+function earliestAndLatest(n: number, firstPlayer: number, secondPlayer: number): number[] {
   // dpEarliest[p][l][r] = minimum rounds for p players, firstPlayer at l, secondPlayer at r
   // dpLatest[p][l][r] = maximum rounds for p players, firstPlayer at l, secondPlayer at r
   const dpEarliest: Int8Array[][] = [];
   const dpLatest: Int8Array[][] = [];
 
   // Pre-allocate memoization tables for all possible states
-  for (let playerCount = 0; playerCount <= playerCountTotal; playerCount++) {
+  for (let playerCount = 0; playerCount <= n; playerCount++) {
     dpEarliest[playerCount] = [];
     dpLatest[playerCount] = [];
     for (let leftPlayerPosition = 0; leftPlayerPosition <= playerCount; leftPlayerPosition++) {
@@ -187,5 +183,5 @@ function earliestAndLatest(
   }
 
   // Initial call: start with full n players, both targets at their original positions
-  return computeRounds(playerCountTotal, firstPlayerPosition, secondPlayerPosition);
+  return computeRounds(n, firstPlayer, secondPlayer);
 }

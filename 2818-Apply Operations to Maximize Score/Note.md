@@ -67,7 +67,7 @@ $$
 
 ```typescript
 const MODULO = 1000000007n;
-const n = numbers.length;
+const n = nums.length;
 ```
 
 ### Step 2：預處理質數列表（Sieve 篩法）
@@ -75,7 +75,7 @@ const n = numbers.length;
 計算小於等於 $\sqrt{\text{max(nums)}}$ 的所有質數，以利後續質因數分解。
 
 ```typescript
-const maxValue = Math.max(...numbers);
+const maxValue = Math.max(...nums);
 const sqrtLimit = Math.floor(Math.sqrt(maxValue)) + 1;
 const isPrime = new Array(sqrtLimit + 1).fill(true);
 isPrime[0] = isPrime[1] = false;
@@ -124,7 +124,7 @@ function countDistinctPrimeFactors(value: number): number {
 
 const primeFactorCounts: number[] = new Array(n);
 for (let index = 0; index < n; index++) {
-  primeFactorCounts[index] = countDistinctPrimeFactors(numbers[index]);
+  primeFactorCounts[index] = countDistinctPrimeFactors(nums[index]);
 }
 ```
 
@@ -161,7 +161,7 @@ for (let index = n - 1; index >= 0; index--) {
 依據前一步計算的邊界，得出每個數字可作為候選元素出現的次數，考量操作上限 `k`。
 
 ```typescript
-const maxOperationsBigInt = BigInt(maxOperations);
+const maxOperationsBigInt = BigInt(k);
 const frequencyByNumber = new Map<number, bigint>();
 
 for (let index = 0; index < n; index++) {
@@ -171,8 +171,8 @@ for (let index = 0; index < n; index++) {
   const capped = frequency > maxOperationsBigInt ? maxOperationsBigInt : frequency;
 
   frequencyByNumber.set(
-    numbers[index],
-    (frequencyByNumber.get(numbers[index]) || 0n) + capped
+    nums[index],
+    (frequencyByNumber.get(nums[index]) || 0n) + capped
   );
 }
 ```

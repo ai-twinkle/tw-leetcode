@@ -117,13 +117,13 @@ for (let index = MAX_DIGITS; index >= 1; index--) {
 - 若總和為奇數或超出偶數位和的最大可能值（$\lceil n/2\rceil\times9$），可直接返回 0。
 
 ```typescript
-const totalDigits = numberString.length;
+const totalDigits = num.length;
 const numberOfEvenPositions = Math.ceil(totalDigits / 2); // 偶數位數量
 const numberOfOddPositions = totalDigits - numberOfEvenPositions;
 
 const digitFrequencies = new Array<number>(10).fill(0);
 let totalSumOfDigits = 0;
-for (const character of numberString) {
+for (const character of num) {
   const digitValue = character.charCodeAt(0) - 48;
   digitFrequencies[digitValue]++;
   totalSumOfDigits += digitValue;

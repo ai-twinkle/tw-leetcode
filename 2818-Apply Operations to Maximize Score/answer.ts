@@ -1,12 +1,12 @@
-function maximumScore(numbers: number[], maxOperations: number): number {
+function maximumScore(nums: number[], k: number): number {
   const MODULO = 1000000007n;
-  const n = numbers.length;
+  const n = nums.length;
 
   // ───────────────────────────────────────────────────────────────
-  // Step 1: Precompute all prime numbers up to √max(numbers[])
-  // This allows efficient factorization of any number ≤ max(numbers)
+  // Step 1: Precompute all prime nums up to √max(nums[])
+  // This allows efficient factorization of any number ≤ max(nums)
   // ───────────────────────────────────────────────────────────────
-  const maxValue = Math.max(...numbers);
+  const maxValue = Math.max(...nums);
   const sqrtLimit = Math.floor(Math.sqrt(maxValue)) + 1;
   const isPrime = new Array(sqrtLimit + 1).fill(true);
   isPrime[0] = isPrime[1] = false;
@@ -60,7 +60,7 @@ function maximumScore(numbers: number[], maxOperations: number): number {
   // ───────────────────────────────────────────────────────────────
   const primeFactorCounts: number[] = new Array(n);
   for (let index = 0; index < n; index++) {
-    primeFactorCounts[index] = countDistinctPrimeFactors(numbers[index]);
+    primeFactorCounts[index] = countDistinctPrimeFactors(nums[index]);
   }
 
   // ───────────────────────────────────────────────────────────────
@@ -96,14 +96,14 @@ function maximumScore(numbers: number[], maxOperations: number): number {
 
   // ───────────────────────────────────────────────────────────────
   // Step 5: Calculate frequency (i.e. number of subarrays where
-  //         numbers[i] would be chosen as the max prime score element)
+  //         nums[i] would be chosen as the max prime score element)
   //
   // Frequency = (# options on left) × (# options on right)
   //            = (i - left[i]) * (right[i] - i)
   //
   // Then aggregate all contributions for each unique number.
   // ───────────────────────────────────────────────────────────────
-  const maxOperationsBigInt = BigInt(maxOperations);
+  const maxOperationsBigInt = BigInt(k);
   const frequencyByNumber = new Map<number, bigint>();
 
   for (let index = 0; index < n; index++) {
@@ -113,13 +113,13 @@ function maximumScore(numbers: number[], maxOperations: number): number {
     const capped = frequency > maxOperationsBigInt ? maxOperationsBigInt : frequency;
 
     frequencyByNumber.set(
-      numbers[index],
-      (frequencyByNumber.get(numbers[index]) || 0n) + capped
+      nums[index],
+      (frequencyByNumber.get(nums[index]) || 0n) + capped
     );
   }
 
   // ───────────────────────────────────────────────────────────────
-  // Step 6: Sort numbers in descending order and greedily use the best
+  // Step 6: Sort nums in descending order and greedily use the best
   //         multipliers first until operations run out
   // ───────────────────────────────────────────────────────────────
   const aggregatedEntries = Array.from(frequencyByNumber.entries());

@@ -30,13 +30,13 @@ for (let currentNumber = 2; currentNumber <= MAX_LIMIT; currentNumber++) {
  * Finds the pair of closest prime numbers within the given range.
  * The function uses the precomputed list of prime numbers.
  *
- * @param rangeStart {number} - The start of the range (inclusive).
- * @param rangeEnd {number} - The end of the range (inclusive).
+ * @param left {number} - The start of the range (inclusive).
+ * @param right {number} - The end of the range (inclusive).
  * @returns {number[]} - An array containing the pair of closest primes, or [-1, -1] if not found.
  */
-function closestPrimes(rangeStart: number, rangeEnd: number): number[] {
+function closestPrimes(left: number, right: number): number[] {
   // Early return if the range includes the optimal prime pair [2, 3].
-  if (rangeStart <= 2 && rangeEnd >= 3) {
+  if (left <= 2 && right >= 3) {
     return [2, 3];
   }
 
@@ -84,10 +84,10 @@ function closestPrimes(rangeStart: number, rangeEnd: number): number[] {
     return lowerIndex;
   }
 
-  // Find the start index of prime numbers that are >= rangeStart.
-  const startIndex = lowerBoundIndex(primeNumbers, rangeStart);
-  // Find the end index (last prime number <= rangeEnd) by finding the upper bound and subtracting one.
-  let endIndex = upperBoundIndex(primeNumbers, rangeEnd) - 1;
+  // Find the start index of prime numbers that are >= left.
+  const startIndex = lowerBoundIndex(primeNumbers, left);
+  // Find the end index (last prime number <= right) by finding the upper bound and subtracting one.
+  let endIndex = upperBoundIndex(primeNumbers, right) - 1;
 
   // If there are not at least two primes in the range, return [-1, -1].
   if (endIndex - startIndex < 1) {

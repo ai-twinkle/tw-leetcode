@@ -92,12 +92,12 @@ function getKMirrorPrefixSums(radix: number): number[] {
 }
 
 /**
- * Return the sum of the first `count` k-mirror numbers in base `radix`.
- * @param {number} radix - The base in which to compute k-mirror numbers.
- * @param {number} count - The number of k-mirror numbers to sum.
- * @returns {number} The sum of the first `count` k-mirror numbers in base `radix`.
+ * Return the sum of the first `n` k-mirror numbers in base `k`.
+ * @param {number} k - The base in which to compute k-mirror numbers.
+ * @param {number} n - The number of k-mirror numbers to sum.
+ * @returns {number} The sum of the first `n` k-mirror numbers in base `k`.
  */
-function kMirror(radix: number, count: number): number {
-  const sums = getKMirrorPrefixSums(radix);
-  return sums[count - 1];
+function kMirror(k: number, n: number): number {
+  const sums = getKMirrorPrefixSums(k);
+  return sums[n - 1];
 }

@@ -56,7 +56,7 @@ Return `true` if such cuts can be made; otherwise, return `false`.
 以下程式碼展示了如何分別調用兩個方向的檢查：
 
 ```typescript
-function checkValidCuts(_n: number, rectangles: number[][]): boolean {
+function checkValidCuts(n: number, rectangles: number[][]): boolean {
   // 分別檢查垂直（x 軸）和水平（y 軸）的切割是否可行
   return checkAxis(rectangles, 0, 2) || checkAxis(rectangles, 1, 3);
 }

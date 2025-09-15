@@ -83,7 +83,7 @@ $$
 首先，我們需要取得輸入陣列的長度 `arrayLength`。若陣列為空（長度為 0），則根據題目定義，空集合的 XOR 總和為 0，直接返回 0。
 
 ```typescript
-const arrayLength: number = arrayOfNumbers.length;
+const arrayLength = nums.length;
 
 if (arrayLength === 0) {
     return 0;
@@ -92,11 +92,11 @@ if (arrayLength === 0) {
 
 ### Step 2：計算所有數字的位元或運算結果
 
-接著，我們初始化一個變數 `bitwiseOrAggregate` 為 0，用來儲存所有數字的位元「或」運算結果。遍歷 `arrayOfNumbers` 陣列，對每個元素進行 OR 運算，將所有出現過的 1 位元合併進來。
+接著，我們初始化一個變數 `bitwiseOrAggregate` 為 0，用來儲存所有數字的位元「或」運算結果。遍歷 `nums` 陣列，對每個元素進行 OR 運算，將所有出現過的 1 位元合併進來。
 
 ```typescript
-let bitwiseOrAggregate: number = 0;
-for (const currentNumber of arrayOfNumbers) {
+let bitwiseOrAggregate = 0;
+for (const currentNumber of nums) {
     bitwiseOrAggregate |= currentNumber;
 }
 ```
@@ -109,7 +109,7 @@ for (const currentNumber of arrayOfNumbers) {
 
 ```typescript
 // 2^(n - 1) can be computed by left shifting 1 by (arrayLength - 1)
-const powerMultiplier: number = 1 << (arrayLength - 1);
+const powerMultiplier = 1 << (arrayLength - 1);
 ```
 
 最後，我們將所有數字的位元 OR 結果與乘數相乘，即可得到所有子集的 XOR 總和，並返回該結果。

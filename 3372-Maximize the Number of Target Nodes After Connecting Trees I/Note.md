@@ -46,8 +46,8 @@ That is, for every query you will remove the added edge before proceeding to the
 
 ```typescript
 // 計算每棵樹各自的節點數
-const numberOfNodesInTree1 = edgesTree1.length + 1;
-const numberOfNodesInTree2 = edgesTree2.length + 1;
+const numberOfNodesInTree1 = edges1.length + 1;
+const numberOfNodesInTree2 = edges2.length + 1;
 ```
 
 ### Step 2：建立壓縮稀疏列 (CSR) 結構
@@ -94,12 +94,12 @@ function buildCompressedSparseRow(
 const {
   offsets: csrOffsetsTree1,
   neighbors: csrNeighborsTree1
-} = buildCompressedSparseRow(edgesTree1, numberOfNodesInTree1);
+} = buildCompressedSparseRow(edges1, numberOfNodesInTree1);
 
 const {
   offsets: csrOffsetsTree2,
   neighbors: csrNeighborsTree2
-} = buildCompressedSparseRow(edgesTree2, numberOfNodesInTree2);
+} = buildCompressedSparseRow(edges2, numberOfNodesInTree2);
 ```
 
 ### Step 4：計算每個節點可達節點數量（使用 BFS）
@@ -201,7 +201,7 @@ const reachableCountPerNodeInTree1 = computeReachableNodesArray(
   csrOffsetsTree1,
   csrNeighborsTree1,
   numberOfNodesInTree1,
-  maximumDistance
+  k
 );
 
 // 第二棵樹最多能走 k-1 步，因為有橋接邊耗費 1 步
@@ -209,7 +209,7 @@ const bestReachableInTree2 = computeMaximumReachableNodes(
   csrOffsetsTree2,
   csrNeighborsTree2,
   numberOfNodesInTree2,
-  maximumDistance - 1 // 因為有橋接邊所以最多為 k-1
+  k - 1 // 因為有橋接邊所以最多為 k-1
 );
 
 // 合併兩棵樹的結果

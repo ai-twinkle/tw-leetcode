@@ -1,3 +1,3 @@
-function subsets(nums: number[]): number[][] {
-    
+function wordSubsets(words1: string[], words2: string[]): string[] {
+
 }

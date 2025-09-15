@@ -1,4 +1,4 @@
-function countBalancedPermutations(numberString: string): number {
+function countBalancedPermutations(num: string): number {
   const MODULUS = 1000000007n;
   const MAX_DIGITS = 80;
 
@@ -49,14 +49,14 @@ function countBalancedPermutations(numberString: string): number {
     inverseFactorials[index - 1] = (inverseFactorials[index] * BigInt(index)) % MODULUS;
   }
 
-  const totalDigits = numberString.length;
+  const totalDigits = num.length;
   const numberOfEvenPositions = Math.ceil(totalDigits / 2); // positions to allocate first half
   const numberOfOddPositions = totalDigits - numberOfEvenPositions;
 
   // Step 3: Count digit frequencies and compute the total sum
   const digitFrequencies = new Array<number>(10).fill(0);
   let totalSumOfDigits = 0;
-  for (const character of numberString) {
+  for (const character of num) {
     const digitValue = character.charCodeAt(0) - 48;
     digitFrequencies[digitValue]++;
     totalSumOfDigits += digitValue;

@@ -199,8 +199,8 @@ const precomputedGoodIntegers = precomputeGoodIntegers();
 ### Step 7：最終查詢函式（$O(1)$ 查詢）
 
 ```typescript
-function countGoodIntegers(totalDigits: number, divisor: number): number {
-  return precomputedGoodIntegers[totalDigits][divisor];
+function countGoodIntegers(n: number, k: number): number {
+  return precomputedGoodIntegers[n][k];
 }
 ```
 

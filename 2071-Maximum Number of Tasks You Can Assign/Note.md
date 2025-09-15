@@ -60,7 +60,7 @@ const sortedWorkers = new Uint32Array(workers).sort();
 若沒有可用藥水 (`pills === 0`) 或藥水無效果 (`strength === 0`)，可透過雙指針法直接貪婪求解：
 
 ```typescript
-if (pills === 0 || pillStrength === 0) {
+if (pills === 0 || strength === 0) {
   let taskPtr = taskCount - 1;
   let workerPtr = workerCount - 1;
   let completed = 0;
@@ -83,7 +83,7 @@ if (pills === 0 || pillStrength === 0) {
 ```typescript
 const boostedWorkers = new Uint32Array(workerCount);
 for (let i = 0; i < workerCount; i++) {
-  boostedWorkers[i] = sortedWorkers[i] + pillStrength;
+  boostedWorkers[i] = sortedWorkers[i] + strength;
 }
 
 if (pills >= workerCount) {

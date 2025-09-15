@@ -1,13 +1,13 @@
-function removeSubfolders(folderList: string[]): string[] {
+function removeSubfolders(folder: string[]): string[] {
   // Lexicographically sort so that any sub-folder always follows its parent
-  folderList.sort();
+  folder.sort();
 
   const filteredFolderList: string[] = [];
   // Track the last folder we kept, *with* a trailing "/" for fast prefix checks
   let lastKeptFolderPath = "";
   let lastKeptFolderPathWithSlash = "";
 
-  for (const currentFolderPath of folderList) {
+  for (const currentFolderPath of folder) {
     // If we haven’t kept anything yet, or this path does *not* start
     // with lastKeptFolderPath + "/" (i.e. is not a sub-folder), keep it:
     if (

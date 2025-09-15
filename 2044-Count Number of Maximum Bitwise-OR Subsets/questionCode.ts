@@ -1,3 +1,3 @@
-function subsets(nums: number[]): number[][] {
-    
+function countMaxOrSubsets(nums: number[]): number {
+
 }

@@ -1,4 +1,4 @@
-function maximumValueSum(nums: number[], k: number, _edges: number[][]): number {
+function maximumValueSum(nums: number[], k: number, edges: number[][]): number {
   const nodeCount = nums.length;
 
   let totalSum = 0;

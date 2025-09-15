@@ -47,10 +47,10 @@ For example, `"/leetcode"` and `"/leetcode/problems"` are valid paths while an e
 
 ### Step 1：排序並初始化相關變數
 
-一開始，我們需要將目錄清單 `folderList` 按照字典序排序，以確保父路徑永遠在子路徑之前：
+一開始，我們需要將目錄清單 `folder` 按照字典序排序，以確保父路徑永遠在子路徑之前：
 
 ```typescript
-folderList.sort(); // 字典序排序，父目錄必定在子目錄前面
+folder.sort(); // 字典序排序，父目錄必定在子目錄前面
 
 const filteredFolderList: string[] = []; // 存放最終結果的陣列
 let lastKeptFolderPath = "";             // 最近保留的父路徑
@@ -65,7 +65,7 @@ let lastKeptFolderPathWithSlash = "";    // 最近保留的父路徑 (後面加�
 - 否則代表這是子目錄，應忽略。
 
 ```typescript
-for (const currentFolderPath of folderList) {
+for (const currentFolderPath of folder) {
   // 如果這是第一個路徑，或目前的路徑非前一個父路徑的子路徑
   if (
     !lastKeptFolderPath ||

@@ -64,10 +64,10 @@ const VOWEL_CHARACTERS = ['A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u'];
 若字串長度小於等於 1，無需處理，直接回傳。
 
 ```typescript
-const stringLength = inputString.length;
+const stringLength = s.length;
 
 if (stringLength <= 1) {
-  return inputString;
+  return s;
 }
 ```
 
@@ -90,7 +90,7 @@ const vowelPositionMask = new Uint8Array(stringLength);
 ```typescript
 // 第一次遍歷：計算每種母音出現次數，並記錄母音位置
 for (let characterIndex = 0; characterIndex < stringLength; characterIndex++) {
-  const characterCode = inputString.charCodeAt(characterIndex); // 題目保證輸入為英文字母
+  const characterCode = s.charCodeAt(characterIndex); // 題目保證輸入為英文字母
 
   let vowelIndex = -1;
   if (characterCode < 128) {
@@ -128,7 +128,7 @@ for (let characterIndex = 0; characterIndex < stringLength; characterIndex++) {
     vowelCountByIndex[vowelBucketPointer]--;
   } else {
     // 子音直接保留原字
-    outputCharacters[characterIndex] = inputString[characterIndex];
+    outputCharacters[characterIndex] = s[characterIndex];
   }
 }
 ```

@@ -1,3 +1,3 @@
-function transformArray(arr: number[]): number[] {
+function minZeroArray(nums: number[], queries: number[][]): number {
 
 }

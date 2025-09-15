@@ -6,7 +6,8 @@
   "scripts": {
     "compile": "node compile-dataset.js",
     "enhance": "node enhance-with-metadata.js",
-    "test": "node test-compiler.js"
+    "test": "node test-compiler.js",
+    "verify": "node verify-code-consistency.js"
   },
   "dependencies": {},
   "devDependencies": {
