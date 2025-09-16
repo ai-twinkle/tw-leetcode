@@ -1,122 +1,184 @@
-/**
- * Finds the size of the largest island that can be formed by changing at most one `0` to `1`.
- * An island is defined as a 4-directionally connected group of `1`s.
- *
- * @param grid - The input n x n binary grid.
- * @returns The size of the largest island after flipping one `0` to `1`.
- */
 function largestIsland(grid: number[][]): number {
-  const n = grid.length;
+  const dimension = grid.length;
+  const totalCells = dimension * dimension;
 
-  // Island IDs start from 2 to distinguish from 1s and 0s
-  let currentIslandId = 2;
-
-  // Maps islandId to its size
-  const islandSizes: Record<number, number> = {};
-
-  /**
-   * Performs DFS to label the current island and count its size.
-   *
-   * @param row - The current row index.
-   * @param col - The current column index.
-   * @param islandId - The ID assigned to the current island.
-   */
-  function dfs(row: number, col: number, islandId: number): void {
-    // Base case: Out of bounds or not part of the current island
-    if (row < 0 || col < 0 || row >= n || col >= n || grid[row][col] !== 1) {
-      return;
+  // 1. Special case: handle smallest grid (1x1)
+  if (totalCells === 1) {
+    if (grid[0][0] === 1) {
+      return 1;
+    } else {
+      return 1;
     }
-
-    grid[row][col] = islandId; // Label this cell with the current islandId
-    islandSizes[islandId]++;   // Increment the size of the current island
-
-    // Explore all 4 directions
-    dfs(row - 1, col, islandId);
-    dfs(row + 1, col, islandId);
-    dfs(row, col - 1, islandId);
-    dfs(row, col + 1, islandId);
   }
 
-  /**
-   * 1. Label all islands and calculate their sizes
-   */
-  for (let row = 0; row < n; row++) {
-    for (let col = 0; col < n; col++) {
-      // Skip water cells and already labeled islands
-      if (grid[row][col] !== 1) {
+  // 2. Flatten the 2D grid into a 1D typed array
+  const flatGrid = new Int32Array(totalCells);
+  let zeroCount = 0;
+
+  for (let row = 0; row < dimension; row++) {
+    const rowBase = row * dimension;
+    const rowArray = grid[row];
+
+    for (let column = 0; column < dimension; column++) {
+      const value = rowArray[column] | 0;
+      flatGrid[rowBase + column] = value;
+
+      if (value === 0) {
+        zeroCount++;
+      }
+    }
+  }
+
+  // 3. Quick return if the grid has no zero → already full island
+  if (zeroCount === 0) {
+    return totalCells;
+  }
+
+  // 4. Label islands and compute their sizes (iterative DFS flood-fill)
+  const islandSizes = new Int32Array(totalCells + 2);
+  let islandId = 2;
+  let maximumIslandSize = 0;
+
+  // Pre-allocated stacks for flood-fill traversal
+  const stackRow = new Int32Array(totalCells);
+  const stackColumn = new Int32Array(totalCells);
+  let stackSize = 0;
+
+  for (let row = 0; row < dimension; row++) {
+    const rowBase = row * dimension;
+
+    for (let column = 0; column < dimension; column++) {
+      const index = rowBase + column;
+
+      if (flatGrid[index] !== 1) {
         continue;
       }
 
-      // Initialize the size of the current island
-      islandSizes[currentIslandId] = 0;
+      // Start exploring a new island
+      let currentSize = 0;
+      stackRow[stackSize] = row;
+      stackColumn[stackSize] = column;
+      stackSize++;
 
-      // Perform DFS to label the current island and count its size
-      dfs(row, col, currentIslandId);
+      flatGrid[index] = islandId;
 
-      // Move to the next island ID
-      currentIslandId++;
+      // Flood-fill with stack
+      while (stackSize > 0) {
+        stackSize--;
+        const currentRow = stackRow[stackSize];
+        const currentColumn = stackColumn[stackSize];
+        const currentBase = currentRow * dimension;
+        currentSize++;
+
+        // Explore Up
+        if (currentRow > 0) {
+          const upIndex = (currentRow - 1) * dimension + currentColumn;
+          if (flatGrid[upIndex] === 1) {
+            flatGrid[upIndex] = islandId;
+            stackRow[stackSize] = currentRow - 1;
+            stackColumn[stackSize] = currentColumn;
+            stackSize++;
+          }
+        }
+
+        // Explore Down
+        if (currentRow + 1 < dimension) {
+          const downIndex = (currentRow + 1) * dimension + currentColumn;
+          if (flatGrid[downIndex] === 1) {
+            flatGrid[downIndex] = islandId;
+            stackRow[stackSize] = currentRow + 1;
+            stackColumn[stackSize] = currentColumn;
+            stackSize++;
+          }
+        }
+
+        // Explore Left
+        if (currentColumn > 0) {
+          const leftIndex = currentBase + (currentColumn - 1);
+          if (flatGrid[leftIndex] === 1) {
+            flatGrid[leftIndex] = islandId;
+            stackRow[stackSize] = currentRow;
+            stackColumn[stackSize] = currentColumn - 1;
+            stackSize++;
+          }
+        }
+
+        // Explore Right
+        if (currentColumn + 1 < dimension) {
+          const rightIndex = currentBase + (currentColumn + 1);
+          if (flatGrid[rightIndex] === 1) {
+            flatGrid[rightIndex] = islandId;
+            stackRow[stackSize] = currentRow;
+            stackColumn[stackSize] = currentColumn + 1;
+            stackSize++;
+          }
+        }
+      }
+
+      // Store computed island size
+      islandSizes[islandId] = currentSize;
+      if (currentSize > maximumIslandSize) {
+        maximumIslandSize = currentSize;
+      }
+
+      islandId++;
     }
   }
 
-  /**
-   * Calculates the size contributed by neighboring islands when flipping a `0` to `1`.
-   *
-   * @param row - The row index of the `0` cell.
-   * @param col - The column index of the `0` cell.
-   * @param visitedIslands - Set to track visited islands and avoid double counting.
-   * @returns The size contribution of neighboring islands.
-   */
-  function getConnectedIslandSize(row: number, col: number, visitedIslands: Set<number>): number {
-    // Out of bounds or water cell or already visited island
-    if (row < 0 || col < 0 || row >= n || col >= n || grid[row][col] <= 1) {
-      return 0;
-    }
+  // 5. Try flipping each zero to one and merge with neighbors
+  let bestResult = maximumIslandSize;
 
-    // Get the island ID of the neighboring island
-    const islandId = grid[row][col];
-    if (visitedIslands.has(islandId)) {
-      return 0;
-    }
+  for (let row = 0; row < dimension; row++) {
+    const rowBase = row * dimension;
 
-    visitedIslands.add(islandId); // Mark this island as visited
-    return islandSizes[islandId]; // Return its size
-  }
+    for (let column = 0; column < dimension; column++) {
+      const index = rowBase + column;
 
-  let maxIslandSize = 0;
+      if (flatGrid[index] !== 0) {
+        continue;
+      }
 
-  // Flag to check if any 0 was found in the grid
-  let haveZeroCell = false;
+      // Collect neighboring island ids
+      const upId = row > 0 ? flatGrid[(row - 1) * dimension + column] : 0;
+      const downId = row + 1 < dimension ? flatGrid[(row + 1) * dimension + column] : 0;
+      const leftId = column > 0 ? flatGrid[index - 1] : 0;
+      const rightId = column + 1 < dimension ? flatGrid[index + 1] : 0;
 
-  /**
-   * 2. Check each `0` cell to find the maximum possible island size.
-   */
-  for (let row = 0; row < n; row++) {
-    for (let col = 0; col < n; col++) {
-      if (grid[row][col] === 0) {
-        // A 0 was found, so flag it
-        haveZeroCell = true;
+      // Candidate island size (start with 1 for the flipped cell)
+      let candidateSize = 1;
 
-        // Track visited neighboring islands
-        const visitedIslands = new Set<number>();
+      if (upId > 1) {
+        candidateSize += islandSizes[upId];
+      }
 
-        // Calculate the potential island size by flipping this 0
-        let potentialSize = 1; // Start with 1 for the flipped 0 itself
+      if (rightId > 1 && rightId !== upId) {
+        candidateSize += islandSizes[rightId];
+      }
 
-        // Check the size of neighboring islands in 4 directions
-        potentialSize += getConnectedIslandSize(row - 1, col, visitedIslands);
-        potentialSize += getConnectedIslandSize(row + 1, col, visitedIslands);
-        potentialSize += getConnectedIslandSize(row, col - 1, visitedIslands);
-        potentialSize += getConnectedIslandSize(row, col + 1, visitedIslands);
+      if (downId > 1 && downId !== upId && downId !== rightId) {
+        candidateSize += islandSizes[downId];
+      }
 
-        // Update the maximum island size
-        maxIslandSize = Math.max(maxIslandSize, potentialSize);
+      if (leftId > 1 && leftId !== upId && leftId !== rightId && leftId !== downId) {
+        candidateSize += islandSizes[leftId];
+      }
+
+      // Update best result
+      if (candidateSize > bestResult) {
+        bestResult = candidateSize;
+
+        // Early exit if we reach full grid
+        if (bestResult === totalCells) {
+          return bestResult;
+        }
       }
     }
   }
 
-  /**
-   * 3. Return the maximum island size after flipping one `0` to `1`.
-   *    If no `0` was found, return the size of the entire grid.
-   */
-  return haveZeroCell ? maxIslandSize : n * n;
+  // 6. If all were zero, flipping one creates an island of size 1
+  if (bestResult === 0) {
+    return 1;
+  }
+
+  return bestResult;
 }
