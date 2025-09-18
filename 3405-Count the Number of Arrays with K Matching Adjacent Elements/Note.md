@@ -140,7 +140,6 @@ function countGoodArrays(n: number, m: number, k: number): number {
 }
 ```
 
-
 ## 時間複雜度
 
 - 預計算階乘和反階乘需時 $O(n)$。
