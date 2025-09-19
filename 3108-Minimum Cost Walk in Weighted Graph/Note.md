@@ -1,4 +1,4 @@
-# 3191. Minimum Cost Walk in Weighted Graph
+# 3108. Minimum Cost Walk in Weighted Graph
 
 There is an undirected weighted graph with n vertices labeled from `0` to `n - 1`.
 

@@ -582,47 +582,47 @@ class CodeConsistencyVerifier {
 
   /**
    * Parse directory name to extract problem number and title
-   * Format: "123-Problem Title Here" -> { number: 123, title: "Problem Title Here" }
+   * Format: "123-K-th Smallest in Lexicographical Order" -> { number: 123, title: "K-th Smallest in Lexicographical Order" }
    */
   parseDirectoryName(dirName) {
-    const parts = dirName.split('-');
-    if (parts.length < 2) {
+    const firstHyphenIndex = dirName.indexOf('-');
+    if (firstHyphenIndex === -1) {
       return null;
     }
-    
-    const number = parseInt(parts[0], 10);
+
+    const numberPart = dirName.substring(0, firstHyphenIndex).trim();
+    const titlePart = dirName.substring(firstHyphenIndex + 1).trim();
+
+    const number = parseInt(numberPart, 10);
     if (isNaN(number)) {
       return null;
     }
-    
-    // Join remaining parts with spaces to get the title
-    const title = parts.slice(1).join(' ');
-    
-    return { number, title };
+
+    return { number, title: titlePart };
   }
 
   /**
    * Parse Note.md first line to extract problem number and title
-   * Format: "# 123. Problem Title Here" -> { number: 123, title: "Problem Title Here" }
+   * Format: "# 123. K-th Smallest in Lexicographical Order" -> { number: 123, title: "K-th Smallest in Lexicographical Order" }
    */
   parseNoteTitle(firstLine) {
     // Remove leading # and trim
     const content = firstLine.replace(/^#\s*/, '').trim();
-    
+
     // Split by first ". " to separate number and title
     const dotIndex = content.indexOf('. ');
     if (dotIndex === -1) {
       return null;
     }
-    
+
     const numberPart = content.substring(0, dotIndex).trim();
     const titlePart = content.substring(dotIndex + 2).trim();
-    
+
     const number = parseInt(numberPart, 10);
     if (isNaN(number)) {
       return null;
     }
-    
+
     return { number, title: titlePart };
   }
 }
