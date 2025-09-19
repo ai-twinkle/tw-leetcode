@@ -231,13 +231,16 @@ class CodeConsistencyVerifier {
       directory: dirName,
       hasQuestionFile: false,
       hasAnswerFile: false,
+      hasNoteFile: false,
       questionSignature: null,
       answerSignature: null,
+      noteTitle: null,
       issues: []
     };
 
     const questionPath = join(dirPath, 'questionCode.ts');
     const answerPath = join(dirPath, 'answer.ts');
+    const notePath = join(dirPath, 'Note.md');
 
     // Check if files exist
     try {
@@ -254,6 +257,13 @@ class CodeConsistencyVerifier {
       // File doesn't exist
     }
 
+    try {
+      statSync(notePath);
+      result.hasNoteFile = true;
+    } catch (error) {
+      // File doesn't exist
+    }
+
     if (!result.hasQuestionFile && !result.hasAnswerFile) {
       result.issues.push('Neither questionCode.ts nor answer.ts found');
       return result;
@@ -265,6 +275,41 @@ class CodeConsistencyVerifier {
 
     if (!result.hasAnswerFile) {
       result.issues.push('Missing answer.ts file');
+    }
+
+    // Check Note.md title consistency
+    if (result.hasNoteFile) {
+      try {
+        const noteContent = readFileSync(notePath, 'utf-8');
+        const lines = noteContent.split('\n');
+        if (lines.length > 0) {
+          const firstLine = lines[0].trim();
+          result.noteTitle = this.parseNoteTitle(firstLine);
+          
+          if (result.noteTitle) {
+            const dirInfo = this.parseDirectoryName(dirName);
+            if (dirInfo) {
+              // Compare number and title
+              if (result.noteTitle.number !== dirInfo.number) {
+                result.issues.push(`Problem number mismatch: directory has '${dirInfo.number}', Note.md has '${result.noteTitle.number}'`);
+              }
+              if (result.noteTitle.title !== dirInfo.title) {
+                result.issues.push(`Problem title mismatch: directory has '${dirInfo.title}', Note.md has '${result.noteTitle.title}'`);
+              }
+            } else {
+              result.issues.push('Could not parse directory name format (expected: "NUMBER-Title")');
+            }
+          } else {
+            result.issues.push('Could not parse Note.md title format (expected: "# NUMBER. Title")');
+          }
+        } else {
+          result.issues.push('Note.md is empty');
+        }
+      } catch (error) {
+        result.issues.push(`Error reading Note.md: ${error.message}`);
+      }
+    } else {
+      result.issues.push('Missing Note.md file');
     }
 
     // If both files exist, compare their signatures
@@ -484,6 +529,11 @@ class CodeConsistencyVerifier {
         console.log(`   • ${issue}`);
       }
 
+      // Show Note.md title information if available
+      if (result.hasNoteFile && result.noteTitle) {
+        console.log(`   Note.md: # ${result.noteTitle.number}. ${result.noteTitle.title}`);
+      }
+
       if (result.questionSignature && result.answerSignature) {
         if (result.questionSignature.type === 'class' && result.answerSignature.type === 'class') {
           console.log(`   Question: class ${result.questionSignature.name}`);
@@ -528,6 +578,52 @@ class CodeConsistencyVerifier {
     }
 
     console.log('\n✅ Verification complete!');
+  }
+
+  /**
+   * Parse directory name to extract problem number and title
+   * Format: "123-Problem Title Here" -> { number: 123, title: "Problem Title Here" }
+   */
+  parseDirectoryName(dirName) {
+    const parts = dirName.split('-');
+    if (parts.length < 2) {
+      return null;
+    }
+    
+    const number = parseInt(parts[0], 10);
+    if (isNaN(number)) {
+      return null;
+    }
+    
+    // Join remaining parts with spaces to get the title
+    const title = parts.slice(1).join(' ');
+    
+    return { number, title };
+  }
+
+  /**
+   * Parse Note.md first line to extract problem number and title
+   * Format: "# 123. Problem Title Here" -> { number: 123, title: "Problem Title Here" }
+   */
+  parseNoteTitle(firstLine) {
+    // Remove leading # and trim
+    const content = firstLine.replace(/^#\s*/, '').trim();
+    
+    // Split by first ". " to separate number and title
+    const dotIndex = content.indexOf('. ');
+    if (dotIndex === -1) {
+      return null;
+    }
+    
+    const numberPart = content.substring(0, dotIndex).trim();
+    const titlePart = content.substring(dotIndex + 2).trim();
+    
+    const number = parseInt(numberPart, 10);
+    if (isNaN(number)) {
+      return null;
+    }
+    
+    return { number, title: titlePart };
   }
 }
 
