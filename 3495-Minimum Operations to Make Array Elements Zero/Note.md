@@ -134,8 +134,8 @@ function floorLogBaseFourIndex(n: number, powerOfFourTable: Uint32Array): number
 
 藉由加權前綴和 + 最後一段線性公式，計算 $\sum_{x=1}^n \lfloor \log_4 x \rfloor$。
 
-* 先透過 `floorLogBaseFourIndex(n)` 找到區間層級。
-* 回傳加權總和 + 線性尾段。
+- 先透過 `floorLogBaseFourIndex(n)` 找到區間層級。
+- 回傳加權總和 + 線性尾段。
 
 ```typescript
 /**
