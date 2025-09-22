@@ -53,14 +53,13 @@ and `drop` will only be called if the shop had previously rented out the movie.
 
 設計策略：
 
-* **緊湊狀態表**：對每筆拷貝賦予 `entryId`，用定長陣列（TypedArray）存放 `price / shop / movie / state / version`，O(1) 讀寫。
-* **直接索引**：建 `movie → (shop → entryId)` 映射，使 `rent/drop` 能 O(1) 取得對應拷貝。
-* **雙堆 + 惰性刪除**：
-
-    * 每部電影一個「可租堆」：按（價格、店編）排序。
-    * 全域一個「已租堆」：按（價格、店編、電影）排序。
-    * **不做中間刪除**：每次狀態改變就讓該 `entryId` 的 **版本號 +1**，把 `(entryId, version)` 打包入堆；取堆頂時若版本不符或狀態不符就丟棄，直到遇到有效元素。
-* **可重用二元堆**：以通用 `BinaryHeap`（由比較器決定排序）承載上述兩類優先順序。
+- **緊湊狀態表**：對每筆拷貝賦予 `entryId`，用定長陣列（TypedArray）存放 `price / shop / movie / state / version`，O(1) 讀寫。
+- **直接索引**：建 `movie → (shop → entryId)` 映射，使 `rent/drop` 能 O(1) 取得對應拷貝。
+- **雙堆 + 惰性刪除**：
+    - 每部電影一個「可租堆」：按（價格、店編）排序。
+    - 全域一個「已租堆」：按（價格、店編、電影）排序。
+    - **不做中間刪除**：每次狀態改變就讓該 `entryId` 的 **版本號 +1**，把 `(entryId, version)` 打包入堆；取堆頂時若版本不符或狀態不符就丟棄，直到遇到有效元素。
+- **可重用二元堆**：以通用 `BinaryHeap`（由比較器決定排序）承載上述兩類優先順序。
 
 ## 解題步驟
 
