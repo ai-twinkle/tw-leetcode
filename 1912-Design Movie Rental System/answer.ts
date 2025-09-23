@@ -109,10 +109,10 @@ class MovieRentingSystem {
   private readonly rentedHeap: BinaryHeap;
 
   /**
-   * @param shopCount Total number of shops.
+   * @param n Total number of shops.
    * @param entries Array of [shop, movie, price].
    */
-  constructor(shopCount: number, entries: number[][]) {
+  constructor(n: number, entries: number[][]) {
     this.entryCount = entries.length;
     const totalEntries = this.entryCount;
 

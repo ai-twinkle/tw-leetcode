@@ -197,10 +197,10 @@ class MovieRentingSystem {
   // Step 2：主類別與欄位宣告（MovieRentingSystem）
 
   /**
-   * @param shopCount 店家總數。
+   * @param n 店家總數。
    * @param entries [shop, movie, price] 陣列。
    */
-  constructor(shopCount: number, entries: number[][]) {
+  constructor(n: number, entries: number[][]) {
     this.entryCount = entries.length;
     const totalEntries = this.entryCount;
 
