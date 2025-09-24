@@ -87,7 +87,10 @@ You need to consider the following
 4. In most cases, math can help to solve it by combining!
 5. Consider the constraint, designing a well-fit solution is better
 6. Do not change the main function name/function parameter, as it may invoke an error
-7. Use a full name other than a shortcut for readability 
+7. Use a full name other than a shortcut for readability
+8. If commenting on a function/method, please use JSDoc with params and return (Only use return if you have no void return)
+9. Please use a meaningful comment in a single line at an important step
+10. Avoid using a single line if or for statement for readability
 
 Now consider the question and the following code; try to optimize it as fast as possible.
 Your task will be marked as a failure if your run time performance is worse than the base code.
