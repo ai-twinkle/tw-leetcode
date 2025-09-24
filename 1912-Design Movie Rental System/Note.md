@@ -44,232 +44,81 @@ and `drop` will only be called if the shop had previously rented out the movie.
 
 ## 基礎思路
 
-本題需設計一個電影租借系統，支援：
+本題目標是設計一套電影租借系統，需同時滿足下列四項功能與效能需求：
 
-1. `search(movie)`：查詢該電影目前**可租**的店家，依「價格升冪 → 店編升冪」取前 5 家。
-2. `rent(shop, movie)`：將該店的此電影標記為**已租**。
-3. `drop(shop, movie)`：歸還已租拷貝，恢復為**可租**。
-4. `report()`：回報目前**已租**清單中，依「價格升冪 → 店編升冪 → 電影編升冪」取前 5 筆 `[shop, movie]`。
+1. **搜尋可租店家**：給定某部電影，找出最多 5 家仍有副本可供租借的店家，依「價格升序 → 店號升序」排序。
+2. **租借與歸還操作**：系統需支援對任意店家與電影的租借與歸還，並正確維護租借狀態。
+3. **租借報表輸出**：查詢目前所有已被租出的條目中，最便宜的前 5 筆 `(shop, movie)`，排序依「價格升序 → 店號升序 → 電影編號升序」。
+4. **操作效率要求**：在 $10^5$ 次操作內皆需高效完成，需避免每次操作都對全體資料進行掃描或排序。
 
-設計策略：
+為了達成上述目標，我們可以採用以下策略：
 
-- **緊湊狀態表**：對每筆拷貝賦予 `entryId`，用定長陣列（TypedArray）存放 `price / shop / movie / state / version`，O(1) 讀寫。
-- **直接索引**：建 `movie → (shop → entryId)` 映射，使 `rent/drop` 能 O(1) 取得對應拷貝。
-- **雙堆 + 惰性刪除**：
-    - 每部電影一個「可租堆」：按（價格、店編）排序。
-    - 全域一個「已租堆」：按（價格、店編、電影）排序。
-    - **不做中間刪除**：每次狀態改變就讓該 `entryId` 的 **版本號 +1**，把 `(entryId, version)` 打包入堆；取堆頂時若版本不符或狀態不符就丟棄，直到遇到有效元素。
-- **可重用二元堆**：以通用 `BinaryHeap`（由比較器決定排序）承載上述兩類優先順序。
+- **建立電影與店家的關聯結構**：需能針對任一電影，快速查詢其所有擁有副本的店家。
+- **維護租借狀態與即時更新**：系統需能即時反映租借或歸還後的狀態變更，並使後續查詢與報表保持正確。
+- **快速取得最便宜選項**：無論是查詢可租副本或列出已租項目，皆需能即時找出最便宜的前幾筆結果，並具備穩定的排序規則。
+- **使用快取與限制視窗**：為避免重複計算，可在查詢結果中使用適當快取；由於僅需返回最多 5 筆結果，排序處理可限制於小範圍內以降低成本。
+
+透過上述策略設計，系統能在每次操作中達成接近常數或線性時間的處理效能，滿足題目所要求的高頻查詢與即時回應能力。
 
 ## 解題步驟
 
-### Step 1：通用二元堆 `BinaryHeap`（比較器決定順序）
+### Step 1：主類別與欄位宣告
 
-先實作與本題配合的最小堆（以比較器定義 a 是否在 b 前），供「可租堆」與「已租堆」共用。
-
-```typescript
-/**
- * 數值型二元堆。比較器需回傳 true 表示 a 應位於 b 前（a < b）。
- */
-class BinaryHeap {
-  private data: number[] = [];
-  private readonly comparator: (a: number, b: number) => boolean;
-
-  /**
-   * @param comparator 若 a 應在 b 前則回傳 true 的函式。
-   */
-  constructor(comparator: (a: number, b: number) => boolean) {
-    this.comparator = comparator;
-  }
-
-  /**
-   * @returns 堆中元素個數。
-   */
-  size(): number {
-    return this.data.length;
-  }
-
-  /**
-   * @returns 不移除的堆頂元素。
-   */
-  peek(): number | undefined {
-    return this.data[0];
-  }
-
-  /**
-   * 插入一個數值。
-   * @param value 要推入的數字。
-   */
-  push(value: number): void {
-    this.data.push(value);
-    this.siftUp(this.data.length - 1);
-  }
-
-  /**
-   * 移除並回傳堆頂元素。
-   * @returns 堆頂數字；若為空回傳 undefined。
-   */
-  pop(): number | undefined {
-    const n = this.data.length;
-    if (n === 0) {
-      return undefined;
-    }
-    const top = this.data[0];
-    const last = this.data.pop()!;
-    if (n > 1) {
-      this.data[0] = last;
-      this.siftDown(0);
-    }
-    return top;
-  }
-
-  private siftUp(index: number): void {
-    while (index > 0) {
-      const parentIndex = (index - 1) >> 1;
-      if (this.comparator(this.data[index], this.data[parentIndex])) {
-        const tmp = this.data[index];
-        this.data[index] = this.data[parentIndex];
-        this.data[parentIndex] = tmp;
-        index = parentIndex;
-      } else {
-        break;
-      }
-    }
-  }
-
-  private siftDown(index: number): void {
-    const n = this.data.length;
-    while (true) {
-      let smallest = index;
-      const leftIndex = (index << 1) + 1;
-      const rightIndex = leftIndex + 1;
-
-      if (leftIndex < n && this.comparator(this.data[leftIndex], this.data[smallest])) {
-        smallest = leftIndex;
-      }
-      if (rightIndex < n && this.comparator(this.data[rightIndex], this.data[smallest])) {
-        smallest = rightIndex;
-      }
-      if (smallest === index) {
-        break;
-      }
-      const tmp = this.data[index];
-      this.data[index] = this.data[smallest];
-      this.data[smallest] = tmp;
-      index = smallest;
-    }
-  }
-}
-```
-
-### Step 2：主類別與欄位宣告（`MovieRentingSystem`）
-
-宣告打包常數、拷貝屬性表、狀態/版本、查找索引，以及兩種堆。
+宣告常數索引、型別別名與四個核心結構：`(shop,movie) → entry`、`movie → entries[]`、已租集合、以及單片搜尋快取。
 
 ```typescript
+/* ------------------ 保留相容性的型別與常數定義 ------------------ */
+const SHOP = 0;   // 商店索引
+const MOVIE = 1;  // 電影索引
+const PRICE = 2;  // 價格索引
+
+type Entry = [shop: number, movie: number, price: number];  // 一筆租借條目：[商店編號, 電影編號, 價格]
+
+/* --------------------------- 電影租借系統 --------------------------- */
 class MovieRentingSystem {
-  /**
-   * 打包因子：把 (entryId, version) 編碼成單一數字。
-   */
-  private readonly PACK = 1_000_000;
-
-  private readonly entryCount: number;
-  private readonly priceByEntry: Int32Array;
-  private readonly shopByEntry: Int32Array;
-  private readonly movieByEntry: Int32Array;
-  private readonly stateByEntry: Uint8Array;    // 0 = 可租, 1 = 已租
-  private readonly versionByEntry: Int32Array;  // 每次狀態改變都 +1
-
-  private readonly movieToShopToEntry: Map<number, Map<number, number>> = new Map();
-  private readonly availableHeaps: Map<number, BinaryHeap> = new Map();
-  private readonly rentedHeap: BinaryHeap;
+  private readonly entryByPairKey: Map<number, Entry>;       // 快速查找：(shop,movie) → entry（價格/報表使用）
+  private readonly entriesByMovieMap: Map<number, Entry[]>;  // 依電影分組，加速 search()，避免掃描不相關條目
+  private readonly rentedPairKeys: Set<number>;              // 當前已租集合，元素為數值鍵 (shop,movie)
+  private readonly searchResultCache: Map<number, number[]>; // 每部電影的搜尋快取（店家列表）
 
   // ...
 }
 ```
 
-### Step 3：建構子 — 載入拷貝、初始化索引與堆
+### Step 2：建構子 — 初始化索引
 
-初始化各欄位、建立比較器，為每部電影建立可租堆，並將所有初始可租拷貝（version=0）推入。
+建立 `(shop,movie)` 數值鍵索引與 `movie` 分桶；輸入 `entries` 為 `number[][]`，以 `Entry` 斷言讀取。
 
 ```typescript
 class MovieRentingSystem {
-  // Step 2：主類別與欄位宣告（MovieRentingSystem）
+  // Step 1：主類別與欄位宣告
 
   /**
-   * @param n 店家總數。
-   * @param entries [shop, movie, price] 陣列。
+   * 初始化電影租借系統。
+   * @param n 商店數量
+   * @param entries 條目清單 [shop, movie, price]
    */
   constructor(n: number, entries: number[][]) {
-    this.entryCount = entries.length;
-    const totalEntries = this.entryCount;
+    this.entryByPairKey = new Map<number, Entry>();
+    this.entriesByMovieMap = new Map<number, Entry[]>();
+    this.rentedPairKeys = new Set<number>();
+    this.searchResultCache = new Map<number, number[]>();
 
-    this.priceByEntry = new Int32Array(totalEntries);
-    this.shopByEntry = new Int32Array(totalEntries);
-    this.movieByEntry = new Int32Array(totalEntries);
-    this.stateByEntry = new Uint8Array(totalEntries);
-    this.versionByEntry = new Int32Array(totalEntries);
+    // 建立數值鍵與每部電影的索引，提昇 search 效率
+    for (let index = 0; index < entries.length; index++) {
+      const entry = entries[index] as Entry;
+      const shopIdentifier = entry[SHOP];
+      const movieIdentifier = entry[MOVIE];
 
-    // 可租堆比較器（價格升冪 → 店編升冪）
-    const lessAvailable = (a: number, b: number): boolean => {
-      const entryA = Math.floor(a / this.PACK);
-      const entryB = Math.floor(b / this.PACK);
-      const priceA = this.priceByEntry[entryA];
-      const priceB = this.priceByEntry[entryB];
-      if (priceA !== priceB) {
-        return priceA < priceB;
+      const pairKey = this.packKey(shopIdentifier, movieIdentifier);
+      this.entryByPairKey.set(pairKey, entry);
+
+      let listForMovie = this.entriesByMovieMap.get(movieIdentifier);
+      if (listForMovie === undefined) {
+        listForMovie = [];
+        this.entriesByMovieMap.set(movieIdentifier, listForMovie);
       }
-      return this.shopByEntry[entryA] < this.shopByEntry[entryB];
-    };
-
-    // 已租堆比較器（價格升冪 → 店編升冪 → 電影升冪）
-    const lessRented = (a: number, b: number): boolean => {
-      const entryA = Math.floor(a / this.PACK);
-      const entryB = Math.floor(b / this.PACK);
-      const priceA = this.priceByEntry[entryA];
-      const priceB = this.priceByEntry[entryB];
-      if (priceA !== priceB) {
-        return priceA < priceB;
-      }
-      const shopA = this.shopByEntry[entryA];
-      const shopB = this.shopByEntry[entryB];
-      if (shopA !== shopB) {
-        return shopA < shopB;
-      }
-      return this.movieByEntry[entryA] < this.movieByEntry[entryB];
-    };
-
-    this.rentedHeap = new BinaryHeap(lessRented);
-
-    // 載入 entries 並初始化
-    for (let entryId = 0; entryId < totalEntries; entryId++) {
-      const [shop, movie, price] = entries[entryId];
-
-      // 基本屬性與初始狀態
-      this.priceByEntry[entryId] = price;
-      this.shopByEntry[entryId] = shop;
-      this.movieByEntry[entryId] = movie;
-      this.stateByEntry[entryId] = 0;      // 可租
-      this.versionByEntry[entryId] = 0;    // 初始版本
-
-      // 查找索引：movie -> shop -> entryId
-      let shopToEntry = this.movieToShopToEntry.get(movie);
-      if (!shopToEntry) {
-        shopToEntry = new Map();
-        this.movieToShopToEntry.set(movie, shopToEntry);
-      }
-      shopToEntry.set(shop, entryId);
-
-      // 為此 movie 準備可租堆
-      let heap = this.availableHeaps.get(movie);
-      if (!heap) {
-        heap = new BinaryHeap(lessAvailable);
-        this.availableHeaps.set(movie, heap);
-      }
-
-      // 推入可租堆（version = 0）
-      const packed = entryId * this.PACK;
-      heap.push(packed);
+      listForMovie.push(entry);
     }
   }
 
@@ -277,196 +126,262 @@ class MovieRentingSystem {
 }
 ```
 
-### Step 4：`search(movie)` — 查詢可租店家（取前 5 家）
+### Step 3：私有工具 `packKey` — 將 `(shop, movie)` 打包成數值鍵
 
-從該電影的可租堆彈出檢查有效快照（狀態為可租且版本符合），收集到 5 筆為止，並把有效元素推回以維持堆完整。
+以 `shop * 10001 + movie` 合成唯一鍵，避免建立字串與碰撞。
 
 ```typescript
 class MovieRentingSystem {
-  // Step 2：主類別與欄位宣告（MovieRentingSystem）
+  // Step 1：主類別與欄位宣告
   
-  // Step 3：建構子 — 載入拷貝、初始化索引與堆
+  // Step 2：建構子 — 初始化索引
 
   /**
-   * 找到最多 5 間擁有可租拷貝的店，依「價格、店編」排序。
-   * @param movie 電影編號。
-   * @returns 店家編號陣列。
+   * 將 (shop, movie) 組合為穩定的數值鍵。
+   * 常數選擇確保唯一性並避免字串建立的開銷。
+   *
+   * @param shop 商店編號
+   * @param movie 電影編號
+   * @returns 數值鍵
+   */
+  private packKey(shop: number, movie: number): number {
+    // 合成單一數字鍵；常數 10001 可避免碰撞
+    return shop * 10001 + movie;
+  }
+
+  // ...
+}
+```
+
+### Step 4：`search(movie)` — 查詢未租出的最便宜店家（至多 5 家）
+
+先查快取；若未命中，僅掃描該片 `entries`，跳過已租，維護長度 ≤ 5 的視窗（價格升序、同價比店號），最後回傳店號並寫入快取。
+
+```typescript
+class MovieRentingSystem {
+  // Step 1：主類別與欄位宣告
+  
+  // Step 2：建構子 — 初始化索引
+  
+  // Step 3：私有工具 `packKey` — 將 `(shop, movie)` 打包成數值鍵
+
+  /**
+   * 查詢至多 5 家未租出、且最便宜的店家（價升序，若同價則店號升序）。
+   *
+   * @param movie 電影編號
+   * @returns 店家編號陣列
    */
   search(movie: number): number[] {
-    const heap = this.availableHeaps.get(movie);
-    if (!heap) {
+    // 若有快取，直接回傳
+    const cachedShops = this.searchResultCache.get(movie);
+    if (cachedShops !== undefined) {
+      return cachedShops;
+    }
+
+    // 僅處理該電影的條目，避免全域掃描
+    const entriesOfMovie = this.entriesByMovieMap.get(movie);
+    if (entriesOfMovie === undefined || entriesOfMovie.length === 0) {
+      this.searchResultCache.set(movie, []);
       return [];
     }
-    const results: number[] = [];
-    const buffer: number[] = [];
 
-    // 彈出直到集滿 5 筆有效紀錄或堆空
-    while (results.length < 5 && heap.size() > 0) {
-      const packed = heap.pop()!;
-      const entryId = Math.floor(packed / this.PACK);
-      const pushedVersion = packed % this.PACK;
+    // 維護長度 ≤ 5 的排序視窗（價格升序、同價店號升序）
+    const topCandidates: Entry[] = [];
 
-      // 驗證狀態與版本
-      if (this.stateByEntry[entryId] === 0 && pushedVersion === this.versionByEntry[entryId]) {
-        results.push(this.shopByEntry[entryId]);
-        buffer.push(packed); // 保持堆完整
+    // 以插入法建立前 5 名
+    outerLoop: for (let index = 0; index < entriesOfMovie.length; index++) {
+      const entry = entriesOfMovie[index];
+      const shopIdentifier = entry[SHOP];
+
+      // 已租則跳過
+      const pairKey = this.packKey(shopIdentifier, movie);
+      if (this.rentedPairKeys.has(pairKey)) {
+        continue;
+      }
+
+      // 插入到有序視窗中
+      for (let position = 0; position < topCandidates.length; position++) {
+        const current = topCandidates[position];
+
+        const isCheaper =
+          entry[PRICE] < current[PRICE] ||
+          (entry[PRICE] === current[PRICE] && shopIdentifier < current[SHOP]);
+
+        if (isCheaper) {
+          topCandidates.splice(position, 0, entry);
+
+          if (topCandidates.length > 5) {
+            topCandidates.pop();
+          }
+          continue outerLoop;
+        }
+      }
+
+      if (topCandidates.length < 5) {
+        topCandidates.push(entry);
       }
     }
 
-    // 推回有效元素
-    for (const p of buffer) {
-      heap.push(p);
-    }
-    return results;
+    // 取出店家編號，並寫入快取
+    const resultShops: number[] = topCandidates.map((entry) => entry[SHOP]);
+    this.searchResultCache.set(movie, resultShops);
+    return resultShops;
   }
 
   // ...
 }
 ```
 
-### Step 5：`rent(shop, movie)` — 出租拷貝（版本 +1，進入已租堆）
+### Step 5：`rent(shop, movie)` — 租出電影
 
-透過索引定位拷貝，版本 +1、標為已租，並把新版本快照推入「已租堆」。
+將 `(shop,movie)` 標記為已租，並移除該電影的搜尋快取。
 
 ```typescript
 class MovieRentingSystem {
-  // Step 2：主類別與欄位宣告（MovieRentingSystem）
+  // Step 1：主類別與欄位宣告
+
+  // Step 2：建構子 — 初始化索引
+
+  // Step 3：私有工具 `packKey` — 將 `(shop, movie)` 打包成數值鍵
   
-  // Step 3：建構子 — 載入拷貝、初始化索引與堆
-  
-  // Step 4：search(movie) — 查詢可租店家
+  // Step 4：`search(movie)` — 查詢未租出的最便宜店家（至多 5 家）
 
   /**
-   * 從指定店家租出該電影。
-   * @param shop 店家編號。
-   * @param movie 電影編號。
+   * 將指定電影自指定商店租出。
+   *
+   * @param shop 商店編號
+   * @param movie 電影編號
    */
   rent(shop: number, movie: number): void {
-    const entryId = this.movieToShopToEntry.get(movie)!.get(shop)!;
+    // 標記為已租
+    const pairKey = this.packKey(shop, movie);
+    this.rentedPairKeys.add(pairKey);
 
-    // 版本 +1 並標記為已租
-    this.versionByEntry[entryId]++;
-    this.stateByEntry[entryId] = 1;
-
-    // 推入已租堆（帶新版本）
-    const packed = entryId * this.PACK + this.versionByEntry[entryId];
-    this.rentedHeap.push(packed);
+    // 僅使該電影的搜尋快取失效
+    this.searchResultCache.delete(movie);
   }
 
   // ...
 }
 ```
 
-### Step 6：`drop(shop, movie)` — 歸還拷貝（版本 +1，回到可租堆）
+### Step 6：`drop(shop, movie)` — 歸還電影
 
-版本 +1、狀態改為可租，確保該電影的可租堆存在後，推入新版本快照。
+移除 `(shop,movie)` 的已租標記，並使該電影的搜尋快取失效。
 
 ```typescript
 class MovieRentingSystem {
-  // Step 2：主類別與欄位宣告（MovieRentingSystem）
+  // Step 1：主類別與欄位宣告
+
+  // Step 2：建構子 — 初始化索引
+
+  // Step 3：私有工具 `packKey` — 將 `(shop, movie)` 打包成數值鍵
+
+  // Step 4：`search(movie)` — 查詢未租出的最便宜店家（至多 5 家）
   
-  // Step 3：建構子 — 載入拷貝、初始化索引與堆
-  
-  // Step 4：search(movie) — 查詢可租店家
-  
-  // Step 5：rent(shop, movie) — 出租拷貝
+  // Step 5：`rent(shop, movie)` — 租出電影
 
   /**
-   * 歸還在指定店家租借的電影。
-   * @param shop 店家編號。
-   * @param movie 電影編號。
+   * 歸還指定商店的指定電影。
+   *
+   * @param shop 商店編號
+   * @param movie 電影編號
    */
   drop(shop: number, movie: number): void {
-    const entryId = this.movieToShopToEntry.get(movie)!.get(shop)!;
+    // 解除已租狀態
+    const pairKey = this.packKey(shop, movie);
+    this.rentedPairKeys.delete(pairKey);
 
-    // 版本 +1 並標記為可租
-    this.versionByEntry[entryId]++;
-    this.stateByEntry[entryId] = 0;
-
-    // 確保存在此 movie 的可租堆
-    let heap = this.availableHeaps.get(movie);
-    if (!heap) {
-      const lessAvailable = (a: number, b: number): boolean => {
-        const entryA = Math.floor(a / this.PACK);
-        const entryB = Math.floor(b / this.PACK);
-        const priceA = this.priceByEntry[entryA];
-        const priceB = this.priceByEntry[entryB];
-        if (priceA !== priceB) {
-          return priceA < priceB;
-        }
-        return this.shopByEntry[entryA] < this.shopByEntry[entryB];
-      };
-      heap = new BinaryHeap(lessAvailable);
-      this.availableHeaps.set(movie, heap);
-    }
-
-    // 推回可租堆（帶新版本）
-    const packed = entryId * this.PACK + this.versionByEntry[entryId];
-    heap.push(packed);
+    // 僅使該電影的搜尋快取失效
+    this.searchResultCache.delete(movie);
   }
 
   // ...
 }
 ```
 
-### Step 7：`report()` — 回報已租前 5 名（價格、店編、電影）
+### Step 7：`report()` — 列出最多 5 部最便宜的已租電影
 
-與 `search` 類似，從全域「已租堆」彈出檢查有效快照並收集到 5 筆，最後推回有效元素。
+遍歷已租集合，透過主索引取回 `entry`，用小視窗插入維護「價格 → 店號 → 電影編號」排序，最後轉成 `[shop, movie]` 陣列回傳。
 
 ```typescript
 class MovieRentingSystem {
-  // Step 2：主類別與欄位宣告（MovieRentingSystem）
+  // Step 1：主類別與欄位宣告
+
+  // Step 2：建構子 — 初始化索引
+
+  // Step 3：私有工具 `packKey` — 將 `(shop, movie)` 打包成數值鍵
+
+  // Step 4：`search(movie)` — 查詢未租出的最便宜店家（至多 5 家）
+
+  // Step 5：`rent(shop, movie)` — 租出電影
   
-  // Step 3：建構子 — 載入拷貝、初始化索引與堆
-  
-  // Step 4：search(movie) — 查詢可租店家
-  
-  // Step 5：rent(shop, movie) — 出租拷貝
-  
-  // Step 6：drop(shop, movie) — 歸還拷貝
+  // Step 6：`drop(shop, movie)` — 歸還電影
 
   /**
-   * 回報最多 5 筆目前已出租的拷貝（[shop, movie]），
-   * 按「價格、店編、電影」排序。
+   * 回傳至多 5 筆已租電影，排序：價格升序 → 店號升序 → 電影編號升序。
+   *
+   * @returns 二維陣列，每筆為 [shop, movie]
    */
   report(): number[][] {
-    const results: number[][] = [];
-    const buffer: number[] = [];
+    // 維護長度 ≤ 5 的已租小視窗
+    const topRented: Entry[] = [];
 
-    // 取出最多 5 筆有效拷貝
-    while (results.length < 5 && this.rentedHeap.size() > 0) {
-      const packed = this.rentedHeap.pop()!;
-      const entryId = Math.floor(packed / this.PACK);
-      const pushedVersion = packed % this.PACK;
+    // 僅遍歷當前已租集合
+    for (const pairKey of this.rentedPairKeys) {
+      const entry = this.entryByPairKey.get(pairKey) as Entry;
 
-      // 驗證狀態與版本
-      if (this.stateByEntry[entryId] === 1 && pushedVersion === this.versionByEntry[entryId]) {
-        results.push([this.shopByEntry[entryId], this.movieByEntry[entryId]]);
-        buffer.push(packed); // 保持堆完整
+      let inserted = false;
+      for (let position = 0; position < topRented.length; position++) {
+        const current = topRented[position];
+
+        const isBetter =
+          entry[PRICE] < current[PRICE] ||
+          (entry[PRICE] === current[PRICE] &&
+            (entry[SHOP] < current[SHOP] ||
+              (entry[SHOP] === current[SHOP] && entry[MOVIE] < current[MOVIE])));
+
+        if (isBetter) {
+          topRented.splice(position, 0, entry);
+
+          if (topRented.length > 5) {
+            topRented.pop();
+          }
+          inserted = true;
+          break;
+        }
+      }
+
+      if (!inserted && topRented.length < 5) {
+        topRented.push(entry);
       }
     }
 
-    // 推回有效元素
-    for (const p of buffer) {
-      this.rentedHeap.push(p);
+    // 轉為 [shop, movie] 的輸出格式
+    const result: number[][] = new Array(topRented.length);
+    for (let index = 0; index < topRented.length; index++) {
+      const entry = topRented[index];
+      result[index] = [entry[SHOP], entry[MOVIE]];
     }
-    return results;
+    return result;
   }
 }
 ```
 
 ## 時間複雜度
 
-- 建構子：載入 `n` 筆拷貝並推入對應堆，約為 $O(n \log n)$。
-- `search(movie)` / `report()`：各自最多處理 5 筆堆操作，$O(\log n)$。
-- `rent` / `drop`：索引查找 O(1)；推入堆一次 $O(\log n)$。
-- 總時間複雜度為 $O(n \log n + Q \log n)$。
+- `search(movie)`：最壞掃描該片出現次數 $k$，維持前 5 名為常數開銷，故為 $O(k)$；若快取命中則為 $O(1)$。
+- `rent/drop`：集合增刪與單片快取失效皆為 $O(1)$。
+- `report`：遍歷已租集合大小 $r$，每筆只做前 5 名插入維護（常數），故為 $O(r)$。
+- 總時間複雜度為 $O(k + r)$；在快取生效場景中，多數查詢可近似 $O(1)$。
 
-> $O(n \log n + Q \log n)$
+> $O(k + r)$
 
 ## 空間複雜度
 
-- 狀態表與索引對每筆拷貝各一，為 $O(n)$；兩類堆總元素量同階。
-- 總空間複雜度為 $O(n)$。
+- 輸入條目與索引：`movie → entries[]` 與 `(shop,movie) → entry` 僅存參考，總量級為 $O(E)$。
+- 已租集合：最壞可達 $O(E)$。
+- 搜尋快取：每部電影最多 5 家店，合計 $O(M)$ 且 $M \le E$。
+- 總空間複雜度為 $O(E)$。
 
-> $O(n)$
+> $O(E)$

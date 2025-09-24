@@ -1,302 +1,200 @@
-/**
- * Binary heap for numbers. The comparator must return true if a < b.
- */
-class BinaryHeap {
-  private data: number[] = [];
-  private readonly comparator: (a: number, b: number) => boolean;
+/* ------------------ Types & constants kept for compatibility ------------------ */
+const SHOP = 0;
+const MOVIE = 1;
+const PRICE = 2;
 
-  /**
-   * @param comparator Function that returns true if a should be before b.
-   */
-  constructor(comparator: (a: number, b: number) => boolean) {
-    this.comparator = comparator;
-  }
+type Entry = [shop: number, movie: number, price: number];
 
-  /**
-   * @returns Number of elements in the heap.
-   */
-  size(): number {
-    return this.data.length;
-  }
-
-  /**
-   * @returns Top element without removing it.
-   */
-  peek(): number | undefined {
-    return this.data[0];
-  }
-
-  /**
-   * Insert a value into the heap.
-   * @param value Number to push.
-   */
-  push(value: number): void {
-    this.data.push(value);
-    this.siftUp(this.data.length - 1);
-  }
-
-  /**
-   * Remove and return the top element.
-   * @returns Top number or undefined if empty.
-   */
-  pop(): number | undefined {
-    const n = this.data.length;
-    if (n === 0) {
-      return undefined;
-    }
-    const top = this.data[0];
-    const last = this.data.pop()!;
-    if (n > 1) {
-      this.data[0] = last;
-      this.siftDown(0);
-    }
-    return top;
-  }
-
-  private siftUp(index: number): void {
-    while (index > 0) {
-      const parentIndex = (index - 1) >> 1;
-      if (this.comparator(this.data[index], this.data[parentIndex])) {
-        const tmp = this.data[index];
-        this.data[index] = this.data[parentIndex];
-        this.data[parentIndex] = tmp;
-        index = parentIndex;
-      } else {
-        break;
-      }
-    }
-  }
-
-  private siftDown(index: number): void {
-    const n = this.data.length;
-    while (true) {
-      let smallest = index;
-      const leftIndex = (index << 1) + 1;
-      const rightIndex = leftIndex + 1;
-
-      if (leftIndex < n && this.comparator(this.data[leftIndex], this.data[smallest])) {
-        smallest = leftIndex;
-      }
-      if (rightIndex < n && this.comparator(this.data[rightIndex], this.data[smallest])) {
-        smallest = rightIndex;
-      }
-      if (smallest === index) {
-        break;
-      }
-      const tmp = this.data[index];
-      this.data[index] = this.data[smallest];
-      this.data[smallest] = tmp;
-      index = smallest;
-    }
-  }
-}
-
+/* --------------------------- Movie Renting System --------------------------- */
 class MovieRentingSystem {
-  /**
-   * Packing factor: encodes (entryId, version) into one number.
-   */
-  private readonly PACK = 1_000_000;
-
-  private readonly entryCount: number;
-  private readonly priceByEntry: Int32Array;
-  private readonly shopByEntry: Int32Array;
-  private readonly movieByEntry: Int32Array;
-  private readonly stateByEntry: Uint8Array;    // 0 = available, 1 = rented
-  private readonly versionByEntry: Int32Array;  // Increments at every state change
-
-  private readonly movieToShopToEntry: Map<number, Map<number, number>> = new Map();
-  private readonly availableHeaps: Map<number, BinaryHeap> = new Map();
-  private readonly rentedHeap: BinaryHeap;
+  private readonly entryByPairKey: Map<number, Entry>;       // Fast lookup: (shop,movie) → entry for price retrieval and reporting
+  private readonly entriesByMovieMap: Map<number, Entry[]>;  // Per-movie grouping to avoid scanning unrelated entries in search()
+  private readonly rentedPairKeys: Set<number>;              // Set of currently rented pairs, keyed by numeric (shop,movie)
+  private readonly searchResultCache: Map<number, number[]>; // Simple per-movie search cache of shop lists
 
   /**
-   * @param n Total number of shops.
-   * @param entries Array of [shop, movie, price].
+   * Initialize the movie renting system.
+   * @param n Number of shops
+   * @param entries List of [shop, movie, price]
    */
   constructor(n: number, entries: number[][]) {
-    this.entryCount = entries.length;
-    const totalEntries = this.entryCount;
+    this.entryByPairKey = new Map<number, Entry>();
+    this.entriesByMovieMap = new Map<number, Entry[]>();
+    this.rentedPairKeys = new Set<number>();
+    this.searchResultCache = new Map<number, number[]>();
 
-    this.priceByEntry = new Int32Array(totalEntries);
-    this.shopByEntry = new Int32Array(totalEntries);
-    this.movieByEntry = new Int32Array(totalEntries);
-    this.stateByEntry = new Uint8Array(totalEntries);
-    this.versionByEntry = new Int32Array(totalEntries);
+    // Build maps: numeric keys and per-movie index for faster search.
+    for (let index = 0; index < entries.length; index++) {
+      const entry = entries[index] as Entry;
+      const shopIdentifier = entry[SHOP];
+      const movieIdentifier = entry[MOVIE];
 
-    // Comparator for available heap (by price, then shop).
-    const lessAvailable = (a: number, b: number): boolean => {
-      const entryA = Math.floor(a / this.PACK);
-      const entryB = Math.floor(b / this.PACK);
-      const priceA = this.priceByEntry[entryA];
-      const priceB = this.priceByEntry[entryB];
-      if (priceA !== priceB) {
-        return priceA < priceB;
+      const pairKey = this.packKey(shopIdentifier, movieIdentifier);
+      this.entryByPairKey.set(pairKey, entry);
+
+      let listForMovie = this.entriesByMovieMap.get(movieIdentifier);
+      if (listForMovie === undefined) {
+        listForMovie = [];
+        this.entriesByMovieMap.set(movieIdentifier, listForMovie);
       }
-      return this.shopByEntry[entryA] < this.shopByEntry[entryB];
-    };
-
-    // Comparator for rented heap (by price, then shop, then movie).
-    const lessRented = (a: number, b: number): boolean => {
-      const entryA = Math.floor(a / this.PACK);
-      const entryB = Math.floor(b / this.PACK);
-      const priceA = this.priceByEntry[entryA];
-      const priceB = this.priceByEntry[entryB];
-      if (priceA !== priceB) {
-        return priceA < priceB;
-      }
-      const shopA = this.shopByEntry[entryA];
-      const shopB = this.shopByEntry[entryB];
-      if (shopA !== shopB) {
-        return shopA < shopB;
-      }
-      return this.movieByEntry[entryA] < this.movieByEntry[entryB];
-    };
-
-    this.rentedHeap = new BinaryHeap(lessRented);
-
-    // Load entries into arrays and heaps.
-    for (let entryId = 0; entryId < totalEntries; entryId++) {
-      const [shop, movie, price] = entries[entryId];
-
-      // Store base attributes
-      this.priceByEntry[entryId] = price;
-      this.shopByEntry[entryId] = shop;
-      this.movieByEntry[entryId] = movie;
-      this.stateByEntry[entryId] = 0;      // Mark as available
-      this.versionByEntry[entryId] = 0;    // Initial version
-
-      // Build lookup index: movie -> shop -> entryId
-      let shopToEntry = this.movieToShopToEntry.get(movie);
-      if (!shopToEntry) {
-        shopToEntry = new Map();
-        this.movieToShopToEntry.set(movie, shopToEntry);
-      }
-      shopToEntry.set(shop, entryId);
-
-      // Initialize available heap for this movie if needed
-      let heap = this.availableHeaps.get(movie);
-      if (!heap) {
-        heap = new BinaryHeap(lessAvailable);
-        this.availableHeaps.set(movie, heap);
-      }
-
-      // Push initial entry with version = 0
-      const packed = entryId * this.PACK;
-      heap.push(packed);
+      listForMovie.push(entry);
     }
   }
 
   /**
-   * Find up to 5 shops with an unrented copy of the given movie.
-   * Shops are sorted by price ascending, then shop id ascending.
-   * @param movie Movie id.
-   * @returns Array of shop ids.
+   * Compose a stable numeric key for the pair (shop, movie).
+   * The constant used keeps keys unique and avoids string creation overhead.
+   *
+   * @param shop Shop identifier
+   * @param movie Movie identifier
+   * @returns Numeric key representing the pair
+   */
+  private packKey(shop: number, movie: number): number {
+    // Combine shop and movie into a single number; the constant prevents collisions.
+    return shop * 10001 + movie;
+  }
+
+  /**
+   * Search for up to 5 cheapest shops that have an unrented copy of a given movie.
+   * Shops are sorted by price ascending, then shop ascending.
+   *
+   * @param movie Movie identifier
+   * @returns Array of shop identifiers
    */
   search(movie: number): number[] {
-    const heap = this.availableHeaps.get(movie);
-    if (!heap) {
+    // Return cached result when available.
+    const cachedShops = this.searchResultCache.get(movie);
+    if (cachedShops !== undefined) {
+      return cachedShops;
+    }
+
+    // Work only on entries of this movie (no full scan across all entries).
+    const entriesOfMovie = this.entriesByMovieMap.get(movie);
+    if (entriesOfMovie === undefined || entriesOfMovie.length === 0) {
+      this.searchResultCache.set(movie, []);
       return [];
     }
-    const results: number[] = [];
-    const buffer: number[] = [];
 
-    // Pop until 5 valid results or heap is empty
-    while (results.length < 5 && heap.size() > 0) {
-      const packed = heap.pop()!;
-      const entryId = Math.floor(packed / this.PACK);
-      const pushedVersion = packed % this.PACK;
+    // Maintain a tiny sorted array (size ≤ 5) by (price asc, shop asc).
+    const topCandidates: Entry[] = [];
 
-      // Validate state and version
-      if (this.stateByEntry[entryId] === 0 && pushedVersion === this.versionByEntry[entryId]) {
-        results.push(this.shopByEntry[entryId]);
-        buffer.push(packed); // Keep heap intact
+    // Build the top-5 list by simple insertion (original approach).
+    outerLoop: for (let index = 0; index < entriesOfMovie.length; index++) {
+      const entry = entriesOfMovie[index];
+      const shopIdentifier = entry[SHOP];
+
+      // Skip if this copy is currently rented.
+      const pairKey = this.packKey(shopIdentifier, movie);
+      if (this.rentedPairKeys.has(pairKey)) {
+        continue;
+      }
+
+      // Insert into the sorted window of up to 5 items.
+      for (let position = 0; position < topCandidates.length; position++) {
+        const current = topCandidates[position];
+
+        const isCheaper =
+          entry[PRICE] < current[PRICE] ||
+          (entry[PRICE] === current[PRICE] && shopIdentifier < current[SHOP]);
+
+        if (isCheaper) {
+          topCandidates.splice(position, 0, entry);
+
+          if (topCandidates.length > 5) {
+            topCandidates.pop();
+          }
+          continue outerLoop;
+        }
+      }
+
+      if (topCandidates.length < 5) {
+        topCandidates.push(entry);
       }
     }
 
-    // Push back valid entries
-    for (const p of buffer) {
-      heap.push(p);
-    }
-    return results;
+    // Extract just the shop identifiers in the correct order.
+    const resultShops: number[] = topCandidates.map((entry) => entry[SHOP]);
+    this.searchResultCache.set(movie, resultShops);
+    return resultShops;
   }
 
   /**
-   * Rent the given movie from the given shop.
-   * @param shop Shop id.
-   * @param movie Movie id.
+   * Rent an unrented copy of a given movie from a given shop.
+   *
+   * @param shop Shop identifier
+   * @param movie Movie identifier
    */
   rent(shop: number, movie: number): void {
-    const entryId = this.movieToShopToEntry.get(movie)!.get(shop)!;
+    // Mark as rented.
+    const pairKey = this.packKey(shop, movie);
+    this.rentedPairKeys.add(pairKey);
 
-    // Increment version and mark as rented
-    this.versionByEntry[entryId]++;
-    this.stateByEntry[entryId] = 1;
-
-    // Push into rented heap with new version
-    const packed = entryId * this.PACK + this.versionByEntry[entryId];
-    this.rentedHeap.push(packed);
+    // Invalidate only this movie’s cached search result.
+    this.searchResultCache.delete(movie);
   }
 
   /**
-   * Drop off a previously rented movie at the given shop.
-   * @param shop Shop id.
-   * @param movie Movie id.
+   * Drop off a previously rented movie at a given shop.
+   *
+   * @param shop Shop identifier
+   * @param movie Movie identifier
    */
   drop(shop: number, movie: number): void {
-    const entryId = this.movieToShopToEntry.get(movie)!.get(shop)!;
+    // Mark as available again.
+    const pairKey = this.packKey(shop, movie);
+    this.rentedPairKeys.delete(pairKey);
 
-    // Increment version and mark as available
-    this.versionByEntry[entryId]++;
-    this.stateByEntry[entryId] = 0;
-
-    // Ensure available heap exists for this movie
-    let heap = this.availableHeaps.get(movie);
-    if (!heap) {
-      const lessAvailable = (a: number, b: number): boolean => {
-        const entryA = Math.floor(a / this.PACK);
-        const entryB = Math.floor(b / this.PACK);
-        const priceA = this.priceByEntry[entryA];
-        const priceB = this.priceByEntry[entryB];
-        if (priceA !== priceB) {
-          return priceA < priceB;
-        }
-        return this.shopByEntry[entryA] < this.shopByEntry[entryB];
-      };
-      heap = new BinaryHeap(lessAvailable);
-      this.availableHeaps.set(movie, heap);
-    }
-
-    // Push back into available heap with updated version
-    const packed = entryId * this.PACK + this.versionByEntry[entryId];
-    heap.push(packed);
+    // Invalidate only this movie’s cached search result.
+    this.searchResultCache.delete(movie);
   }
 
   /**
-   * Report up to 5 cheapest currently rented movies as [shop, movie].
-   * Sorted by price, then shop id, then movie id.
-   * @returns Array of [shop, movie] pairs.
+   * Report up to 5 cheapest rented movies, sorted by price ascending,
+   * then shop ascending, then movie ascending.
+   *
+   * @returns Array of [shop, movie] pairs
    */
   report(): number[][] {
-    const results: number[][] = [];
-    const buffer: number[] = [];
+    // Maintain a tiny sorted array (size ≤ 5) for rented entries.
+    const topRented: Entry[] = [];
 
-    // Pop until 5 valid rented entries
-    while (results.length < 5 && this.rentedHeap.size() > 0) {
-      const packed = this.rentedHeap.pop()!;
-      const entryId = Math.floor(packed / this.PACK);
-      const pushedVersion = packed % this.PACK;
+    // Iterate only the currently rented pairs and keep the best 5.
+    for (const pairKey of this.rentedPairKeys) {
+      const entry = this.entryByPairKey.get(pairKey) as Entry;
 
-      // Validate state and version
-      if (this.stateByEntry[entryId] === 1 && pushedVersion === this.versionByEntry[entryId]) {
-        results.push([this.shopByEntry[entryId], this.movieByEntry[entryId]]);
-        buffer.push(packed); // Keep heap intact
+      let inserted = false;
+      for (let position = 0; position < topRented.length; position++) {
+        const current = topRented[position];
+
+        const isBetter =
+          entry[PRICE] < current[PRICE] ||
+          (entry[PRICE] === current[PRICE] &&
+            (entry[SHOP] < current[SHOP] ||
+              (entry[SHOP] === current[SHOP] && entry[MOVIE] < current[MOVIE])));
+
+        if (isBetter) {
+          topRented.splice(position, 0, entry);
+
+          if (topRented.length > 5) {
+            topRented.pop();
+          }
+          inserted = true;
+          break;
+        }
+      }
+
+      if (!inserted && topRented.length < 5) {
+        topRented.push(entry);
       }
     }
 
-    // Push back valid entries
-    for (const p of buffer) {
-      this.rentedHeap.push(p);
+    // Shape the result to [shop, movie] per requirement.
+    const result: number[][] = new Array(topRented.length);
+    for (let index = 0; index < topRented.length; index++) {
+      const entry = topRented[index];
+      result[index] = [entry[SHOP], entry[MOVIE]];
     }
-    return results;
+    return result;
   }
 }
 
