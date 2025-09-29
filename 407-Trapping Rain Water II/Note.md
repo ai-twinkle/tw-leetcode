@@ -77,27 +77,29 @@ return the volume of water it can trap after raining.
 
 ## 解題步驟
 
-### Step 1: 定義 MinHeap 類別
+### Step 1: 定義 MinHeapCells 類別
+
+這是個基本的最小堆實現，我們可以使用它來追蹤當前最小的高度。
 
 ```typescript
 /**
- * A basic MinHeap implementation for the problem
+ * 一個基本的最小堆實現，用於儲存格子資訊
  */
-class MinHeap<T> {
+class MinHeapCells<T> {
   /**
-   * The heap array where elements are stored
+   * 堆的內部陣列
    * @private
    */
   private readonly heap: T[];
   /**
-   * The comparator function used to order the elements in the heap
+   * 比較函數，用於比較兩個元素的大小
    * @private
    */
   private readonly comparator: (a: T, b: T) => number;
 
   /**
-   * Creates a new MinHeap
-   * @param comparator The comparator function used to order the elements in the heap
+   * 構造函數
+   * @param comparator 比較函數，用於比較兩個元素的大小
    */
   constructor(comparator: (a: T, b: T) => number) {
     this.heap = [];
@@ -105,8 +107,8 @@ class MinHeap<T> {
   }
 
   /**
-   * Pushes a new value into the heap
-   * @param value The value to push
+   * 將一個值推入堆中
+   * @param value 要推入的值
    */
   push(value: T): void {
     this.heap.push(value);
@@ -114,8 +116,8 @@ class MinHeap<T> {
   }
 
   /**
-   * Pops the smallest value from the heap
-   * @returns The smallest value in the heap
+   * 彈出堆中最小的值
+   * @returns 堆中最小的值
    */
   pop(): T | undefined {
     if (this.size() === 0) return undefined;
@@ -127,24 +129,24 @@ class MinHeap<T> {
   }
 
   /**
-   * Returns the smallest value in the heap
-   * @returns The smallest value in
+   * 返回堆中最小的值但不移除它
+   * @returns 堆中最小的值
     */
   peek(): T | undefined {
     return this.heap[0];
   }
 
   /**
-   * Returns the size of the heap
-   * @returns The size of the heap
+   * 返回堆的大小
+   * @returns 堆的大小
    */
   size(): number {
     return this.heap.length;
   }
 
   /**
-   * Restores the heap property by moving the element up
-   * @param index The index of the element to move up
+   * 調整堆以維持堆性質，從下往上調整
+   * @param index 要調整的元素索引
    * @private
    */
   private heapifyUp(index: number): void {
@@ -157,8 +159,8 @@ class MinHeap<T> {
   }
 
   /**
-   * Restores the heap property by moving the element down
-   * @param index The index of the element to move down
+   * 調整堆以維持堆性質，從上往下調整
+   * @param index 要調整的元素索引
    * @private
    */
   private heapifyDown(index: number): void {
@@ -182,7 +184,6 @@ class MinHeap<T> {
   }
 }
 ```
-這是個基本的最小堆實現，我們可以使用它來追蹤當前最小的高度。
 
 ### Step 2: 定義搜尋方向
 
@@ -212,7 +213,7 @@ if (m < 3 || n < 3) return 0;
 // 把所有的格子都標記為未訪問
 const visited = Array.from({ length: m }, () => Array(n).fill(false));
 // 初始化最小堆，比較函數是根據高度來比較
-const minHeap = new MinHeap<{ height: number; row: number; col: number }>(
+const minHeap = new MinHeapCells<{ height: number; row: number; col: number }>(
   (a, b) => a.height - b.height
 );
 ```
@@ -286,15 +287,15 @@ return trappedWater;
 
 ## 時間複雜度
 
-1. **初始化最小堆**
+- **初始化最小堆**
    - 邊界單元約 $O(m + n)$，推入堆操作約 $O(k \log k)$，但這部分相對整體不算大。
 
-2. **主體搜索**
+- **主體搜索**
    - 理論上，整個地圖的每個格子最多只會被放入堆一次，因此 $k \approx m \times n$。
    - 每次 push/pop 需要 $O(\log(m \times n))$ 時間。
    - 綜合下來，整體為 $O(m \times n \log (m \times n))$。
 
-3. 總時間複雜度為 $O(m \times n \log (m \times n))$。
+- 總時間複雜度為 $O(m \times n \log (m \times n))$。
 
 > $O(m \times n \log (m \times n))$。
 

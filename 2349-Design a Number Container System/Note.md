@@ -38,7 +38,7 @@ Implement the `NumberContainers` class:
 因此我們先實作一個簡單的 Min-Heap 類別，提供插入（insert）、查看堆頂（peek）、移除堆頂（pop）等基本操作。
 
 ```typescript
-class MinHeap {
+class MinHeapNumbers {
   private heap: number[];
 
   constructor() {
@@ -114,12 +114,12 @@ class MinHeap {
 
 為了實現 `NumberContainers` 類別，我們需要以下的存儲結構：
 
-- **numberHeaps**：一個 Map，鍵為數字，值為對應數字的最小堆（MinHeap）。
+- **numberHeaps**：一個 Map，鍵為數字，值為對應數字的最小堆（MinHeapNumbers）。
 - **indexMap**：一個 Map，用來記錄每個 index 目前最新存放的數字，方便在查詢時驗證堆中數據是否為最新資料。
 
 ```typescript
 class NumberContainers {
-  private numberHeaps: Map<number, MinHeap>;
+  private numberHeaps: Map<number, MinHeapNumbers>;
   private indexMap: Map<number, number>;
   
   // ...
@@ -129,7 +129,7 @@ class NumberContainers {
 ### Step 3: 實作 `change(index, number)` 操作
 
 - 將 index 對應的最新數字寫入 indexMap。
-- 若 number 還未建立堆，先建立一個新的 MinHeap。
+- 若 number 還未建立堆，先建立一個新的 MinHeapNumbers。
 - 將 index 插入 number 的堆中。
 
 （在這邊，我們不需主動從舊數字堆中移除 index，使用懶惰刪除即可）
@@ -143,7 +143,7 @@ class NumberContainers {
     this.indexMap.set(index, number);
     // 若對應數字的最小堆不存在，則先建立一個
     if (!this.numberHeaps.has(number)) {
-      this.numberHeaps.set(number, new MinHeap());
+      this.numberHeaps.set(number, new MinHeapNumbers());
     }
     // 將 index 插入到最小堆中
     this.numberHeaps.get(number)!.insert(index);

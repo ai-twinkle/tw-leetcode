@@ -1,7 +1,7 @@
 /**
  * A basic MinHeap implementation for the problem
  */
-class MinHeap<T> {
+class MinHeapCells<T> {
   /**
    * The heap array where elements are stored
    * @private
@@ -118,7 +118,7 @@ function trapRainWater(heightMap: number[][]): number {
 
   // Initialize the visited array and the min heap
   const visited = Array.from({ length: m }, () => Array(n).fill(false));
-  const minHeap = new MinHeap<{ height: number; row: number; col: number }>(
+  const minHeap = new MinHeapCells<{ height: number; row: number; col: number }>(
     (a, b) => a.height - b.height
   );
 
