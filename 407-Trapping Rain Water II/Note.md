@@ -12,297 +12,202 @@ return the volume of water it can trap after raining.
 
 ## 基礎思路
 
-1. **最小堆**：利用最小堆來追蹤當前最小的高度，確保每次處理的都是目前能影響水量的最低高度。
-2. **廣度優先搜尋（實際上更貼近 Dijkstra 思路）**：每次處理堆中最低高度的單元，嘗試將鄰居單元的高度加入堆中，並計算可能的儲水量。
+本題要求在一個二維高度地圖中，計算雨水可以被困住的總量。
+問題的本質是：**每個位置能困住的水量取決於它周圍邊界的最小高度**。
 
-> **為何稱「更貼近 Dijkstra」？**  
-> 傳統的 BFS 通常使用 Queue 先進先出、不涉及權重。此題使用「最小堆」讓每次擴張都從「當前最低水位」開始，過程更接近 Dijkstra 的「多源最短路徑」，只是大部分教學慣用「BFS」來描述此擴散流程，故仍保留此稱呼。
+若僅從單點觀察，需知道「從外圍邊界向內推進時，某格能被填充的最高水位」。這使問題轉化為一種**由外而內的最小邊界擴展**。
 
-具體做法：
-- 先將所有「邊界」的高度加入最小堆並標記為已訪問。
-- 從最小堆中取出最低高度的單元，嘗試向鄰居擴散：
-   - 若鄰居高度較低，則可儲水：儲水量是高度差，並更新鄰居的高度（即「被填滿」的概念）。
-   - 若鄰居高度較高，僅將它加入最小堆即可。
-- 不斷重複，直到堆中元素處理完畢，計算出所有可儲水量的總和。
+思考時需注意幾點：
 
-> **為什麼需要更新鄰居的高度？**  
-> 更新鄰居高度的目的是為了模擬「水會填滿低於當前高度的區域」。
-> 1. **水位總是以邊界為基準**：低洼區域的水位不能超過邊界的最低高度，因為水會從更低的地方流出去。如果鄰居高度低於當前高度，就需要將其高度更新為當前高度，代表「已被水填滿至該高度」。
-> 2. **防止水流出**：若不更新鄰居的高度，演算法可能誤判這些已被填水的區域還能二度儲水。
-> 3. **確保模擬過程正確**：每次更新鄰居高度，等於向內推進「最低的邊界」，並繼續以最小堆的機制維持正確的水位擴散。
+* **邊界限制**：矩陣邊緣的格子一定無法存水，因為水會外洩；計算應從邊界開始往內推。
+* **水位高度**：某格最終水位高度取決於它周圍的最低邊界，而非自身高度。
+* **搜尋策略**：適合採用「最小堆 / 優先隊列」或等價結構，由最矮的邊界開始擴展，逐步更新內部格子的可能水位。
+* **空間優化**：由於高度上限僅 $2 \times 10^4$，可以用 **bucket（高度桶）+ 鏈結陣列** 來模擬優先隊列，降低常數開銷。
 
-### 範例分解
+解題策略如下：
 
-1. **輸入**:
-    ```typescript
-    const heightMap = [
-      [1, 4, 3, 1, 3, 2],
-      [3, 2, 1, 3, 2, 4],
-      [2, 3, 3, 2, 3, 1]
-    ]
-    ```
-
-2. **邊界高度**:
-   - 初始邊界高度為：
-
-   | - | 0     | 1     | 2     | 3     | 4     | 5     |
-      |---|-------|-------|-------|-------|-------|-------|
-   | 0 | **1** | **4** | **3** | **1** | **3** | **2** |
-   | 1 | **3** |       |       |       |       | **4** |
-   | 2 | **2** | **3** | **3** | **2** | **3** | **1** |
-
-   這些高度先行加入最小堆，並標記為已訪問。
-
-3. **初始處理**:
-   - 將邊界高度加入最小堆。
-   - 每次從堆中取出最低高度單元，處理其鄰居：
-      - 若鄰居高度比當前高度低，計算儲水量並更新鄰居高度為當前高度。
-      - 若鄰居高度高於當前高度，直接將鄰居加入堆。
-
-4. **模擬過程**:
-   - 例如，處理 (0, 0) 的高度 1，其鄰居為 (0, 1) 和 (1, 0)：
-      - (0, 1): 高度為 4，高於 1，無法儲水，直接將其加入堆。
-      - (1, 0): 高度為 3，高於 1，無法儲水，直接將其加入堆。
-
-5. **最終結果**:
-   - 當所有單元處理完成後，累計的儲水量為 **4**。
-
-### 示意圖
-
-![示意圖](./images/TestCase1.gif)
-
-![示意圖](./images/TestCase2.gif)
-
-自由輸入測試案例，可觀察演算法運作過程。到[這裡](https://ai-twinkle.github.io/tw-leetcode/407-Trapping%20Rain%20Water%20II/heap-visualization/index.html)可以看到最小堆的動畫。
+1. **初始化邊界**：將邊界格子視為初始「牆」，加入結構並標記訪問。
+2. **由外向內擴展**：每次從當前最低高度的邊界格子開始，向鄰居傳遞「水位」。
+3. **更新水量**：若鄰居比當前水位低，表示可蓄水，水量為「水位 - 高度」。
+4. **維護水位**：若鄰居較高，則其自身高度成為新的邊界。
+5. **重複直至處理完所有格子**。
 
 ## 解題步驟
 
-### Step 1: 定義 MinHeapCells 類別
+### Step 1：基礎變數與特殊情況處理
 
-這是個基本的最小堆實現，我們可以使用它來追蹤當前最小的高度。
+若矩陣過小（小於 3x3），無法形成內部蓄水區，直接返回 0。
 
 ```typescript
-/**
- * 一個基本的最小堆實現，用於儲存格子資訊
- */
-class MinHeapCells<T> {
-  /**
-   * 堆的內部陣列
-   * @private
-   */
-  private readonly heap: T[];
-  /**
-   * 比較函數，用於比較兩個元素的大小
-   * @private
-   */
-  private readonly comparator: (a: T, b: T) => number;
+// 矩陣行列數
+const rowCount = heightMap.length;
+const columnCount = heightMap[0].length;
 
-  /**
-   * 構造函數
-   * @param comparator 比較函數，用於比較兩個元素的大小
-   */
-  constructor(comparator: (a: T, b: T) => number) {
-    this.heap = [];
-    this.comparator = comparator;
-  }
+// 特例：若行或列小於 3，無法蓄水，直接返回 0
+if (rowCount < 3 || columnCount < 3) {
+  return 0;
+}
+```
 
-  /**
-   * 將一個值推入堆中
-   * @param value 要推入的值
-   */
-  push(value: T): void {
-    this.heap.push(value);
-    this.heapifyUp(this.heap.length - 1);
-  }
+### Step 2：初始化平坦化存儲結構
 
-  /**
-   * 彈出堆中最小的值
-   * @returns 堆中最小的值
-   */
-  pop(): T | undefined {
-    if (this.size() === 0) return undefined;
-    if (this.size() === 1) return this.heap.pop();
-    const root = this.heap[0];
-    this.heap[0] = this.heap.pop()!;
-    this.heapifyDown(0);
-    return root;
-  }
+將二維矩陣轉為一維陣列，並記錄每個格子的 row/column，方便計算。
 
-  /**
-   * 返回堆中最小的值但不移除它
-   * @returns 堆中最小的值
-    */
-  peek(): T | undefined {
-    return this.heap[0];
-  }
+```typescript
+const cellCount = rowCount * columnCount;
 
-  /**
-   * 返回堆的大小
-   * @returns 堆的大小
-   */
-  size(): number {
-    return this.heap.length;
-  }
+// 使用 TypedArray 優化：高度、是否訪問、桶鏈結等
+const cellHeights = new Int32Array(cellCount);
+const visitedCells = new Uint8Array(cellCount);
+const bucketHead = new Int32Array(MAX_HEIGHT + 1).fill(-1);
+const nextCellLink = new Int32Array(cellCount);
+const rowOfCell = new Uint16Array(cellCount);
+const columnOfCell = new Uint16Array(cellCount);
 
-  /**
-   * 調整堆以維持堆性質，從下往上調整
-   * @param index 要調整的元素索引
-   * @private
-   */
-  private heapifyUp(index: number): void {
-    while (index > 0) {
-      const parentIndex = Math.floor((index - 1) / 2);
-      if (this.comparator(this.heap[index], this.heap[parentIndex]) >= 0) break;
-      [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
-      index = parentIndex;
-    }
-  }
-
-  /**
-   * 調整堆以維持堆性質，從上往下調整
-   * @param index 要調整的元素索引
-   * @private
-   */
-  private heapifyDown(index: number): void {
-    const size = this.size();
-    while (index < size) {
-      let smallest = index;
-      const leftChild = 2 * index + 1;
-      const rightChild = 2 * index + 2;
-
-      if (leftChild < size && this.comparator(this.heap[leftChild], this.heap[smallest]) < 0) {
-        smallest = leftChild;
-      }
-      if (rightChild < size && this.comparator(this.heap[rightChild], this.heap[smallest]) < 0) {
-        smallest = rightChild;
-      }
-      if (smallest === index) break;
-
-      [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
-      index = smallest;
-    }
+// 平坦化輸入矩陣，並預先存 row/col 資訊
+for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+  const rowReference = heightMap[rowIndex];
+  const baseIndex = rowIndex * columnCount;
+  for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+    const flatIndex = baseIndex + columnIndex;
+    cellHeights[flatIndex] = rowReference[columnIndex] | 0;
+    rowOfCell[flatIndex] = rowIndex;
+    columnOfCell[flatIndex] = columnIndex;
   }
 }
 ```
 
-### Step 2: 定義搜尋方向
+### Step 3：定義推入高度桶的方法
+
+用「高度 → 鏈結表」的結構維護 bucket。
 
 ```typescript
-const MOVE_DIRECTIONS = [
-  { dx: 0, dy: 1 },
-  { dx: 1, dy: 0 },
-  { dx: 0, dy: -1 },
-  { dx: -1, dy: 0 },
-];
+// 將格子推入對應高度桶
+const pushToBucket = (height: number, flatIndex: number): void => {
+  nextCellLink[flatIndex] = bucketHead[height];
+  bucketHead[height] = flatIndex;
+};
 ```
 
-### Step 3: 檢查 Edge Case
+### Step 4：初始化邊界作為起始牆
+
+所有邊界格子都是初始水牆，推入結構並標記訪問。
 
 ```typescript
-// 取得矩陣的行和列
-const m = heightMap.length;    // m 是矩陣的行數
-const n = heightMap[0].length; // n 是矩陣的列數
+let minimumBoundaryHeight = MAX_HEIGHT;
+let queueCount = 0;
 
-// 如果矩陣的行或列小於 3，則無法儲水
-if (m < 3 || n < 3) return 0;
+// 將邊界格子加入 bucket 並標記訪問
+const enqueueBoundary = (flatIndex: number): void => {
+  if (visitedCells[flatIndex] === 0) {
+    visitedCells[flatIndex] = 1;
+    const cellHeight = cellHeights[flatIndex];
+    pushToBucket(cellHeight, flatIndex);
+    if (cellHeight < minimumBoundaryHeight) {
+      minimumBoundaryHeight = cellHeight;
+    }
+    queueCount++;
+  }
+};
+
+// 上下邊界
+for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+  enqueueBoundary(columnIndex); // 第一行
+  enqueueBoundary((rowCount - 1) * columnCount + columnIndex); // 最後一行
+}
+// 左右邊界
+for (let rowIndex = 1; rowIndex < rowCount - 1; rowIndex++) {
+  enqueueBoundary(rowIndex * columnCount); // 第一列
+  enqueueBoundary(rowIndex * columnCount + columnCount - 1); // 最後一列
+}
 ```
 
-### Step 4: 初始化最小堆
+### Step 5：從邊界開始進行擴展
+
+維護當前水位，逐步從低高度向內部傳遞。
 
 ```typescript
-// 把所有的格子都標記為未訪問
-const visited = Array.from({ length: m }, () => Array(n).fill(false));
-// 初始化最小堆，比較函數是根據高度來比較
-const minHeap = new MinHeapCells<{ height: number; row: number; col: number }>(
-  (a, b) => a.height - b.height
-);
+let currentHeightLevel = minimumBoundaryHeight;
+let totalTrappedWater = 0;
+
+// 使用 bucket-based BFS 擴展
+while (queueCount > 0) {
+  // 找下一個非空的高度桶
+  while (currentHeightLevel <= MAX_HEIGHT && bucketHead[currentHeightLevel] === -1) {
+    currentHeightLevel++;
+  }
+  if (currentHeightLevel > MAX_HEIGHT) {
+    break;
+  }
+
+  // 彈出當前桶的一個格子
+  const flatIndex = bucketHead[currentHeightLevel];
+  bucketHead[currentHeightLevel] = nextCellLink[flatIndex];
+  queueCount--;
+
+  const rowIndex = rowOfCell[flatIndex];
+  const columnIndex = columnOfCell[flatIndex];
 ```
 
-### Step 5: 將邊界高度加入最小堆
+### Step 6：檢查四個方向鄰居並更新水量
+
+若鄰居比當前水位低，表示能蓄水；否則更新邊界。
 
 ```typescript
-for (let i = 0; i < m; i++) {
-  for (let j = 0; j < n; j++) {
-    // 如果不是邊界，則跳過
-    if (i !== 0 && i !== m - 1 && j !== 0 && j !== n - 1) {
+  // 四個方向鄰居
+  for (let directionIndex = 0; directionIndex < 4; directionIndex++) {
+    let neighborIndex: number | undefined;
+
+    if (directionIndex === 0 && columnIndex + 1 < columnCount) {
+      neighborIndex = flatIndex + 1;
+    } else if (directionIndex === 1 && columnIndex > 0) {
+      neighborIndex = flatIndex - 1;
+    } else if (directionIndex === 2 && rowIndex + 1 < rowCount) {
+      neighborIndex = flatIndex + columnCount;
+    } else if (directionIndex === 3 && rowIndex > 0) {
+      neighborIndex = flatIndex - columnCount;
+    } else {
       continue;
     }
 
-    // 把邊界的高度加入最小堆
-    minHeap.push({ height: heightMap[i][j], row: i, col: j });
-
-    // 標記為已訪問
-    visited[i][j] = true;
-  }
-}
-```
-
-### Step 6: 開始廣度優先搜索（Dijkstra-like）
-
-```typescript
-let trappedWater = 0;
-
-// 開始「最小堆」式的搜索
-while (minHeap.size() > 0) {
-  // 取出當前最小高度的方格
-  const { height, row, col } = minHeap.pop()!;
-
-  // 檢查當前方格的鄰居
-  for (const { dx, dy } of MOVE_DIRECTIONS) {
-    const newRow = row + dx;
-    const newCol = col + dy;
-
-    // 跳過邊界和已訪問的方格
-    if (
-      newRow < 0 ||
-      newRow >= m ||
-      newCol < 0 ||
-      newCol >= n ||
-      visited[newRow][newCol]
-    ) {
+    // 已訪問過則略過
+    if (visitedCells[neighborIndex] === 1) {
       continue;
     }
+    visitedCells[neighborIndex] = 1;
 
-    // 標記為已訪問
-    visited[newRow][newCol] = true;
-
-    // 計算儲水量，儲水量是當前方格和鄰居方格的高度差
-    trappedWater += Math.max(0, height - heightMap[newRow][newCol]);
-
-    // 把鄰居方格的高度加入最小堆
-    minHeap.push({
-      height: Math.max(height, heightMap[newRow][newCol]),
-      row: newRow,
-      col: newCol,
-    });
+    // 計算水量或更新邊界
+    const neighborHeight = cellHeights[neighborIndex];
+    if (currentHeightLevel > neighborHeight) {
+      totalTrappedWater += currentHeightLevel - neighborHeight;
+      pushToBucket(currentHeightLevel, neighborIndex);
+    } else {
+      pushToBucket(neighborHeight, neighborIndex);
+    }
+    queueCount++;
   }
 }
 ```
 
-### Step 7: 返回結果
+### Step 7：返回結果
+
+最後累計的水量即為答案。
 
 ```typescript
-return trappedWater;
+return totalTrappedWater;
 ```
 
 ## 時間複雜度
 
-- **初始化最小堆**
-   - 邊界單元約 $O(m + n)$，推入堆操作約 $O(k \log k)$，但這部分相對整體不算大。
+- 每個格子最多被訪問一次，總共 $m \times n$ 格子。
+- 每次訪問僅做常數操作（桶推入/彈出）。
+- 總時間複雜度為 $O(m \times n)$。
 
-- **主體搜索**
-   - 理論上，整個地圖的每個格子最多只會被放入堆一次，因此 $k \approx m \times n$。
-   - 每次 push/pop 需要 $O(\log(m \times n))$ 時間。
-   - 綜合下來，整體為 $O(m \times n \log (m \times n))$。
-
-- 總時間複雜度為 $O(m \times n \log (m \times n))$。
-
-> $O(m \times n \log (m \times n))$。
+> $O(m \times n)$
 
 ## 空間複雜度
 
-- 堆的大小在最壞情況下可達 $O(m \times n)$。
-- `visited` 矩陣亦為 $O(m \times n)$。
-- 空間複雜度為 $O(m \times n)$。
+- 額外儲存高度陣列、訪問標記、桶結構、鏈結表與索引，皆與格子數量等階。
+- 總空間複雜度為 $O(m \times n)$。
 
-> $O(m \times n)$。
+> $O(m \times n)$
