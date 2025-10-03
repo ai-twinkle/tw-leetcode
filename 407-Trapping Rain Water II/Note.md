@@ -147,6 +147,9 @@ while (queueCount > 0) {
 
   const rowIndex = rowOfCell[flatIndex];
   const columnIndex = columnOfCell[flatIndex];
+
+  // ...
+}
 ```
 
 ### Step 6：檢查四個方向鄰居並更新水量
@@ -154,6 +157,9 @@ while (queueCount > 0) {
 若鄰居比當前水位低，表示能蓄水；否則更新邊界。
 
 ```typescript
+while (queueCount > 0) {
+  // Step 5：從邊界開始進行擴展
+  
   // 四個方向鄰居
   for (let directionIndex = 0; directionIndex < 4; directionIndex++) {
     let neighborIndex: number | undefined;
