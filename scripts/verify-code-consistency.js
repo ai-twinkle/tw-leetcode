@@ -277,7 +277,7 @@ class CodeConsistencyVerifier {
       result.issues.push('Missing answer.ts file');
     }
 
-    // Check Note.md title consistency
+    // Check Note.md title consistency and format
     if (result.hasNoteFile) {
       try {
         const noteContent = readFileSync(notePath, 'utf-8');
@@ -302,6 +302,9 @@ class CodeConsistencyVerifier {
           } else {
             result.issues.push('Could not parse Note.md title format (expected: "# NUMBER. Title")');
           }
+
+          // Check for required sections in Note.md
+          this.validateNoteStructure(noteContent, result.issues);
         } else {
           result.issues.push('Note.md is empty');
         }
@@ -578,6 +581,79 @@ class CodeConsistencyVerifier {
     }
 
     console.log('\n✅ Verification complete!');
+  }
+
+  /**
+   * Validate Note.md structure and required sections
+   * Checks for expected sections: Constraints, 基礎思路, 解題步驟, 時間複雜度, 空間複雜度
+   */
+  validateNoteStructure(noteContent, issues) {
+    // Check for Constraints section (should appear before solution sections)
+    if (!/\*\*Constraints:\*\*/.test(noteContent)) {
+      issues.push('Missing required section in Note.md: **Constraints:**');
+    }
+
+    const requiredSections = [
+      { name: '基礎思路', pattern: /##\s+基礎思路/ },
+      { name: '解題步驟', pattern: /##\s+解題步驟/ },
+      { name: '時間複雜度', pattern: /##\s+時間複雜度/ },
+      { name: '空間複雜度', pattern: /##\s+空間複雜度/ }
+    ];
+
+    for (const section of requiredSections) {
+      if (!section.pattern.test(noteContent)) {
+        issues.push(`Missing required section in Note.md: '## ${section.name}'`);
+      }
+    }
+
+    // Check if code blocks use TypeScript syntax highlighting
+    const codeBlocks = noteContent.match(/```(\w*)\n/g);
+    if (codeBlocks) {
+      for (const block of codeBlocks) {
+        const match = block.match(/```(\w*)\n/);
+        if (match && match[1] && match[1] !== 'typescript') {
+          issues.push(`Code block should use 'typescript' syntax highlighting, found: '${match[1]}'`);
+        } else if (match && !match[1]) {
+          issues.push('Code block missing language specification (should be: ```typescript)');
+        }
+      }
+    }
+
+    // Check for complexity notation format (should use > $O(...)$ format)
+    const hasTimeComplexity = /##\s+時間複雜度/.test(noteContent);
+    const hasSpaceComplexity = /##\s+空間複雜度/.test(noteContent);
+    
+    if (hasTimeComplexity) {
+      const timeSection = noteContent.match(/##\s+時間複雜度[\s\S]*?(?=##|$)/);
+      if (timeSection && timeSection[0]) {
+        // Check for invalid O! notation (exclamation mark should not be in Big O)
+        if (/>\s*\$O!/.test(timeSection[0])) {
+          issues.push('Time complexity uses invalid notation $O!(...) - should be $O(...)$ without exclamation mark');
+        }
+        // Check if there's a blockquote with complexity notation
+        // Allow any characters inside O(...) to support LaTeX notation like \cdot, \alpha, etc.
+        // Match both O(...) and O\left(...\right) patterns
+        else if (!/>\s*\$O(?:\(.*?\)|\\\w+\(.*?\\\w+\))\$/.test(timeSection[0])) {
+          issues.push('Time complexity section should include complexity notation in format: > $O(...)$');
+        }
+      }
+    }
+
+    if (hasSpaceComplexity) {
+      const spaceSection = noteContent.match(/##\s+空間複雜度[\s\S]*?(?=##|$)/);
+      if (spaceSection && spaceSection[0]) {
+        // Check for invalid O! notation (exclamation mark should not be in Big O)
+        if (/>\s*\$O!/.test(spaceSection[0])) {
+          issues.push('Space complexity uses invalid notation $O!(...) - should be $O(...)$ without exclamation mark');
+        }
+        // Check if there's a blockquote with complexity notation
+        // Allow any characters inside O(...) to support LaTeX notation like \cdot, \alpha, etc.
+        // Match both O(...) and O\left(...\right) patterns
+        else if (!/>\s*\$O(?:\(.*?\)|\\\w+\(.*?\\\w+\))\$/.test(spaceSection[0])) {
+          issues.push('Space complexity section should include complexity notation in format: > $O(...)$');
+        }
+      }
+    }
   }
 
   /**
