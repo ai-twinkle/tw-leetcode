@@ -12,7 +12,7 @@ If there are multiple answers, you may return any of them.
 - `nums[i]` is either `'0'` or `'1'`.
 - All the strings of `nums` are unique.
 
-## 基本思路
+## 基礎思路
 
 此題的目標是找出一個與 `nums` 中所有二進位字串長度相同、但又不屬於 `nums` 的二進位數。
 每個數字必須滿足：對於 `nums` 中的每一個數字，至少存在一個位元是不同的。

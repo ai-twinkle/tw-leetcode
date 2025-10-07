@@ -19,7 +19,7 @@ Return true if such an array exists or false otherwise.
 - `1 <= n <= 10^5`
 - The values in derived are either `0`'s or `1`'s
 
-## 基本思路
+## 基礎思路
 
 我們可以換個角度思考這個問題：相鄰值的 XOR 值 表示 `original` 陣列中該位置的兩個元素是否相同。
 

@@ -4,7 +4,7 @@ Given an `m x n` integer matrix `matrix`, if an element is `0`, set its entire r
 
 You must do it [in place](https://en.wikipedia.org/wiki/In-place_algorithm).
 
-Constraints:
+**Constraints:**
 
 - `m == matrix.length`
 - `n == matrix[0].length`

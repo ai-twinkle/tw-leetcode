@@ -145,13 +145,13 @@ function soupServings(n: number): number {
 
 - 建表時需計算約 `(s+1)^2` 個格子，每格 `O(1)`，`s = ceil(n/25)`。
 - 使用快取後，若已建到足夠規模，查詢為 `O(1)`；擴表僅在新需求超過舊上限時發生。
-- 總時間複雜度為 $O!\left((\lceil n/25\rceil)^2\right)$。
+- 總時間複雜度為 $O((\lceil n/25\rceil)^2)$。
 
-> $O!\left((\lceil n/25\rceil)^2\right)$
+> $O((\lceil n/25\rceil)^2)$
 
 ## 空間複雜度
 
 - 機率表大小為 `(s+1) \times (s+1)`，其餘快取欄位為常數級。
-- 總空間複雜度為 $O!\left((\lceil n/25\rceil)^2\right)$。
+- 總空間複雜度為 $O((\lceil n/25\rceil)^2)$。
 
-> $O!\left((\lceil n/25\rceil)^2\right)$
+> $O((\lceil n/25\rceil)^2)$

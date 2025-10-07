@@ -12,7 +12,7 @@ The punishment number of `n` is defined as the sum of the squares of all integer
 
 - `1 <= n <= 1000`
 
-## 基本思路
+## 基礎思路
 
 這題會用到一個數學概念，其證明如下：
 

@@ -188,9 +188,9 @@ return needsTeachingCount - maximumAlreadyKnow;
 - 建表：遍歷所有使用者的語言清單，為 $\sum_i |languages[i]|$。
 - 檢查友誼邊：對每條邊只枚舉語言較少的一方，成本為 $\sum_{(u,v)} \min(|L_u|,|L_v|)$，查表為 $O(1)$。
 - 統計與取最大：僅對被標記者再掃其語言清單（$\le \sum_i |languages[i]|$）與一次 $O(n)$ 的取最大。
-- 總時間複雜度為 $O!\left(\sum_i |languages[i]| + \sum_{(u,v)} \min(|L_u|,|L_v|) + n\right)$。
+- 總時間複雜度為 $O(\sum_i |languages[i]| + \sum_{(u,v)} \min(|L_u|,|L_v|) + n)$。
 
-> $O!\left(\sum_i |languages[i]| + \sum_{(u,v)} \min(|L_u|,|L_v|) + n\right)$
+> $O(\sum_i |languages[i]| + \sum_{(u,v)} \min(|L_u|,|L_v|) + n)$
 
 ## 空間複雜度
 

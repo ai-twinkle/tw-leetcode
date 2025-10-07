@@ -10,7 +10,7 @@ Return the positive integer array `ans = [num1, num2]`.
 If there are multiple pairs satisfying these conditions, return the one with the smallest `num1` value. 
 If no such numbers exist, return `[-1, -1]`.
 
-Constraints:
+**Constraints:**
 
 - `1 <= left <= right <= 10^6`
 

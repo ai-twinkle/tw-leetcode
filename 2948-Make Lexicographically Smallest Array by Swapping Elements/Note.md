@@ -13,7 +13,7 @@ array `a` has an element that is less than the corresponding element in `b`.
 For example, the array `[2,10,3]` is lexicographically smaller than the array `[10,2,3]` because 
 they differ at index `0` and `2 < 10`.
 
-Constraints:
+**Constraints:**
 
 - `1 <= nums.length <= 10^5`
 - `1 <= nums[i] <= 10^9`

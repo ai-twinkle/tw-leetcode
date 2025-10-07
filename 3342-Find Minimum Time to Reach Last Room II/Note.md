@@ -204,9 +204,7 @@ return result === INF ? -1 : result;
 ## 時間複雜度
 
 - **初始化與預處理**：平面化與填表操作為 $O(n\times m)$；
-
 - **Dijkstra 演算法**：每個節點最多進堆與出堆一次，每次堆操作為 $O(\log(n\times m))$，總計 $O((n\times m)\log(n\times m))$。
-
 - 總時間複雜度為 $O((n\times m)\log(n\times m))$。
 
 > $O((n\times m)\log(n\times m))$
@@ -214,7 +212,6 @@ return result === INF ? -1 : result;
 ## 空間複雜度
 
 - `openTimeArray`、`stepCostArray`、`distanceArray`、`visitedFlags`、`heapIndices` 都為長度 $n\times m$ 的陣列；
-
 - 總空間複雜度為 $O(n\times m)$。
 
 > $O(n\times m)$

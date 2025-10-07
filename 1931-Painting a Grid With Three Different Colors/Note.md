@@ -24,6 +24,8 @@ Since the answer can be very large, return it modulo $10^9 + 7$.
 
 此方法可大幅縮減運算量，符合題目規模要求。
 
+## 解題步驟
+
 ### Step 1：生成並快取所有相容的欄模式
 
 #### Step 1.1：建立快取，避免重複計算
