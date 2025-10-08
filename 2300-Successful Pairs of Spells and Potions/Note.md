@@ -18,139 +18,138 @@ Return an integer array `pairs` of length `n` where `pairs[i]` is the number of 
 
 ## 基礎思路
 
-本題要求我們計算每個法術（`spell`）能與多少藥水（`potion`）組成成功配對。當兩者力量乘積 ≥ `success` 時，該配對視為成功。
+本題要求計算每個法術（spell）能與多少藥水（potion）形成「成功配對」。
+一組 `(spell, potion)` 被視為成功，若兩者強度乘積 $\geq$ `success`。
 
-在思考解法時，需要注意以下幾點：
+舉例來說，若 `success = 10`，`spell = 2` 時，只要藥水強度 $\geq 5$ 即為成功。
+我們需要針對每個法術計算出滿足條件的藥水數量。
 
-- **直接暴力法不可行**：若對每個法術逐一檢查所有藥水，時間複雜度為 $O(n \times m)$，在 $10^5$ 級別輸入下會超時。
-- **成功條件轉換**：對於固定的 `spell` 值 $s$，成功條件為
-  
-  $$
-  s \times p \ge success \Rightarrow p \ge \frac{success}{s}
-  $$
+在思考解法時，需注意以下重點：
 
-  也就是說，我們只需知道有多少藥水強度大於等於該「臨界值」。
-- **快速查詢數量**：若能預先計算出「藥水強度 ≥ 某值」的數量，就能在 $O(1)$ 時間內取得答案。
+- 直接進行兩兩乘積比較的暴力法會達 $O(n \times m)$，在 $10^5$ 級別資料下明顯不可行。
+- 每個法術的成功條件可化為「藥水強度需大於等於某閾值」的形式。
+- 藥水數組可事先統計並加速查詢，避免重複運算。
 
-因此，我們採用以下策略：
+為達成此目標，可以採用以下策略：
 
-- **建立藥水強度統計表**：使用長度為最大藥水值（$10^5$）的陣列，紀錄每個強度出現次數。
-- **轉換為後綴和表**：從高強度往下累加，使每個位置代表「強度 ≥ v 的藥水數」。
-- **逐一處理法術**：對每個法術計算其所需的最小藥水強度（以向上取整的方式求出），再利用後綴和表 $O(1)$ 查詢。
-- **快速邊界處理**：若臨界值 ≤ 1 則全通過；若超過最大值則全失敗；否則使用查表結果。
+- **直方圖建模**：先統計每個藥水強度的出現次數。
+- **後綴累積和（suffix sum）**：將直方圖轉為「強度 ≥ v 的藥水數量」，使查詢任一門檻值的藥水數量成為 O(1)。
+- **逐法術查詢**：對每個 `spell`，計算其達成成功所需的最低藥水強度門檻，再利用後綴累積和直接查詢對應數量。
+- **邊界優化**：若法術本身過強（`spell >= success`），則所有藥水都能成功；若門檻超過藥水最大強度，則無法成功。
 
-此策略避免排序與二分搜尋，以**固定長度陣列 + 後綴和查表**達成常數查詢效率，整體效能優於傳統二分法。
+此設計能將整體時間複雜度壓至線性級別，適用於最大輸入範圍。
 
 ## 解題步驟
 
-### Step 1：建立藥水統計表
+### Step 1：建立藥水強度直方圖
 
-使用 TypedArray（`Uint32Array`）紀錄每個藥水強度的出現次數。
+使用 TypedArray（`Uint32Array`）統計每個藥水強度的出現次數，確保常數時間查詢且記憶體緊湊。
 
 ```typescript
-// 建立固定長度的藥水強度計數表（0~100000）
+// 設定最大藥水強度（依題目約束）
 const maximumPotionValue = 100000;
-const greaterOrEqual = new Uint32Array(maximumPotionValue + 1);
-const potionsLength = potions.length;
 
-// 統計每個藥水強度出現次數
-for (let i = 0; i < potionsLength; i++) {
+// 建立藥水強度分佈直方圖
+const potionCountAtOrAbove = new Uint32Array(maximumPotionValue + 1);
+const totalPotionCount = potions.length;
+
+// 統計每種強度的出現次數
+for (let i = 0; i < totalPotionCount; i++) {
   const potionStrength = potions[i];
-  greaterOrEqual[potionStrength] += 1;
+  potionCountAtOrAbove[potionStrength] += 1;
 }
 ```
 
-### Step 2：構建「後綴和」統計表
+### Step 2：轉換為「後綴累積和」
 
-從高強度往下累加，使每個索引代表「強度 ≥ v」的藥水數量。
+將直方圖改為「強度 ≥ v 的藥水總數」，之後查詢可在 O(1) 取得結果。
 
 ```typescript
-// 建立後綴和表：ge[v] 代表藥水強度 ≥ v 的數量
+// 將統計轉為後綴累積和（suffix sum）
 let cumulativeCount = 0;
 for (let v = maximumPotionValue; v >= 1; v--) {
-  cumulativeCount += greaterOrEqual[v];
-  greaterOrEqual[v] = cumulativeCount;
+  cumulativeCount += potionCountAtOrAbove[v];
+  potionCountAtOrAbove[v] = cumulativeCount;
 }
 ```
 
-### Step 3：初始化變數並預先計算常數
+### Step 3：準備常數與結果陣列
 
-為加速查表與計算，先將常用變數存入本地變數。
+預先保存常用變數以減少重複存取成本，並配置結果陣列空間。
 
 ```typescript
-// 快速存取變數以減少屬性讀取開銷
-const totalPotions = potionsLength;
-const ge = greaterOrEqual;
-const maxV = maximumPotionValue;
+// 預存常數以減少重複運算
+const totalPotions = totalPotionCount;
+const maxPotionValue = maximumPotionValue;
 const requiredSuccess = success;
 const successMinusOne = requiredSuccess - 1;
 
-// 預先配置結果陣列以減少動態分配
-const spellsLength = spells.length;
-const result = new Array<number>(spellsLength);
+// 配置結果陣列
+const totalSpells = spells.length;
+const result = new Array<number>(totalSpells);
 ```
 
-### Step 4：逐一處理每個法術
+### Step 4：逐一計算每個法術的成功組合數
 
-對每個法術計算所需的臨界藥水強度，並透過查表取得結果。
+對每個法術計算「達成成功所需的最低藥水強度」，並從後綴陣列查詢。
 
 ```typescript
-// 逐一處理每個法術，計算可成功的藥水數量
-for (let i = 0; i < spellsLength; i++) {
+// 對每個法術計算成功配對的藥水數量
+for (let i = 0; i < totalSpells; i++) {
   const spellStrength = spells[i];
 
-  // 若法術本身強度已 ≥ success，則所有藥水皆成功
+  // 若法術強度已足以單獨達成 success，所有藥水皆符合
   if (spellStrength >= requiredSuccess) {
     result[i] = totalPotions;
     continue;
   }
 
-  // 計算臨界值：需達成 success 的最小藥水強度（向上取整）
+  // 計算達成 success 所需的最小藥水強度（向上取整）
   const threshold = Math.floor((successMinusOne + spellStrength) / spellStrength);
 
-  let countSuccessful: number;
+  let successfulPotionCount: number;
 
-  // 若臨界值 ≤ 1，代表所有藥水皆合格
+  // 若門檻 ≤ 1，表示所有藥水皆足夠
   if (threshold <= 1) {
-    countSuccessful = totalPotions;
+    successfulPotionCount = totalPotions;
   } else {
-    // 若臨界值超出最大範圍，代表無法配對成功
-    if (threshold > maxV) {
-      countSuccessful = 0;
+    // 若門檻超過最大藥水強度，表示無法成功
+    if (threshold > maxPotionValue) {
+      successfulPotionCount = 0;
     } else {
-      // 使用後綴和表 O(1) 查詢
-      countSuccessful = ge[threshold];
+      // 直接查表取得「≥ threshold」的藥水數量
+      successfulPotionCount = potionCountAtOrAbove[threshold];
     }
   }
 
-  // 將結果寫入對應法術索引
-  result[i] = countSuccessful;
+  // 記錄此法術的成功配對數
+  result[i] = successfulPotionCount;
 }
 ```
 
-### Step 5：回傳結果
+### Step 5：回傳最終結果
 
-將所有法術對應的成功組合數量返回。
+所有法術皆已處理完畢，輸出結果陣列。
 
 ```typescript
-// 回傳結果陣列
+// 回傳每個法術可成功的藥水數量
 return result;
 ```
 
 ## 時間複雜度
 
-- 建立統計表需遍歷所有藥水：$O(m)$；
-- 構建後綴和表需遍歷最大強度範圍：$O(V)$（$V = 10^5$）；
-- 處理所有法術：$O(n)$（每次查表為常數時間）。
-- 總時間複雜度為 $O(n + m + V)$，由於 $V = 10^5$ 為常數上限，可視為線性時間。
+- 建立藥水直方圖：$O(m)$
+- 後綴累積和：$O(V)$（$V = 10^5$ 為強度上限）
+- 查詢每個法術的結果：$O(n)$
+- 總時間複雜度為 $O(n + m + V)$，其中 $V$ 為常數級，故可視為 $O(n + m)$。
 
 > $O(n + m)$
 
 ## 空間複雜度
 
-- 後綴和表 `greaterOrEqual` 需 $O(V)$ 空間；
-- 結果陣列需 $O(n)$；
-- 其餘輔助變數為常數級別。
-- 總空間複雜度為 $O(n + V)$，其中 $V = 10^5$ 為固定上限。
+- 直方圖陣列：$O(V)$
+- **結果陣列：$O(n)$**
+- 其餘變數與暫存空間皆為常數級。
+- 總空間複雜度為 $O(n + V)$。
 
 > $O(n)$

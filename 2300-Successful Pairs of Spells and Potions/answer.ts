@@ -1,67 +1,66 @@
 function successfulPairs(spells: number[], potions: number[], success: number): number[] {
-  // Define upper bound of potion strength based on problem constraint
+  // Define the maximum possible potion strength based on constraint
   const maximumPotionValue = 100000;
 
-  // Create a typed array histogram to count potion occurrences (fast and memory efficient)
-  const greaterOrEqual = new Uint32Array(maximumPotionValue + 1);
-  const potionsLength = potions.length;
+  // Build a histogram of potion strengths (typed array for performance and low GC)
+  const potionCountAtOrAbove = new Uint32Array(maximumPotionValue + 1);
+  const totalPotionCount = potions.length;
 
-  // Count each potion's strength
-  for (let i = 0; i < potionsLength; i++) {
+  for (let i = 0; i < totalPotionCount; i++) {
     const potionStrength = potions[i];
-    greaterOrEqual[potionStrength] += 1;
+    potionCountAtOrAbove[potionStrength] += 1;
   }
 
-  // Build suffix sum array: ge[v] = count of potions with strength ≥ v
+  // Convert histogram into suffix sum: potionCountAtOrAbove[v] = count of potions ≥ v
   let cumulativeCount = 0;
   for (let v = maximumPotionValue; v >= 1; v--) {
-    cumulativeCount += greaterOrEqual[v];
-    greaterOrEqual[v] = cumulativeCount;
+    cumulativeCount += potionCountAtOrAbove[v];
+    potionCountAtOrAbove[v] = cumulativeCount;
   }
 
-  // Prepare variables for fast access in loop (helps JIT optimization)
-  const totalPotions = potionsLength;
-  const ge = greaterOrEqual;
-  const maxV = maximumPotionValue;
+  // Prepare reusable constants for better performance
+  const totalPotions = totalPotionCount;
+  const maxPotionValue = maximumPotionValue;
   const requiredSuccess = success;
   const successMinusOne = requiredSuccess - 1;
 
-  // Preallocate result array for performance
-  const spellsLength = spells.length;
-  const result = new Array<number>(spellsLength);
+  // Preallocate result array to avoid dynamic resizing
+  const totalSpells = spells.length;
+  const result = new Array<number>(totalSpells);
 
-  // Iterate through each spell to compute qualifying potion count
-  for (let i = 0; i < spellsLength; i++) {
+  // Process each spell to count matching potions
+  for (let i = 0; i < totalSpells; i++) {
     const spellStrength = spells[i];
 
-    // Fast check: if the spell itself already ≥ success, every potion works
+    // Fast path: if the spell itself already meets or exceeds success, all potions qualify
     if (spellStrength >= requiredSuccess) {
       result[i] = totalPotions;
       continue;
     }
 
-    // Compute minimum potion strength needed (threshold = ceil(success / spell))
+    // Compute minimum potion strength needed using integer ceil division
     const threshold = Math.floor((successMinusOne + spellStrength) / spellStrength);
 
-    let countSuccessful: number;
+    let successfulPotionCount: number;
 
-    // If threshold ≤ 1, all potions qualify
+    // If the threshold ≤ 1, every potion is strong enough
     if (threshold <= 1) {
-      countSuccessful = totalPotions;
+      successfulPotionCount = totalPotions;
     } else {
-      // If threshold exceeds possible potion values, none qualify
-      if (threshold > maxV) {
-        countSuccessful = 0;
+      // If the threshold exceeds any potion strength, no potions qualify
+      if (threshold > maxPotionValue) {
+        successfulPotionCount = 0;
       } else {
-        // Direct O(1) lookup using suffix array
-        countSuccessful = ge[threshold];
+        // Lookup precomputed count from suffix array (O(1))
+        successfulPotionCount = potionCountAtOrAbove[threshold];
       }
     }
 
-    // Store the count of successful potion pairs for this spell
-    result[i] = countSuccessful;
+    // Store result for this spell
+    result[i] = successfulPotionCount;
   }
 
-  // Return the array of results
+  // Return final counts for all spells
   return result;
 }
+
