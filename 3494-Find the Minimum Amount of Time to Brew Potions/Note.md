@@ -56,8 +56,8 @@ $$
 
 ```typescript
 // 初始化魔法師與藥水數量
-const wizardCount = wizardSkill.length;
-const potionCount = potionMana.length;
+const wizardCount = skill.length;
+const potionCount = mana.length;
 ```
 
 ### Step 2：計算魔法師技能的前綴和
@@ -68,7 +68,7 @@ const potionCount = potionMana.length;
 // 建立前綴和陣列：prefixSkill[k] = skill[0] + ... + skill[k-1]
 const prefixSkill = new Uint32Array(wizardCount + 1);
 for (let wizardIndex = 0; wizardIndex < wizardCount; wizardIndex++) {
-  prefixSkill[wizardIndex + 1] = prefixSkill[wizardIndex] + (wizardSkill[wizardIndex] >>> 0);
+  prefixSkill[wizardIndex + 1] = prefixSkill[wizardIndex] + (skill[wizardIndex] >>> 0);
 }
 ```
 
@@ -84,7 +84,7 @@ let prefixStackSize = 0;
 prefixIncreasingStack[prefixStackSize++] = 0;
 
 for (let wizardIndex = 1; wizardIndex < wizardCount; wizardIndex++) {
-  if (wizardSkill[wizardIndex] > wizardSkill[prefixIncreasingStack[prefixStackSize - 1]]) {
+  if (skill[wizardIndex] > skill[prefixIncreasingStack[prefixStackSize - 1]]) {
     prefixIncreasingStack[prefixStackSize++] = wizardIndex;
   }
 }
@@ -101,7 +101,7 @@ let suffixStackSize = 0;
 suffixIncreasingStack[suffixStackSize++] = wizardCount - 1;
 
 for (let wizardIndex = wizardCount - 2; wizardIndex >= 0; wizardIndex--) {
-  if (wizardSkill[wizardIndex] > wizardSkill[suffixIncreasingStack[suffixStackSize - 1]]) {
+  if (skill[wizardIndex] > skill[suffixIncreasingStack[suffixStackSize - 1]]) {
     suffixIncreasingStack[suffixStackSize++] = wizardIndex;
   }
 }
@@ -118,8 +118,8 @@ let totalBrewingTime = 0;
 
 // 依序處理每一對相鄰藥水
 for (let potionIndex = 1; potionIndex < potionCount; potionIndex++) {
-  const previousMana = potionMana[potionIndex - 1];
-  const currentMana = potionMana[potionIndex];
+  const previousMana = mana[potionIndex - 1];
+  const currentMana = mana[potionIndex];
   const isManaIncreasing = previousMana < currentMana;
   const manaDifference = previousMana - currentMana;
 
@@ -130,7 +130,7 @@ for (let potionIndex = 1; potionIndex < potionCount; potionIndex++) {
     for (let stackIndex = 0; stackIndex < prefixStackSize; stackIndex++) {
       const wizardIndex = prefixIncreasingStack[stackIndex];
       const transitionValue =
-        manaDifference * prefixSkill[wizardIndex] + previousMana * wizardSkill[wizardIndex];
+        manaDifference * prefixSkill[wizardIndex] + previousMana * skill[wizardIndex];
       if (transitionValue > maximumTransitionValue) {
         maximumTransitionValue = transitionValue;
       }
@@ -140,7 +140,7 @@ for (let potionIndex = 1; potionIndex < potionCount; potionIndex++) {
     for (let stackIndex = 0; stackIndex < suffixStackSize; stackIndex++) {
       const wizardIndex = suffixIncreasingStack[stackIndex];
       const transitionValue =
-        manaDifference * prefixSkill[wizardIndex] + previousMana * wizardSkill[wizardIndex];
+        manaDifference * prefixSkill[wizardIndex] + previousMana * skill[wizardIndex];
       if (transitionValue > maximumTransitionValue) {
         maximumTransitionValue = transitionValue;
       }
@@ -158,7 +158,7 @@ for (let potionIndex = 1; potionIndex < potionCount; potionIndex++) {
 
 ```typescript
 // 最後一瓶藥水經過所有魔法師的總時間
-totalBrewingTime += potionMana[potionCount - 1] * prefixSkill[wizardCount];
+totalBrewingTime += mana[potionCount - 1] * prefixSkill[wizardCount];
 
 // 回傳最小總釀製時間
 return totalBrewingTime;

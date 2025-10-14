@@ -1,11 +1,11 @@
-function minTime(wizardSkill: number[], potionMana: number[]): number {
-  const wizardCount = wizardSkill.length;
-  const potionCount = potionMana.length;
+function minTime(skill: number[], mana: number[]): number {
+  const wizardCount = skill.length;
+  const potionCount = mana.length;
 
-  // Compute prefix sums of wizard skills: prefixSkill[k] = sum of wizardSkill[0..k-1]
+  // Compute prefix sums of wizard skills: prefixSkill[k] = sum of skill[0..k-1]
   const prefixSkill = new Uint32Array(wizardCount + 1);
   for (let wizardIndex = 0; wizardIndex < wizardCount; wizardIndex++) {
-    prefixSkill[wizardIndex + 1] = prefixSkill[wizardIndex] + (wizardSkill[wizardIndex] >>> 0);
+    prefixSkill[wizardIndex + 1] = prefixSkill[wizardIndex] + (skill[wizardIndex] >>> 0);
   }
 
   // Build prefixIncreasingStack: indices where wizard skill reaches a new maximum (from left to right)
@@ -13,7 +13,7 @@ function minTime(wizardSkill: number[], potionMana: number[]): number {
   let prefixStackSize = 0;
   prefixIncreasingStack[prefixStackSize++] = 0;
   for (let wizardIndex = 1; wizardIndex < wizardCount; wizardIndex++) {
-    if (wizardSkill[wizardIndex] > wizardSkill[prefixIncreasingStack[prefixStackSize - 1]]) {
+    if (skill[wizardIndex] > skill[prefixIncreasingStack[prefixStackSize - 1]]) {
       prefixIncreasingStack[prefixStackSize++] = wizardIndex;
     }
   }
@@ -23,7 +23,7 @@ function minTime(wizardSkill: number[], potionMana: number[]): number {
   let suffixStackSize = 0;
   suffixIncreasingStack[suffixStackSize++] = wizardCount - 1;
   for (let wizardIndex = wizardCount - 2; wizardIndex >= 0; wizardIndex--) {
-    if (wizardSkill[wizardIndex] > wizardSkill[suffixIncreasingStack[suffixStackSize - 1]]) {
+    if (skill[wizardIndex] > skill[suffixIncreasingStack[suffixStackSize - 1]]) {
       suffixIncreasingStack[suffixStackSize++] = wizardIndex;
     }
   }
@@ -33,8 +33,8 @@ function minTime(wizardSkill: number[], potionMana: number[]): number {
 
   // Iterate through each adjacent pair of potions
   for (let potionIndex = 1; potionIndex < potionCount; potionIndex++) {
-    const previousMana = potionMana[potionIndex - 1];
-    const currentMana = potionMana[potionIndex];
+    const previousMana = mana[potionIndex - 1];
+    const currentMana = mana[potionIndex];
     const isManaIncreasing = previousMana < currentMana;
     const manaDifference = previousMana - currentMana;
 
@@ -44,7 +44,7 @@ function minTime(wizardSkill: number[], potionMana: number[]): number {
       // Use prefixIncreasingStack if mana is increasing
       for (let stackIndex = 0; stackIndex < prefixStackSize; stackIndex++) {
         const wizardIndex = prefixIncreasingStack[stackIndex];
-        const transitionValue = manaDifference * prefixSkill[wizardIndex] + previousMana * wizardSkill[wizardIndex];
+        const transitionValue = manaDifference * prefixSkill[wizardIndex] + previousMana * skill[wizardIndex];
         if (transitionValue > maximumTransitionValue) {
           maximumTransitionValue = transitionValue;
         }
@@ -53,7 +53,7 @@ function minTime(wizardSkill: number[], potionMana: number[]): number {
       // Use suffixIncreasingStack if mana is decreasing or equal
       for (let stackIndex = 0; stackIndex < suffixStackSize; stackIndex++) {
         const wizardIndex = suffixIncreasingStack[stackIndex];
-        const transitionValue = manaDifference * prefixSkill[wizardIndex] + previousMana * wizardSkill[wizardIndex];
+        const transitionValue = manaDifference * prefixSkill[wizardIndex] + previousMana * skill[wizardIndex];
         if (transitionValue > maximumTransitionValue) {
           maximumTransitionValue = transitionValue;
         }
@@ -65,7 +65,7 @@ function minTime(wizardSkill: number[], potionMana: number[]): number {
   }
 
   // Add the final potion’s contribution
-  totalBrewingTime += potionMana[potionCount - 1] * prefixSkill[wizardCount];
+  totalBrewingTime += mana[potionCount - 1] * prefixSkill[wizardCount];
 
   return totalBrewingTime;
 }
