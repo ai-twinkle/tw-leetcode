@@ -1,6 +1,6 @@
 function minTime(wizardSkill: number[], potionMana: number[]): number {
-  const wizardCount: number = wizardSkill.length;
-  const potionCount: number = potionMana.length;
+  const wizardCount = wizardSkill.length;
+  const potionCount = potionMana.length;
 
   // Compute prefix sums of wizard skills: prefixSkill[k] = sum of wizardSkill[0..k-1]
   const prefixSkill = new Uint32Array(wizardCount + 1);

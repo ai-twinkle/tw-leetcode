@@ -50,7 +50,17 @@ $$
 
 ## 解題步驟
 
-### Step 1：計算魔法師技能的前綴和
+### Step 1： 輸入初始化
+
+讀取魔法師與藥水的數量，供後續迴圈使用。
+
+```typescript
+// 初始化魔法師與藥水數量
+const wizardCount = wizardSkill.length;
+const potionCount = potionMana.length;
+```
+
+### Step 2：計算魔法師技能的前綴和
 
 建立 `prefixSkill` 陣列，使 `prefixSkill[k]` 表示前 `k` 位魔法師的技能總和，後續可快速取出區段加總。
 
@@ -62,7 +72,7 @@ for (let wizardIndex = 0; wizardIndex < wizardCount; wizardIndex++) {
 }
 ```
 
-### Step 2：構建前綴遞增棧（Prefix Increasing Stack）
+### Step 3：構建前綴遞增棧（Prefix Increasing Stack）
 
 從左到右掃描魔法師技能，僅保留技能值嚴格遞增的索引。
 此結構用於處理 mana 遞增時的最佳轉換點搜尋。
@@ -80,7 +90,7 @@ for (let wizardIndex = 1; wizardIndex < wizardCount; wizardIndex++) {
 }
 ```
 
-### Step 3：構建後綴遞增棧（Suffix Increasing Stack）
+### Step 4：構建後綴遞增棧（Suffix Increasing Stack）
 
 從右到左掃描魔法師技能，僅保留從右側觀察時嚴格遞增的索引，用於 mana 遞減或不變時的最佳轉換搜尋。
 
@@ -97,7 +107,7 @@ for (let wizardIndex = wizardCount - 2; wizardIndex >= 0; wizardIndex--) {
 }
 ```
 
-### Step 4：累積相鄰藥水的轉換時間
+### Step 5：累積相鄰藥水的轉換時間
 
 依序處理每對相鄰藥水，根據 mana 遞增或遞減選擇對應棧，
 計算各魔法師的潛在轉換值並取最大者，加入總時間。
@@ -142,7 +152,7 @@ for (let potionIndex = 1; potionIndex < potionCount; potionIndex++) {
 }
 ```
 
-### Step 5：加上最後一瓶藥水的完整釀製時間
+### Step 6：加上最後一瓶藥水的完整釀製時間
 
 最後一瓶藥水須經過所有魔法師，加入其最終貢獻值。
 
