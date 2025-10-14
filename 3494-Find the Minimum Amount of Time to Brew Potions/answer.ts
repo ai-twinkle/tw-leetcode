@@ -1,61 +1,71 @@
-function minTime(skill: number[], mana: number[]): number {
-  // Guard tiny inputs early
-  const wizardCount = skill.length;
-  const potionCount = mana.length;
+function minTime(wizardSkill: number[], potionMana: number[]): number {
+  const wizardCount: number = wizardSkill.length;
+  const potionCount: number = potionMana.length;
 
-  if (wizardCount === 0 || potionCount === 0) {
-    return 0;
+  // Compute prefix sums of wizard skills: prefixSkill[k] = sum of wizardSkill[0..k-1]
+  const prefixSkill = new Uint32Array(wizardCount + 1);
+  for (let wizardIndex = 0; wizardIndex < wizardCount; wizardIndex++) {
+    prefixSkill[wizardIndex + 1] = prefixSkill[wizardIndex] + (wizardSkill[wizardIndex] >>> 0);
   }
 
-  // Create tight typed views once per call (no cross-call caching).
-  const skillView = new Int32Array(wizardCount);
-  let totalSkillSum = 0;
-
-  for (let i = 0; i < wizardCount; i++) {
-    const value = skill[i];
-    skillView[i] = value;
-    totalSkillSum += value;
+  // Build prefixIncreasingStack: indices where wizard skill reaches a new maximum (from left to right)
+  const prefixIncreasingStack = new Int32Array(wizardCount);
+  let prefixStackSize = 0;
+  prefixIncreasingStack[prefixStackSize++] = 0;
+  for (let wizardIndex = 1; wizardIndex < wizardCount; wizardIndex++) {
+    if (wizardSkill[wizardIndex] > wizardSkill[prefixIncreasingStack[prefixStackSize - 1]]) {
+      prefixIncreasingStack[prefixStackSize++] = wizardIndex;
+    }
   }
 
-  const manaView = new Int32Array(potionCount);
-  for (let j = 0; j < potionCount; j++) {
-    manaView[j] = mana[j];
+  // Build suffixIncreasingStack: indices where wizard skill reaches a new maximum (from right to left)
+  const suffixIncreasingStack = new Int32Array(wizardCount);
+  let suffixStackSize = 0;
+  suffixIncreasingStack[suffixStackSize++] = wizardCount - 1;
+  for (let wizardIndex = wizardCount - 2; wizardIndex >= 0; wizardIndex--) {
+    if (wizardSkill[wizardIndex] > wizardSkill[suffixIncreasingStack[suffixStackSize - 1]]) {
+      suffixIncreasingStack[suffixStackSize++] = wizardIndex;
+    }
   }
 
-  // Accumulated best value across potion transitions
-  let accumulatedBest = 0;
+  // Accumulate the total minimum time
+  let totalBrewingTime = 0;
 
-  // Process potions in order; last potion adds mana_last * sum(skill)
-  for (let j = 1; j < potionCount; j++) {
-    const manaPrevious = manaView[j - 1];
-    const manaCurrent = manaView[j];
+  // Iterate through each adjacent pair of potions
+  for (let potionIndex = 1; potionIndex < potionCount; potionIndex++) {
+    const previousMana = potionMana[potionIndex - 1];
+    const currentMana = potionMana[potionIndex];
+    const isManaIncreasing = previousMana < currentMana;
+    const manaDifference = previousMana - currentMana;
 
-    // Precompute delta used across the inner loop
-    const delta = manaPrevious - manaCurrent;
+    let maximumTransitionValue = -Infinity;
 
-    // Track max candidate for this transition
-    let bestForThisTransition = Number.NEGATIVE_INFINITY;
-
-    // Running prefix sum of skill[0..i-1]
-    let runningPrefix = 0;
-
-    // Tight inner loop: stream prefix, avoid extra arrays/branches
-    for (let i = 0; i < wizardCount; i++) {
-      const candidate =
-        accumulatedBest + runningPrefix * delta + manaPrevious * skillView[i];
-
-      if (candidate > bestForThisTransition) {
-        bestForThisTransition = candidate;
+    if (isManaIncreasing) {
+      // Use prefixIncreasingStack if mana is increasing
+      for (let stackIndex = 0; stackIndex < prefixStackSize; stackIndex++) {
+        const wizardIndex = prefixIncreasingStack[stackIndex];
+        const transitionValue = manaDifference * prefixSkill[wizardIndex] + previousMana * wizardSkill[wizardIndex];
+        if (transitionValue > maximumTransitionValue) {
+          maximumTransitionValue = transitionValue;
+        }
       }
-
-      // Update prefix for next wizard
-      runningPrefix += skillView[i];
+    } else {
+      // Use suffixIncreasingStack if mana is decreasing or equal
+      for (let stackIndex = 0; stackIndex < suffixStackSize; stackIndex++) {
+        const wizardIndex = suffixIncreasingStack[stackIndex];
+        const transitionValue = manaDifference * prefixSkill[wizardIndex] + previousMana * wizardSkill[wizardIndex];
+        if (transitionValue > maximumTransitionValue) {
+          maximumTransitionValue = transitionValue;
+        }
+      }
     }
 
-    // Commit the best transition
-    accumulatedBest = bestForThisTransition;
+    // Add the maximum transition value to the total time
+    totalBrewingTime += maximumTransitionValue;
   }
 
-  // Add the final pass through all wizards for the last potion
-  return accumulatedBest + manaView[potionCount - 1] * totalSkillSum;
+  // Add the final potion’s contribution
+  totalBrewingTime += potionMana[potionCount - 1] * prefixSkill[wizardCount];
+
+  return totalBrewingTime;
 }
