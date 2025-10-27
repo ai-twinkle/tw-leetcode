@@ -167,18 +167,18 @@ const PRECOMPUTED_NUMERICALLY_BALANCED_NUMBERS: Uint32Array = (() => {
  *
  * Constraints: 0 <= n <= 10^6
  *
- * @param inputNumber - The given integer.
- * @returns The smallest numerically balanced number strictly greater than inputNumber.
- * @throws RangeError - If no numerically balanced number exists that is strictly greater than inputNumber.
+ * @param n - The given integer.
+ * @returns The smallest numerically balanced number strictly greater than n.
+ * @throws RangeError - If no numerically balanced number exists that is strictly greater than n.
  */
-function nextBeautifulNumber(inputNumber: number): number {
-  // Binary search to locate the first precomputed number strictly greater than inputNumber
-  const foundIndex = upperBound(PRECOMPUTED_NUMERICALLY_BALANCED_NUMBERS, inputNumber)
+function nextBeautifulNumber(n: number): number {
+  // Binary search to locate the first precomputed number strictly greater than n
+  const foundIndex = upperBound(PRECOMPUTED_NUMERICALLY_BALANCED_NUMBERS, n)
 
   // If not found, signal to the caller that the request is out of the supported range
   if (foundIndex >= PRECOMPUTED_NUMERICALLY_BALANCED_NUMBERS.length) {
     throw new RangeError(
-      `No numerically balanced number strictly greater than ${inputNumber} exists within the precomputed range.`
+      `No numerically balanced number strictly greater than ${n} exists within the precomputed range.`
     )
   }
 
