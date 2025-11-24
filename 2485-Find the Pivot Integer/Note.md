@@ -12,7 +12,7 @@ It is guaranteed that there will be at most one pivot index for the given input.
 
 - `1 <= n <= 1000`
 
-# 基礎思路
+## 基礎思路
 
 本題要求尋找一個整數 `x`，使得：
 
