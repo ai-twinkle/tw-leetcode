@@ -1,3 +1,3 @@
-function countTriples(n: number): number {
+function getConcatenation(nums: number[]): number[] {
 
 }
