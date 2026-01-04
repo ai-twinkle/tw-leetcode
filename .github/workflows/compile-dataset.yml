@@ -23,7 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
@@ -54,18 +54,18 @@ jobs:
           node -e "
             const fs = require('fs');
             const readline = require('readline');
-            
+          
             async function validateJSONL() {
               const fileStream = fs.createReadStream('data/datasets.jsonl');
               const rl = readline.createInterface({
                 input: fileStream,
                 crlfDelay: Infinity
               });
-              
+
               let lineNumber = 0;
               let validEntries = 0;
               let errors = 0;
-              
+          
               for await (const line of rl) {
                 lineNumber++;
                 try {
@@ -81,13 +81,13 @@ jobs:
                   errors++;
                 }
               }
-              
+          
               console.log(\`Validation complete: \${validEntries} valid entries, \${errors} errors\`);
               if (errors > 0) {
                 process.exit(1);
               }
             }
-            
+          
             validateJSONL();
           "
 
@@ -99,10 +99,10 @@ jobs:
           # Backup the compiled dataset and README before removing files
           cp data/datasets.jsonl datasets-backup.jsonl
           cp scripts/README.md.dataset readme-backup.md
-          
+
           # Remove all files except the ones we want to keep
           git rm -rf . || true
-          
+
           # Restore essential files from main
           git checkout main -- .gitattributes .gitignore || true
           
@@ -130,31 +130,27 @@ jobs:
           # Push to dataset branch with proper authentication
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git dataset --force
 
+      # =========================
+      # Hugging Face (only on schedule / dispatch)
+      # =========================
+
       - name: Setup Python for Hugging Face
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install Hugging Face Hub
+      - name: Install Hugging Face Hub (pin)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: pip install --upgrade huggingface_hub
+        run: |
+          pip install --upgrade pip
+          # Pin to a stable version line to avoid sudden CLI/API behavior changes
+          pip install "huggingface_hub==0.24.6"
 
-      # make sure we’re on the dataset branch in your Git repo (local only)
       - name: Switch to dataset branch for upload
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: git checkout dataset
 
-      - name: Authenticate to Hugging Face
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          pip install --upgrade "huggingface_hub>=0.24.6"
-          hf auth login --token "$HF_TOKEN"
-          hf auth whoami
-
-      # ensure the dataset repo exists
       - name: Ensure dataset repo exists
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
@@ -163,31 +159,45 @@ jobs:
           python - <<'PY'
           import os
           from huggingface_hub import create_repo
-          create_repo("twinkle-ai/tw-leetcode", repo_type="dataset",
-                      exist_ok=True, token=os.environ["HF_TOKEN"])
+          create_repo(
+              "twinkle-ai/tw-leetcode",
+              repo_type="dataset",
+              exist_ok=True,
+              token=os.environ["HF_TOKEN"],
+          )
+          print("Repo ensured.")
           PY
 
-      # Upload via PR to the existing 'main' branch
-      - name: Upload to Hugging Face (single PR)
+      - name: Upload to Hugging Face (single PR, Python API)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -e
-          pip install --upgrade "huggingface_hub>=0.24.6"
 
-          # login (non-interactive)
-          hf auth login --token "$HF_TOKEN"
+          python - <<'PY'
+          import os, datetime
+          from huggingface_hub import HfApi
 
-          # We are on the 'dataset' branch locally which only has what we need:
-          #   data/, README.md, .gitattributes
-          # Push EVERYTHING at repo root in one shot to avoid multiple PRs.
-          BASE_BRANCH=main
-          COMMIT_MSG="Auto-update dataset - $(date -u +%Y-%m-%d)"
+          token = os.environ["HF_TOKEN"]
+          repo_id = "twinkle-ai/tw-leetcode"
+          repo_type = "dataset"
 
-          # Single upload => single PR
-          hf upload twinkle-ai/tw-leetcode . . \
-            --repo-type dataset \
-            --revision "$BASE_BRANCH" \
-            --create-pr \
-            --commit-message "$COMMIT_MSG"
+          api = HfApi(token=token)
+
+          # Base branch on Hub you want the PR against:
+          base_branch = "main"
+          commit_msg = f"Auto-update dataset - {datetime.datetime.utcnow().strftime('%Y-%m-%d')}"
+
+          # We are on the local 'dataset' branch (only contains data/, README.md, .gitattributes, .gitignore)
+          api.upload_folder(
+              repo_id=repo_id,
+              repo_type=repo_type,
+              folder_path=".",
+              path_in_repo=".",
+              revision=base_branch,
+              create_pr=True,
+              commit_message=commit_msg,
+          )
+          print("Upload complete (PR created).")
+          PY
