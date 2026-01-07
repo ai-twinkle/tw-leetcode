@@ -27,7 +27,7 @@ function maxProduct(root: TreeNode | null): number {
 
   let totalSum = 0;
 
-  // Collect nodes in reverse-postorder (root-right-left) and compute total sum in one pass
+  // Collect nodes in reverse-postorder (root-right-left) and compute the total sum in one pass
   while (traversalStackSize !== 0) {
     const currentNode = traversalStack[--traversalStackSize];
 
@@ -61,7 +61,7 @@ function maxProduct(root: TreeNode | null): number {
       rightSubtreeSum = subtreeSumStack[--subtreeSumStackSize];
     }
 
-    // Pop left subtree sum next, matching the left-right-root postorder consumption order
+    // Pop the left subtree sum next, matching the left-right-root postorder consumption order
     let leftSubtreeSum = 0;
     if (currentNode.left !== null) {
       leftSubtreeSum = subtreeSumStack[--subtreeSumStackSize];
