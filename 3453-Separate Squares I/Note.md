@@ -388,4 +388,3 @@ function separateSquares(squares: number[][]): number {
 - 總空間複雜度為 $O(n)$。
 
 > $O(n)$
-
