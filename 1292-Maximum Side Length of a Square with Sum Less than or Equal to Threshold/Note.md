@@ -151,4 +151,3 @@ return low;
 - 總空間複雜度為 $O(m \times n)$。
 
 > $O(m \times n)$
-
