@@ -1,6 +1,6 @@
 # 3637. Trionic Array I
 
-You are given an integer array nums of length `n`.
+You are given an integer array `nums` of length `n`.
 
 An array is trionic if there exist indices `0 < p < q < n − 1` such that:
 
