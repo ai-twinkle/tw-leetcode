@@ -71,8 +71,6 @@ for (let index = 0; index < length; index++) {
 for (let index = 0; index < length; index++) {
   // Step 2：建立最外層迴圈並取得當前位移量
 
-  const shift = nums[index];
-
   // 用一次取模加一次修正計算落點索引（比雙重正規化更快）
   let landingIndex = (index + shift) % length;
   if (landingIndex < 0) {
@@ -92,13 +90,6 @@ for (let index = 0; index < length; index++) {
   // Step 2：建立最外層迴圈並取得當前位移量
 
   // Step 3：計算落點索引（含負數模數修正）
-
-  const shift = nums[index];
-
-  let landingIndex = (index + shift) % length;
-  if (landingIndex < 0) {
-    landingIndex += length;
-  }
 
   // 直接從 nums 取值；此落點邏輯也能正確處理 shift == 0
   transformed[index] = nums[landingIndex];

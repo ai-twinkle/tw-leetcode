@@ -29,7 +29,8 @@ Return the minimum possible sum of the cost of these subarrays.
 
 ### Step 1：初始化固定成本與狀態
 
-先取陣列長度與第一段固定成本；再初始化「第二段起點最小值」以及「第二、三段成本和的最小值」。
+先取陣列長度與第一段的固定成本；
+接著初始化兩個狀態量，用來在單次掃描中動態維護「最佳第二段起點」與「第二＋第三段成本和的最小值」。
 
 ```typescript
 // 基本常數：陣列長度與第一段必然成本
@@ -41,25 +42,13 @@ let minimumSecondStart = nums[1];
 let minimumSecondThirdSum = minimumSecondStart + nums[2];
 ```
 
-### Step 2：建立單次掃描的最外層迴圈（枚舉第三段起點）
+### Step 2：單次掃描中嘗試更新最小「第二段＋第三段」成本和
 
-第三段起點必須至少在索引 2（保證前兩段非空），並一路掃到結尾。
-
-```typescript
-// 單次掃描：枚舉合法的第三段起點，同時維護最佳第二段起點
-for (let thirdStartIndex = 2; thirdStartIndex < length; thirdStartIndex++) {
-  // ...
-}
-```
-
-### Step 3：用目前最佳第二段起點，嘗試更新最小「第二+第三」成本和
-
-對每個 `thirdStartIndex`，用已維護的 `minimumSecondStart` 與當前第三段起點值組成候選和，並更新全域最小值。
+第三段起點必須至少在索引 2（確保前兩段非空）。
+對每個可能的第三段起點，使用**目前為止最好的第二段起點**，嘗試更新「第二＋第三」的最小成本和。
 
 ```typescript
 for (let thirdStartIndex = 2; thirdStartIndex < length; thirdStartIndex++) {
-  // Step 2：建立單次掃描的最外層迴圈（枚舉第三段起點）
-
   const candidateSum = minimumSecondStart + nums[thirdStartIndex];
   if (candidateSum < minimumSecondThirdSum) {
     minimumSecondThirdSum = candidateSum;
@@ -69,15 +58,14 @@ for (let thirdStartIndex = 2; thirdStartIndex < length; thirdStartIndex++) {
 }
 ```
 
-### Step 4：更新「第二段起點最小值」，供後續第三段起點使用
+### Step 3：在同一掃描中更新「第二段起點的最小值」
 
-掃描往右走時，新的位置也可能成為更小的第二段起點成本，因此需要隨時更新。
+隨著掃描往右推進，目前的位置也可能成為更小成本的第二段起點，
+因此必須在每一步同步更新 `minimumSecondStart`，供後續第三段起點使用。
 
 ```typescript
 for (let thirdStartIndex = 2; thirdStartIndex < length; thirdStartIndex++) {
-  // Step 2：建立單次掃描的最外層迴圈（枚舉第三段起點）
-
-  // Step 3：用目前最佳第二段起點更新最小「第二+第三」成本和
+  // Step 2：嘗試更新最小「第二段＋第三段」成本和
 
   if (nums[thirdStartIndex] < minimumSecondStart) {
     minimumSecondStart = nums[thirdStartIndex];
@@ -85,9 +73,9 @@ for (let thirdStartIndex = 2; thirdStartIndex < length; thirdStartIndex++) {
 }
 ```
 
-### Step 5：合併固定第一段成本並回傳答案
+### Step 4：合併固定第一段成本並回傳答案
 
-第一段成本固定，因此最後把它加上已求得的最小「第二+第三」成本和即可。
+第一段成本固定不變，因此最後只需將它加上已求得的最小「第二＋第三」成本和，即為最終答案。
 
 ```typescript
 // 合併固定第一段成本與最佳剩餘成本

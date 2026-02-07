@@ -29,7 +29,6 @@ function minimumCost(source: string, target: string, original: string[], changed
 
   // Build an independent shortest-path graph for each substring length
   for (const [length, rules] of rulesByLength.entries()) {
-
     // Assign compact integer ids to all unique strings
     const nodeIdByString = new Map<string, number>();
     for (let ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {

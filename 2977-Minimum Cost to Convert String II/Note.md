@@ -93,7 +93,6 @@ const groups: Group[] = [];
 
 // 對每種子字串長度建立獨立的最短路圖
 for (const [length, rules] of rulesByLength.entries()) {
-
   // 為所有唯一字串配置緊湊的整數 id
   const nodeIdByString = new Map<string, number>();
   for (let ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {

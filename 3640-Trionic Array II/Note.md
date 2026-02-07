@@ -83,8 +83,6 @@ for (let index = 1; index < n; index += 1) {
 for (let index = 1; index < n; index += 1) {
   // Step 2：主迴圈骨架 — 逐一處理相鄰關係
 
-  const currentValue = nums[index];
-
   if (previousValue < currentValue) {
     // 嚴格遞增邊界：更新 increasingEnd 與 trionicEnd 狀態
     const pairSum = previousValue + currentValue;
@@ -122,8 +120,6 @@ for (let index = 1; index < n; index += 1) {
 for (let index = 1; index < n; index += 1) {
   // Step 2：主迴圈骨架 — 逐一處理相鄰關係
 
-  const currentValue = nums[index];
-
   if (previousValue < currentValue) {
     // Step 3：相鄰嚴格上升時的狀態更新
   } else if (previousValue > currentValue) {
@@ -149,8 +145,6 @@ for (let index = 1; index < n; index += 1) {
 for (let index = 1; index < n; index += 1) {
   // Step 2：主迴圈骨架 — 逐一處理相鄰關係
 
-  const currentValue = nums[index];
-
   if (previousValue < currentValue) {
     // Step 3：相鄰嚴格上升時的狀態更新
   } else if (previousValue > currentValue) {
@@ -173,8 +167,6 @@ for (let index = 1; index < n; index += 1) {
 ```typescript
 for (let index = 1; index < n; index += 1) {
   // Step 2：主迴圈骨架 — 逐一處理相鄰關係
-
-  const currentValue = nums[index];
 
   if (previousValue < currentValue) {
     // Step 3：相鄰嚴格上升時的狀態更新

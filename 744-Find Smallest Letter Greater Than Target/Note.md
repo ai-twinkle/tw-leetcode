@@ -68,8 +68,6 @@ while (leftIndex < rightIndex) {
   } else {
     rightIndex = middleIndex;
   }
-
-  // ...
 }
 ```
 
@@ -79,10 +77,6 @@ while (leftIndex < rightIndex) {
 若剛好等於 `lettersCount`，代表不存在更大的字元，需回到 `letters[0]`；否則回傳 `letters[leftIndex]`。
 
 ```typescript
-while (leftIndex < rightIndex) {
-  // Step 3：計算中點並做比較分支
-}
-
 // leftIndex 是第一個滿足 letters[leftIndex] > target 的位置
 if (leftIndex === lettersCount) {
   return letters[0];

@@ -102,8 +102,6 @@ for (let middle = 0; middle < ALPHABET_SIZE; middle++) {
 for (let middle = 0; middle < ALPHABET_SIZE; middle++) {
   // Step 3：枚舉中繼字元
 
-  const middleRowBase = middle * ALPHABET_SIZE;
-
   for (let from = 0; from < ALPHABET_SIZE; from++) {
     const fromRowBase = from * ALPHABET_SIZE;
     const fromToMiddle = distance[fromRowBase + middle];

@@ -392,8 +392,6 @@ function minimumCost(nums: number[], k: number, dist: number): number {
   for (let rightIndex = 1; rightIndex < length; rightIndex++) {
     // Step 12：主迴圈骨架 — 計算視窗左端
 
-    const leftIndex = rightIndex - dist - 1;
-
     if (leftIndex > 0) {
       if (isSelected[leftIndex] === 1) {
         // 移除離開視窗的已選元素
