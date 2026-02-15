@@ -34,7 +34,7 @@ This dataset contains the solutions to the problems on LeetCode.
 
 ## Solution Optimization Process
 
-The approach to solving and optimizing LeetCode problems follows this process:
+The approach to solving and optimizing LeetCode problems follows this process with [optimization_prompt.md](/optimization_prompt.md) prompt:
 
 1. Create a basic solution that correctly solves the problem
 2. Leverage `o4-mini-high` model to iteratively optimize the solution using a specialized prompt
@@ -73,39 +73,6 @@ flowchart TD
 
 ---
 
-## Optimization Prompt
-
-For each optimization iteration, I use the following prompt:
-
-```
-I want to optimize this code for the efficiency of execution time. 
-
-You need to consider the following
-1. Operation time in Typescript, sometimes, even if the complexity is low, the operation takes a lot of overhead, which might have a negative effect
-2. Use efficient data structures like type array instead of number array, as the program might need to handle significantly large cases.
-3. If the code needs to query multiple times, you might consider memory and pre-compute the task for a fast O(1) query.  And store outside the function. Like prefix sum or factor
-4. In most cases, math can help to solve it by combining!
-5. Consider the constraint, designing a well-fit solution is better
-6. Do not change the main function name/function parameter, as it may invoke an error
-7. Use a full name other than a shortcut for readability
-8. If commenting on a function/method, please use JSDoc with params and return (Only use return if you have no void return)
-9. Please use a meaningful comment in a single line at an important step
-10. Avoid using a single line if or for statement for readability
-
-Now consider the question and the following code; try to optimize it as fast as possible.
-Your task will be marked as a failure if your run time performance is worse than the base code.
-
-The following is the base code and the question
----
-{Question}
-
-{Constraints}
-
-{Last Attempt Best Solution}
-```
-
----
-
 ## Optimization Process
 
 The optimization process continues iteratively with these important rules:
@@ -121,7 +88,7 @@ The optimization process continues iteratively with these important rules:
 
 After optimization is complete, the following additional steps are performed:
 
-1. **Generate Solution Explanation**: Use the solution prompt in [solution_prompt.txt](./solution_prompt.txt) with the `o4-mini-high` model to create detailed solution steps and explanations
+1. **Generate Solution Explanation**: Use the solution prompt in [solution_prompt.md](solution_prompt.md) with the `o4-mini-high` model to create detailed solution steps and explanations
 
 2. **Solution Refinement**: Leverage ChatGPT-4.5 or ChatGPT-4.1 to refine the generated solution explanations for clarity and completeness
 
