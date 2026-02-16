@@ -157,4 +157,3 @@ return outputSegments.join("");
 - 總空間複雜度為 $O(n)$。
 
 > $O(n)$
-
