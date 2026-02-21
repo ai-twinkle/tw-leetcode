@@ -1,0 +1,12 @@
+{
+  "total_problems": 427,
+  "problems_with_question_code": 427,
+  "compilation_date": "2026-02-21T06:30:18.785Z",
+  "problems_range": {
+    "min": 1,
+    "max": 3721
+  },
+  "average_text_length": 3566,
+  "average_answer_length": 2011,
+  "average_question_code_length": 87
+}
