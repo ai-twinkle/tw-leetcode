@@ -17,40 +17,10 @@ class CodeConsistencyVerifier {
     // Remove comments and clean up
     const cleanCode = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').trim();
     
-    // Find all function declarations first
-    const functionMatches = [...cleanCode.matchAll(/function\s+(\w+)\s*\(([^)]*)\)\s*:\s*([^{]+)/g)];
-    
     // Check if this has classes
     const hasClass = cleanCode.includes('class ') && !cleanCode.includes('* class ');
     
-    // If we have a reference function (from question), always try to find matching function first
-    if (referenceFunction && referenceFunction.type !== 'class') {
-      const exactMatch = functionMatches.find(match => match[1] === referenceFunction.name);
-      if (exactMatch) {
-        return this.parseFunctionMatch(exactMatch);
-      }
-    }
-    
-    // If no functions found, try class extraction
-    if (functionMatches.length === 0) {
-      if (hasClass) {
-        const classSignature = this.extractClassSignature(cleanCode, referenceFunction?.name);
-        if (classSignature) {
-          return classSignature;
-        }
-      }
-      return null;
-    }
-
-    // If only one function, return it (even if there are also classes)
-    if (functionMatches.length === 1) {
-      const match = functionMatches[0];
-      return this.parseFunctionMatch(match);
-    }
-
-    // Multiple functions found - try to find the main one
-    
-    // Strategy 1: If we have a reference class, look for matching class
+    // If we have a reference class, always look for matching class first
     if (referenceFunction && referenceFunction.type === 'class') {
       const classSignature = this.extractClassSignature(cleanCode, referenceFunction.name);
       if (classSignature && classSignature.name === referenceFunction.name) {
@@ -58,17 +28,49 @@ class CodeConsistencyVerifier {
       }
     }
 
-    // Strategy 2: Look for functions that don't start with common helper prefixes
+    // If this has a class and we don't have a reference or reference is not a function, try class extraction
+    if (hasClass && (!referenceFunction || referenceFunction.type === 'class')) {
+      const classSignature = this.extractClassSignature(cleanCode, referenceFunction?.name);
+      if (classSignature) {
+        return classSignature;
+      }
+    }
+
+    // Find all function declarations
+    const functionMatches = [...cleanCode.matchAll(/function\s+(\w+)\s*\(([^)]*)\)\s*:\s*([^{]+)/g)];
+
+    // If we have a reference function (from question), always try to find matching function
+    if (referenceFunction && referenceFunction.type !== 'class') {
+      const exactMatch = functionMatches.find(match => match[1] === referenceFunction.name);
+      if (exactMatch) {
+        return this.parseFunctionMatch(exactMatch);
+      }
+    }
+    
+    // If no functions found, return null
+    if (functionMatches.length === 0) {
+      return null;
+    }
+
+    // If only one function, return it
+    if (functionMatches.length === 1) {
+      const match = functionMatches[0];
+      return this.parseFunctionMatch(match);
+    }
+
+    // Multiple functions found - try to find the main one
+    
+    // Strategy 1: Look for functions that don't start with common helper prefixes
     const mainFunctions = functionMatches.filter(match => {
       const name = match[1];
-      return !name.match(/^(helper|build|ensure|generate|compute|acquire|initialize|devowel|parse|dfs|bfs|get|set)/i);
+      return !name.match(/^(helper|build|ensure|generate|compute|acquire|initialize|devowel|parse|dfs|bfs|get|set|power)/i);
     });
 
     if (mainFunctions.length === 1) {
       return this.parseFunctionMatch(mainFunctions[0]);
     }
 
-    // Strategy 3: Look for functions with names that match common LeetCode patterns
+    // Strategy 2: Look for functions with names that match common LeetCode patterns
     const leetcodeFunctions = functionMatches.filter(match => {
       const name = match[1];
       return name.match(/^(count|find|max|min|is|can|has|check|solve|remove|add|merge|sort|search|judge|num|largest|smallest|closest|recover|lca)/i);
@@ -78,7 +80,7 @@ class CodeConsistencyVerifier {
       return this.parseFunctionMatch(leetcodeFunctions[0]);
     }
 
-    // Strategy 4: Return the first function (often the main exported function)
+    // Strategy 3: Return the first function (often the main exported function)
     return this.parseFunctionMatch(functionMatches[0]);
   }
 
