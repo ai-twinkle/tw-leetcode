@@ -27,7 +27,7 @@ This dataset contains the solutions to the problems on LeetCode.
 
 - Update Frequency: At least one problem every day.
 - Language: TypeScript
-- Model: Solutions and explanations are generated using OpenAI's GPT-5 and GPT-5-Thinking models with human cleanup.
+- Model: Solutions and explanations are generated using `Anthropic's Claude Sonnet 4.6` (Old solution use OpenAI's `GPT-5` and `GPT-5-Thinking` models) with human cleanup.
 - Question Code Source: TypeScript starter code is extracted from the [whiskwhite/leetcode-complete](https://huggingface.co/datasets/whiskwhite/leetcode-complete) dataset. Missing problems not covered by this dataset are manually collected to ensure completeness.
 
 ---
@@ -37,7 +37,7 @@ This dataset contains the solutions to the problems on LeetCode.
 The approach to solving and optimizing LeetCode problems follows this process with [optimization_prompt.md](/optimization_prompt.md) prompt:
 
 1. Create a basic solution that correctly solves the problem
-2. Leverage `o4-mini-high` model to iteratively optimize the solution using a specialized prompt
+2. Leverage `Claude 4.6 Sonnet` model to iteratively optimize the solution using a specialized prompt
 
 The optimization flow works as follows:
 
@@ -88,9 +88,9 @@ The optimization process continues iteratively with these important rules:
 
 After optimization is complete, the following additional steps are performed:
 
-1. **Generate Solution Explanation**: Use the solution prompt in [solution_prompt.md](solution_prompt.md) with the `o4-mini-high` model to create detailed solution steps and explanations
+1. **Generate Solution Explanation**: Use the solution prompt in [solution_prompt.md](solution_prompt.md) with the `Claude 4.6 Sonnet` model to create detailed solution steps and explanations
 
-2. **Solution Refinement**: Leverage ChatGPT-4.5 or ChatGPT-4.1 to refine the generated solution explanations for clarity and completeness
+2. **Solution Refinement**: Leverage `Claude 4.6 Sonnet` to refine the generated solution explanations for clarity and completeness
 
 3. **Manual Review and Cleanup**: Perform a human review of the solution markdown to ensure:
    - Technical correctness of the solution
