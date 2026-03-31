@@ -15,8 +15,8 @@ If no string can be generated, return an empty string `""`.
 
 **Constraints:**
 
-`1 <= n == str1.length <= 10^4`
-`1 <= m == str2.length <= 500`
+- `1 <= n == str1.length <= 10^4`
+- `1 <= m == str2.length <= 500`
 - `str1` consists only of `'T'` or `'F'`.
 - `str2` consists only of lowercase English characters.
 
