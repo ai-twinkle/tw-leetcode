@@ -115,8 +115,10 @@ for (const command of commands) {
 
 ```typescript
 for (const command of commands) {
-  // Step 3：處理轉向指令
-
+  if (command === -2) {
+    // Step 3：處理轉向指令
+  } else if (command === -1) {
+    // Step 3：處理轉向指令
   } else {
     const stepDeltaX = DIRECTION_DELTA_X[directionIndex];
     const stepDeltaY = DIRECTION_DELTA_Y[directionIndex];
@@ -141,8 +143,10 @@ for (const command of commands) {
 
 ```typescript
 for (const command of commands) {
-  // Step 3：處理轉向指令
-
+  if (command === -2) {
+    // Step 3：處理轉向指令
+  } else if (command === -1) {
+    // Step 3：處理轉向指令
   } else {
     // Step 4：取出方向差量並計算目標格
 
