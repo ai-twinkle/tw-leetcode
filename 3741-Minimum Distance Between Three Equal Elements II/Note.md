@@ -1,4 +1,4 @@
-# 3740. Minimum Distance Between Three Equal Elements I
+# 3741. Minimum Distance Between Three Equal Elements II
 
 You are given an integer array `nums`.
 
