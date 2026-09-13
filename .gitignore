@@ -1,5 +1,4 @@
-
-/.idea
-/.vscode
+# Dataset branch - only contains compiled data
 node_modules/
-/data
+*.log
+.DS_Store
